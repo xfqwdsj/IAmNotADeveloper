@@ -32,7 +32,10 @@
             android:value="GitHub @xfqwdsj" />
         <meta-data
             android:name="xposedminversion"
-            android:value="53" />
+            android:value="82" />
+        <meta-data
+            android:name="xposedsharedprefs"
+            android:value="true" />
     </application>
 
 </manifest>
