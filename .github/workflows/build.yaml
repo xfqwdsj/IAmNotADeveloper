@@ -24,11 +24,6 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
-      - name: 配置签名
-        run: |
-          mkdir app/key
-          echo ${{ secrets.KEY }} | base64 --decode >> app/key/scorer.jks
-          echo ${{ secrets.PROPERTIES }} | base64 --decode >> app/key.properties
       - name: 编译
         run: |
           chmod +x ./gradlew
