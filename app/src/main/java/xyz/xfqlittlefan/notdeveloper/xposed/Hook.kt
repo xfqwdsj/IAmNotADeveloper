@@ -1,7 +1,6 @@
 package xyz.xfqlittlefan.notdeveloper.xposed
 
 import android.content.ContentResolver
-import android.provider.Settings
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XSharedPreferences
@@ -12,17 +11,18 @@ import xyz.xfqlittlefan.notdeveloper.ADB_WIFI_ENABLED
 import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 
 class Hook : IXposedHookLoadPackage {
-    override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam?) {
-        if (lpparam?.packageName?.startsWith("android") == true || lpparam?.packageName?.startsWith(
+    override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
+        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith(
                 "com.android"
-            ) == true
+            )
         ) {
             return
         }
 
         val preferences = XSharedPreferences(this::class.java.`package`!!.name)
 
-        XposedHelpers.findAndHookMethod(Settings.Global::class.java,
+        XposedHelpers.findAndHookMethod(
+            "android.provider.Settings.Global", lpparam.classLoader,
             "getInt",
             ContentResolver::class.java,
             String::class.java,
@@ -49,7 +49,8 @@ class Hook : IXposedHookLoadPackage {
                 }
             })
 
-        XposedHelpers.findAndHookMethod(Settings.Global::class.java,
+        XposedHelpers.findAndHookMethod(
+            "android.provider.Settings.Global", lpparam.classLoader,
             "getInt",
             ContentResolver::class.java,
             String::class.java,
@@ -75,7 +76,8 @@ class Hook : IXposedHookLoadPackage {
                 }
             })
 
-        XposedHelpers.findAndHookMethod(Settings.Secure::class.java,
+        XposedHelpers.findAndHookMethod(
+            "android.provider.Settings.Secure", lpparam.classLoader,
             "getInt",
             ContentResolver::class.java,
             String::class.java,
@@ -95,7 +97,8 @@ class Hook : IXposedHookLoadPackage {
                 }
             })
 
-        XposedHelpers.findAndHookMethod(Settings.Global::class.java,
+        XposedHelpers.findAndHookMethod(
+            "android.provider.Settings.Secure", lpparam.classLoader,
             "getInt",
             ContentResolver::class.java,
             String::class.java,
