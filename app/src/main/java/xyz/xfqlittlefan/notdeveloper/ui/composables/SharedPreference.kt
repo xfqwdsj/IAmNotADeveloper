@@ -4,13 +4,26 @@ import android.content.Context
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import androidx.preference.PreferenceManager.getDefaultSharedPreferences
 import kotlin.reflect.KProperty
 
 @Composable
-fun rememberBooleanSharedPreference(key: String, defaultValue: Boolean): BooleanSharedPreference {
+fun rememberBooleanSharedPreference(
+    preferenceFileKey: String? = null,
+    mode: Int = Context.MODE_PRIVATE,
+    key: String,
+    defaultValue: Boolean
+): BooleanSharedPreference {
     val context = LocalContext.current
-    val preference = remember(key) { BooleanSharedPreference(context, key, defaultValue) }
+    val preference =
+        remember(key) {
+            BooleanSharedPreference(
+                context,
+                preferenceFileKey,
+                mode,
+                key,
+                defaultValue
+            )
+        }
 
     DisposableEffect(preference) {
         onDispose {
@@ -23,10 +36,14 @@ fun rememberBooleanSharedPreference(key: String, defaultValue: Boolean): Boolean
 
 class BooleanSharedPreference(
     context: Context,
+    preferenceFileKey: String? = null,
+    mode: Int = Context.MODE_PRIVATE,
     private val key: String,
     private val defaultValue: Boolean
 ) {
-    private val sharedPreferences = getDefaultSharedPreferences(context)
+    private val sharedPreferences = context.getSharedPreferences(
+        preferenceFileKey ?: (context.packageName + "_preferences"), mode
+    )
 
     private val listener = OnSharedPreferenceChangeListener { sharedPreferences, changedKey ->
         if (changedKey != key) {

@@ -1,5 +1,7 @@
 package xyz.xfqlittlefan.notdeveloper.ui.activities
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +22,7 @@ import xyz.xfqlittlefan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import xyz.xfqlittlefan.notdeveloper.util.allBars
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("WorldReadableFiles")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,14 +42,17 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { padding ->
                     var devSettings by rememberBooleanSharedPreference(
+                        mode = Context.MODE_WORLD_READABLE,
                         key = DEVELOPMENT_SETTINGS_ENABLED,
                         defaultValue = false
                     )
                     var usbDebugging by rememberBooleanSharedPreference(
+                        mode = Context.MODE_WORLD_READABLE,
                         key = ADB_ENABLED,
                         defaultValue = true
                     )
                     var wirelessDebugging by rememberBooleanSharedPreference(
+                        mode = Context.MODE_WORLD_READABLE,
                         key = ADB_WIFI_ENABLED,
                         defaultValue = true
                     )
