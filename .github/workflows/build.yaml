@@ -1,0 +1,40 @@
+name: Building Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: 设置 JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: '11'
+      - name: 设置缓存
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
+      - name: 配置签名
+        run: |
+          mkdir app/key
+          echo ${{ secrets.KEY }} | base64 --decode >> app/key/scorer.jks
+          echo ${{ secrets.PROPERTIES }} | base64 --decode >> app/key.properties
+      - name: 编译
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+      - name: 上传
+        uses: actions/upload-artifact@v3
+        with:
+          name: ci-release
+          path: app/build/outputs/apk/release/app-release.apk
