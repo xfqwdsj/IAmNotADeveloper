@@ -44,11 +44,11 @@ class MainActivity : ComponentActivity() {
                     )
                     var usbDebugging by rememberBooleanSharedPreference(
                         key = ADB_ENABLED,
-                        defaultValue = false
+                        defaultValue = true
                     )
                     var wirelessDebugging by rememberBooleanSharedPreference(
                         key = ADB_WIFI_ENABLED,
-                        defaultValue = false
+                        defaultValue = true
                     )
 
                     Column(
