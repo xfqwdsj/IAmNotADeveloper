@@ -4,4 +4,9 @@
     <string name="hide_development_mode">隐藏开发者模式</string>
     <string name="hide_usb_debugging">隐藏 USB 调试</string>
     <string name="hide_wireless_debugging">隐藏无线调试</string>
+    <string name="description">所有更改将即时生效</string>
+    <string name="test">测试</string>
+    <string name="dialog_test_content">开发者模式状态：%1$s\nUSB 调试状态：%2$s\n无线调试状态：%3$s</string>
+    <string name="on">开启</string>
+    <string name="off">关闭</string>
 </resources>

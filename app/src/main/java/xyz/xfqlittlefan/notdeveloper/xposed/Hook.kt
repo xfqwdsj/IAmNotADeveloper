@@ -33,6 +33,7 @@ class Hook : IXposedHookLoadPackage {
             Int::class.java,
             object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
+                    preferences.reload()
                     when {
                         preferences.getBoolean(
                             DEVELOPMENT_SETTINGS_ENABLED,
@@ -63,6 +64,7 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
+                    preferences.reload()
                     when {
                         preferences.getBoolean(
                             DEVELOPMENT_SETTINGS_ENABLED,
@@ -94,6 +96,7 @@ class Hook : IXposedHookLoadPackage {
             Int::class.java,
             object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
+                    preferences.reload()
                     when {
                         preferences.getBoolean(
                             DEVELOPMENT_SETTINGS_ENABLED,
@@ -118,6 +121,7 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             object : XC_MethodHook() {
                 override fun afterHookedMethod(param: MethodHookParam) {
+                    preferences.reload()
                     when {
                         preferences.getBoolean(
                             DEVELOPMENT_SETTINGS_ENABLED,
