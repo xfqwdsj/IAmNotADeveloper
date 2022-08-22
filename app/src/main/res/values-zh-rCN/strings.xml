@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">我不是开发者</string>
+    <string name="hide_development_mode">隐藏开发者模式</string>
+    <string name="hide_usb_debugging">隐藏 USB 调试</string>
+    <string name="hide_wireless_debugging">隐藏无线调试</string>
+</resources>

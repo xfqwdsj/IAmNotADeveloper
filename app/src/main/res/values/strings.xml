@@ -1,6 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">IAmNotADeveloper</string>
-    <string name="hide_development_mode">隐藏开发者选项</string>
-    <string name="hide_usb_debugging">隐藏USB调试</string>
-    <string name="hide_wireless_debugging">隐藏无线调试</string>
+    <string name="hide_development_mode">Hide development mode</string>
+    <string name="hide_usb_debugging">Hide USB debugging</string>
+    <string name="hide_wireless_debugging">Hide wireless debugging</string>
 </resources>
