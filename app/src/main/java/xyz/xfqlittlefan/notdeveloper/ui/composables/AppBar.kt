@@ -37,7 +37,7 @@ fun AppBar(
         containerColor = Color.Transparent, scrolledContainerColor = Color.Transparent
     )
     Box(Modifier.background(backgroundColor)) {
-        androidx.compose.material3.SmallTopAppBar(
+        SmallTopAppBar(
             title = title,
             modifier = modifier,
             navigationIcon = navigationIcon,

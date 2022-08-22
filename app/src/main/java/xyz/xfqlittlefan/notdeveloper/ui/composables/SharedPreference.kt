@@ -21,7 +21,11 @@ fun rememberBooleanSharedPreference(key: String, defaultValue: Boolean): Boolean
     return preference
 }
 
-class BooleanSharedPreference(context: Context, private val key: String, private val defaultValue: Boolean) {
+class BooleanSharedPreference(
+    context: Context,
+    private val key: String,
+    private val defaultValue: Boolean
+) {
     private val sharedPreferences = getDefaultSharedPreferences(context)
 
     private val listener = OnSharedPreferenceChangeListener { sharedPreferences, changedKey ->
