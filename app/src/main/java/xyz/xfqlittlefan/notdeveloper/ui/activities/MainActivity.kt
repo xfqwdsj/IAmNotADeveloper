@@ -103,7 +103,10 @@ class MainActivity : ComponentActivity() {
                                 )
                             })
                         } else {
-                            Text(stringResource(R.string.unable_to_save_settings))
+                            Text(
+                                stringResource(R.string.unable_to_save_settings),
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
                         }
                         Spacer(Modifier.height(20.dp))
                         Button(onClick = {
@@ -128,11 +131,15 @@ class MainActivity : ComponentActivity() {
                             Text(stringResource(R.string.test))
                         }
                         Spacer(Modifier.height(20.dp))
-                        Text(stringResource(R.string.description))
-                        if (!isModuleActive) {
-                            Spacer(Modifier.height(20.dp))
+                        if (isModuleActive) {
+                            Text(
+                                stringResource(R.string.description),
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        } else {
                             Text(
                                 stringResource(R.string.module_not_actived),
+                                modifier = Modifier.padding(horizontal = 20.dp),
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
