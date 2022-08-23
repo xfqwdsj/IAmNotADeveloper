@@ -9,4 +9,6 @@
     <string name="dialog_test_content">开发者模式状态：%1$s\nUSB 调试状态：%2$s\n无线调试状态：%3$s</string>
     <string name="on">开启</string>
     <string name="off">关闭</string>
+    <string name="module_not_actived">模块未激活</string>
+    <string name="unable_to_save_settings">无法保存设置，默认启用全部功能。请尝试降低 Android 版本至 Android 7 以下或使用 LSPosed 框架并激活本模块</string>
 </resources>

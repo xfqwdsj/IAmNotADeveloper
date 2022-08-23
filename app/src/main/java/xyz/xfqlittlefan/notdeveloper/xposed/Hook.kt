@@ -23,6 +23,18 @@ class Hook : IXposedHookLoadPackage {
             return
         }
 
+        if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
+            XposedHelpers.findAndHookMethod(
+                "xyz.xfqlittlefan.notdeveloper.xposed.ModuleStatusKt",
+                lpparam.classLoader,
+                "isModuleActive",
+                object : XC_MethodHook() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        param.result = true
+                    }
+                })
+        }
+
         val preferences = XSharedPreferences(BuildConfig.APPLICATION_ID)
 
         XposedHelpers.findAndHookMethod(
@@ -32,12 +44,12 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             Int::class.java,
             object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
+                override fun beforeHookedMethod(param: MethodHookParam) {
                     preferences.reload()
                     when {
                         preferences.getBoolean(
                             DEVELOPMENT_SETTINGS_ENABLED,
-                            false
+                            true
                         ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
@@ -63,12 +75,12 @@ class Hook : IXposedHookLoadPackage {
             ContentResolver::class.java,
             String::class.java,
             object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
+                override fun beforeHookedMethod(param: MethodHookParam) {
                     preferences.reload()
                     when {
                         preferences.getBoolean(
                             DEVELOPMENT_SETTINGS_ENABLED,
-                            false
+                            true
                         ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
@@ -95,12 +107,12 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             Int::class.java,
             object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
+                override fun beforeHookedMethod(param: MethodHookParam) {
                     preferences.reload()
                     when {
                         preferences.getBoolean(
                             DEVELOPMENT_SETTINGS_ENABLED,
-                            false
+                            true
                         ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
@@ -120,12 +132,12 @@ class Hook : IXposedHookLoadPackage {
             ContentResolver::class.java,
             String::class.java,
             object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
+                override fun beforeHookedMethod(param: MethodHookParam) {
                     preferences.reload()
                     when {
                         preferences.getBoolean(
                             DEVELOPMENT_SETTINGS_ENABLED,
-                            false
+                            true
                         ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }

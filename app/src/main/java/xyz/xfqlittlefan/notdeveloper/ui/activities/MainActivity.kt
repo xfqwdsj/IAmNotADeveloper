@@ -1,7 +1,5 @@
 package xyz.xfqlittlefan.notdeveloper.ui.activities
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -20,17 +18,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import xyz.xfqlittlefan.notdeveloper.ADB_ENABLED
-import xyz.xfqlittlefan.notdeveloper.ADB_WIFI_ENABLED
-import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
+import xyz.xfqlittlefan.notdeveloper.*
 import xyz.xfqlittlefan.notdeveloper.R
 import xyz.xfqlittlefan.notdeveloper.ui.composables.AppBar
 import xyz.xfqlittlefan.notdeveloper.ui.composables.rememberBooleanSharedPreference
 import xyz.xfqlittlefan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import xyz.xfqlittlefan.notdeveloper.util.allBars
+import xyz.xfqlittlefan.notdeveloper.xposed.isModuleActive
+import xyz.xfqlittlefan.notdeveloper.xposed.isPreferencesReady
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("WorldReadableFiles")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,61 +46,65 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { padding ->
-                    var devSettings by rememberBooleanSharedPreference(
-                        mode = Context.MODE_WORLD_READABLE,
-                        key = DEVELOPMENT_SETTINGS_ENABLED,
-                        defaultValue = false
-                    )
-                    var usbDebugging by rememberBooleanSharedPreference(
-                        mode = Context.MODE_WORLD_READABLE,
-                        key = ADB_ENABLED,
-                        defaultValue = true
-                    )
-                    var wirelessDebugging by rememberBooleanSharedPreference(
-                        mode = Context.MODE_WORLD_READABLE,
-                        key = ADB_WIFI_ENABLED,
-                        defaultValue = true
-                    )
-                    var testResult by remember { mutableStateOf<List<Boolean>?>(null) }
-
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
                             .padding(padding)
+                            .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                             .windowInsetsPadding(WindowInsets.allBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        ListItem(headlineText = {
-                            Text(stringResource(R.string.hide_development_mode))
-                        }, modifier = Modifier.clickable {
-                            devSettings = !devSettings
-                        }, trailingContent = {
-                            Switch(
-                                checked = devSettings,
-                                onCheckedChange = { devSettings = it }
+                        var testResult by remember { mutableStateOf<List<Boolean>?>(null) }
+                        if (isPreferencesReady()) {
+                            var devSettings by rememberBooleanSharedPreference(
+                                mode = mode,
+                                key = DEVELOPMENT_SETTINGS_ENABLED,
+                                defaultValue = true
                             )
-                        })
-                        ListItem(headlineText = {
-                            Text(stringResource(R.string.hide_usb_debugging))
-                        }, modifier = Modifier.clickable {
-                            usbDebugging = !usbDebugging
-                        }, trailingContent = {
-                            Switch(
-                                checked = usbDebugging,
-                                onCheckedChange = { usbDebugging = it }
+                            var usbDebugging by rememberBooleanSharedPreference(
+                                mode = mode,
+                                key = ADB_ENABLED,
+                                defaultValue = true
                             )
-                        })
-                        ListItem(headlineText = {
-                            Text(stringResource(R.string.hide_wireless_debugging))
-                        }, modifier = Modifier.clickable {
-                            wirelessDebugging = !wirelessDebugging
-                        }, trailingContent = {
-                            Switch(
-                                checked = wirelessDebugging,
-                                onCheckedChange = { wirelessDebugging = it }
+                            var wirelessDebugging by rememberBooleanSharedPreference(
+                                mode = mode,
+                                key = ADB_WIFI_ENABLED,
+                                defaultValue = true
                             )
-                        })
+
+                            ListItem(headlineText = {
+                                Text(stringResource(R.string.hide_development_mode))
+                            }, modifier = Modifier.clickable {
+                                devSettings = !devSettings
+                            }, trailingContent = {
+                                Switch(
+                                    checked = devSettings,
+                                    onCheckedChange = { devSettings = it }
+                                )
+                            })
+                            ListItem(headlineText = {
+                                Text(stringResource(R.string.hide_usb_debugging))
+                            }, modifier = Modifier.clickable {
+                                usbDebugging = !usbDebugging
+                            }, trailingContent = {
+                                Switch(
+                                    checked = usbDebugging,
+                                    onCheckedChange = { usbDebugging = it }
+                                )
+                            })
+                            ListItem(headlineText = {
+                                Text(stringResource(R.string.hide_wireless_debugging))
+                            }, modifier = Modifier.clickable {
+                                wirelessDebugging = !wirelessDebugging
+                            }, trailingContent = {
+                                Switch(
+                                    checked = wirelessDebugging,
+                                    onCheckedChange = { wirelessDebugging = it }
+                                )
+                            })
+                        } else {
+                            Text(stringResource(R.string.unable_to_save_settings))
+                        }
                         Spacer(Modifier.height(20.dp))
                         Button(onClick = {
                             val result = mutableListOf<Boolean>()
@@ -128,31 +129,38 @@ class MainActivity : ComponentActivity() {
                         }
                         Spacer(Modifier.height(20.dp))
                         Text(stringResource(R.string.description))
-                    }
+                        if (!isModuleActive) {
+                            Spacer(Modifier.height(20.dp))
+                            Text(
+                                stringResource(R.string.module_not_actived),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
 
-                    if (testResult?.size == 3) {
-                        fun getString(on: String, off: String, input: List<Boolean>) =
-                            input.map { if (it) on else off }.toTypedArray()
+                        if (testResult?.size == 3) {
+                            fun getString(on: String, off: String, input: List<Boolean>) =
+                                input.map { if (it) on else off }.toTypedArray()
 
-                        AlertDialog(onDismissRequest = { testResult = null }, confirmButton = {
-                            Button(onClick = { testResult = null }) {
-                                Text(stringResource(android.R.string.ok))
-                            }
-                        }, title = {
-                            Text(stringResource(R.string.test))
-                        }, text = {
-                            Column {
-                                Text(
-                                    stringResource(
-                                        R.string.dialog_test_content, *getString(
-                                            stringResource(R.string.on),
-                                            stringResource(R.string.off),
-                                            testResult ?: listOf(false, false, false)
+                            AlertDialog(onDismissRequest = { testResult = null }, confirmButton = {
+                                Button(onClick = { testResult = null }) {
+                                    Text(stringResource(android.R.string.ok))
+                                }
+                            }, title = {
+                                Text(stringResource(R.string.test))
+                            }, text = {
+                                Column {
+                                    Text(
+                                        stringResource(
+                                            R.string.dialog_test_content, *getString(
+                                                stringResource(R.string.on),
+                                                stringResource(R.string.off),
+                                                testResult ?: listOf(false, false, false)
+                                            )
                                         )
                                     )
-                                )
-                            }
-                        })
+                                }
+                            })
+                        }
                     }
                 }
             }
