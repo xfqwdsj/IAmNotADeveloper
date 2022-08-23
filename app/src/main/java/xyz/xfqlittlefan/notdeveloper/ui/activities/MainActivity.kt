@@ -1,5 +1,7 @@
 package xyz.xfqlittlefan.notdeveloper.ui.activities
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -18,7 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import xyz.xfqlittlefan.notdeveloper.*
+import xyz.xfqlittlefan.notdeveloper.ADB_ENABLED
+import xyz.xfqlittlefan.notdeveloper.ADB_WIFI_ENABLED
+import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 import xyz.xfqlittlefan.notdeveloper.R
 import xyz.xfqlittlefan.notdeveloper.ui.composables.AppBar
 import xyz.xfqlittlefan.notdeveloper.ui.composables.rememberBooleanSharedPreference
@@ -28,6 +32,7 @@ import xyz.xfqlittlefan.notdeveloper.xposed.isModuleActive
 import xyz.xfqlittlefan.notdeveloper.xposed.isPreferencesReady
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("WorldReadableFiles")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,18 +61,18 @@ class MainActivity : ComponentActivity() {
                     ) {
                         var testResult by remember { mutableStateOf<List<Boolean>?>(null) }
                         if (isPreferencesReady()) {
-                            var devSettings by rememberBooleanSharedPreference(
-                                mode = mode,
+                            @Suppress("DEPRECATION") var devSettings by rememberBooleanSharedPreference(
+                                mode = Context.MODE_WORLD_READABLE,
                                 key = DEVELOPMENT_SETTINGS_ENABLED,
                                 defaultValue = true
                             )
-                            var usbDebugging by rememberBooleanSharedPreference(
-                                mode = mode,
+                            @Suppress("DEPRECATION") var usbDebugging by rememberBooleanSharedPreference(
+                                mode = Context.MODE_WORLD_READABLE,
                                 key = ADB_ENABLED,
                                 defaultValue = true
                             )
-                            var wirelessDebugging by rememberBooleanSharedPreference(
-                                mode = mode,
+                            @Suppress("DEPRECATION") var wirelessDebugging by rememberBooleanSharedPreference(
+                                mode = Context.MODE_WORLD_READABLE,
                                 key = ADB_WIFI_ENABLED,
                                 defaultValue = true
                             )
