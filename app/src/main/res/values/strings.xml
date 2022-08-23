@@ -10,5 +10,5 @@
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="module_not_actived">Module not actived</string>
-    <string name="unable_to_save_settings">Unable to save settings, all features are enabled by default. Plese try to lower your Android version to below Android 7 or use the LSPosed Framwork and activate this module</string>
+    <string name="unable_to_save_settings">Unable to save settings, all features are enabled by default. Plese try to lower your Android version to below Android 8.1 or use the LSPosed Framwork and activate this module</string>
 </resources>
