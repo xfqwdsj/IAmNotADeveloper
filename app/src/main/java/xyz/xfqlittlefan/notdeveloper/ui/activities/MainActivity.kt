@@ -28,7 +28,6 @@ import xyz.xfqlittlefan.notdeveloper.ui.composables.rememberBooleanSharedPrefere
 import xyz.xfqlittlefan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import xyz.xfqlittlefan.notdeveloper.util.allBars
 import xyz.xfqlittlefan.notdeveloper.xposed.isModuleActive
-import xyz.xfqlittlefan.notdeveloper.xposed.isPreferencesReady
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("WorldReadableFiles")
@@ -59,56 +58,49 @@ class MainActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         var testResult by remember { mutableStateOf<List<Boolean>?>(null) }
-                        if (isPreferencesReady()) {
-                            var devSettings by rememberBooleanSharedPreference(
-                                key = DEVELOPMENT_SETTINGS_ENABLED,
-                                defaultValue = true
-                            )
-                            var usbDebugging by rememberBooleanSharedPreference(
-                                key = ADB_ENABLED,
-                                defaultValue = true
-                            )
-                            var wirelessDebugging by rememberBooleanSharedPreference(
-                                key = ADB_WIFI_ENABLED,
-                                defaultValue = true
-                            )
+                        var devSettings by rememberBooleanSharedPreference(
+                            key = DEVELOPMENT_SETTINGS_ENABLED,
+                            defaultValue = true
+                        )
+                        var usbDebugging by rememberBooleanSharedPreference(
+                            key = ADB_ENABLED,
+                            defaultValue = true
+                        )
+                        var wirelessDebugging by rememberBooleanSharedPreference(
+                            key = ADB_WIFI_ENABLED,
+                            defaultValue = true
+                        )
 
-                            ListItem(headlineText = {
-                                Text(stringResource(R.string.hide_development_mode))
-                            }, modifier = Modifier.clickable {
-                                devSettings = !devSettings
-                            }, trailingContent = {
-                                Switch(
-                                    checked = devSettings,
-                                    onCheckedChange = { devSettings = it }
-                                )
-                            })
-                            ListItem(headlineText = {
-                                Text(stringResource(R.string.hide_usb_debugging))
-                            }, modifier = Modifier.clickable {
-                                usbDebugging = !usbDebugging
-                            }, trailingContent = {
-                                Switch(
-                                    checked = usbDebugging,
-                                    onCheckedChange = { usbDebugging = it }
-                                )
-                            })
-                            ListItem(headlineText = {
-                                Text(stringResource(R.string.hide_wireless_debugging))
-                            }, modifier = Modifier.clickable {
-                                wirelessDebugging = !wirelessDebugging
-                            }, trailingContent = {
-                                Switch(
-                                    checked = wirelessDebugging,
-                                    onCheckedChange = { wirelessDebugging = it }
-                                )
-                            })
-                        } else {
-                            Text(
-                                stringResource(R.string.unable_to_save_settings),
-                                modifier = Modifier.padding(horizontal = 20.dp)
+                        ListItem(headlineText = {
+                            Text(stringResource(R.string.hide_development_mode))
+                        }, modifier = Modifier.clickable {
+                            devSettings = !devSettings
+                        }, trailingContent = {
+                            Switch(
+                                checked = devSettings,
+                                onCheckedChange = { devSettings = it }
                             )
-                        }
+                        })
+                        ListItem(headlineText = {
+                            Text(stringResource(R.string.hide_usb_debugging))
+                        }, modifier = Modifier.clickable {
+                            usbDebugging = !usbDebugging
+                        }, trailingContent = {
+                            Switch(
+                                checked = usbDebugging,
+                                onCheckedChange = { usbDebugging = it }
+                            )
+                        })
+                        ListItem(headlineText = {
+                            Text(stringResource(R.string.hide_wireless_debugging))
+                        }, modifier = Modifier.clickable {
+                            wirelessDebugging = !wirelessDebugging
+                        }, trailingContent = {
+                            Switch(
+                                checked = wirelessDebugging,
+                                onCheckedChange = { wirelessDebugging = it }
+                            )
+                        })
                         Spacer(Modifier.height(20.dp))
                         Button(onClick = {
                             val result = mutableListOf<Boolean>()
