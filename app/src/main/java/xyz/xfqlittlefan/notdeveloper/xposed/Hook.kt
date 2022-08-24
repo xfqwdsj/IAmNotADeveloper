@@ -122,6 +122,7 @@ class Hook : IXposedHookLoadPackage {
             authority("xyz.xfqlittlefan.notdeveloper")
             appendPath(key)
         }.build(), null, null, null, null)
+        if (cursor?.moveToFirst() == false) return true
         val result = cursor?.getString(0)?.toBooleanStrictOrNull() ?: true
         cursor?.close()
         return result
