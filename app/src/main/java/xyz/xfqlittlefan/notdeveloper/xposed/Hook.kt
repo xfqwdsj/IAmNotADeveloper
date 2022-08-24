@@ -1,17 +1,17 @@
 package xyz.xfqlittlefan.notdeveloper.xposed
 
 import android.content.ContentResolver
+import android.net.Uri
 import android.provider.Settings
 import androidx.annotation.Keep
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import xyz.xfqlittlefan.notdeveloper.ADB_ENABLED
-import xyz.xfqlittlefan.notdeveloper.ADB_WIFI_ENABLED
 import xyz.xfqlittlefan.notdeveloper.BuildConfig
-import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
+import xyz.xfqlittlefan.notdeveloper.preferences.ADB_ENABLED
+import xyz.xfqlittlefan.notdeveloper.preferences.ADB_WIFI_ENABLED
+import xyz.xfqlittlefan.notdeveloper.preferences.DEVELOPMENT_SETTINGS_ENABLED
 
 @Keep
 class Hook : IXposedHookLoadPackage {
@@ -35,8 +35,6 @@ class Hook : IXposedHookLoadPackage {
                 })
         }
 
-        val preferences = XSharedPreferences(BuildConfig.APPLICATION_ID)
-
         XposedHelpers.findAndHookMethod(
             Settings.Global::class.java,
             "getInt",
@@ -45,24 +43,14 @@ class Hook : IXposedHookLoadPackage {
             Int::class.java,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    preferences.reload()
                     when {
-                        preferences.getBoolean(
-                            DEVELOPMENT_SETTINGS_ENABLED,
-                            true
-                        ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
+                        param.args[0].getPreference(DEVELOPMENT_SETTINGS_ENABLED) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
-                        preferences.getBoolean(
-                            ADB_ENABLED,
-                            true
-                        ) && param.args[1] == ADB_ENABLED -> {
+                        param.args[0].getPreference(ADB_ENABLED) && param.args[1] == ADB_ENABLED -> {
                             param.result = 0
                         }
-                        preferences.getBoolean(
-                            ADB_WIFI_ENABLED,
-                            true
-                        ) && param.args[1] == ADB_WIFI_ENABLED -> {
+                        param.args[0].getPreference(ADB_WIFI_ENABLED) && param.args[1] == ADB_WIFI_ENABLED -> {
                             param.result = 0
                         }
                     }
@@ -76,24 +64,14 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    preferences.reload()
                     when {
-                        preferences.getBoolean(
-                            DEVELOPMENT_SETTINGS_ENABLED,
-                            true
-                        ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
+                        param.args[0].getPreference(DEVELOPMENT_SETTINGS_ENABLED) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
-                        preferences.getBoolean(
-                            ADB_ENABLED,
-                            true
-                        ) && param.args[1] == ADB_ENABLED -> {
+                        param.args[0].getPreference(ADB_ENABLED) && param.args[1] == ADB_ENABLED -> {
                             param.result = 0
                         }
-                        preferences.getBoolean(
-                            ADB_WIFI_ENABLED,
-                            true
-                        ) && param.args[1] == ADB_WIFI_ENABLED -> {
+                        param.args[0].getPreference(ADB_WIFI_ENABLED) && param.args[1] == ADB_WIFI_ENABLED -> {
                             param.result = 0
                         }
                     }
@@ -108,18 +86,11 @@ class Hook : IXposedHookLoadPackage {
             Int::class.java,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    preferences.reload()
                     when {
-                        preferences.getBoolean(
-                            DEVELOPMENT_SETTINGS_ENABLED,
-                            true
-                        ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
+                        param.args[0].getPreference(DEVELOPMENT_SETTINGS_ENABLED) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
-                        preferences.getBoolean(
-                            ADB_ENABLED,
-                            true
-                        ) && param.args[1] == ADB_ENABLED -> {
+                        param.args[0].getPreference(ADB_ENABLED) && param.args[1] == ADB_ENABLED -> {
                             param.result = 0
                         }
                     }
@@ -133,22 +104,26 @@ class Hook : IXposedHookLoadPackage {
             String::class.java,
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    preferences.reload()
                     when {
-                        preferences.getBoolean(
-                            DEVELOPMENT_SETTINGS_ENABLED,
-                            true
-                        ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
+                        param.args[0].getPreference(DEVELOPMENT_SETTINGS_ENABLED) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
-                        preferences.getBoolean(
-                            ADB_ENABLED,
-                            true
-                        ) && param.args[1] == ADB_ENABLED -> {
+                        param.args[0].getPreference(ADB_ENABLED) && param.args[1] == ADB_ENABLED -> {
                             param.result = 0
                         }
                     }
                 }
             })
+    }
+
+    fun Any.getPreference(key: String): Boolean {
+        val cursor = (this as? ContentResolver)?.query(Uri.Builder().apply {
+            scheme("content")
+            authority("xyz.xfqlittlefan.notdeveloper")
+            appendPath(key)
+        }.build(), null, null, null, null)
+        val result = cursor?.getString(0)?.toBooleanStrictOrNull() ?: true
+        cursor?.close()
+        return result
     }
 }

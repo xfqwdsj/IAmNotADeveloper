@@ -1,4 +1,4 @@
-package xyz.xfqlittlefan.notdeveloper
+package xyz.xfqlittlefan.notdeveloper.preferences
 
 const val DEVELOPMENT_SETTINGS_ENABLED = "development_settings_enabled"
 const val ADB_ENABLED = "adb_enabled"
