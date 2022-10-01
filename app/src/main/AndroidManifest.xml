@@ -24,12 +24,6 @@
             </intent-filter>
         </activity>
 
-        <provider
-            android:name=".preferences.PreferencesProvider"
-            android:authorities="xyz.xfqlittlefan.notdeveloper"
-            android:exported="true"
-            tools:ignore="ExportedContentProvider" />
-
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
@@ -39,6 +33,9 @@
         <meta-data
             android:name="xposedminversion"
             android:value="82" />
+        <meta-data
+            android:name="xposedsharedprefs"
+            android:value="true" />
     </application>
 
 </manifest>
