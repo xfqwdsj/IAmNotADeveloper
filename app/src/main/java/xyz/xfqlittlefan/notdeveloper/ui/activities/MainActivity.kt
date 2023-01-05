@@ -24,7 +24,6 @@ import xyz.xfqlittlefan.notdeveloper.ADB_ENABLED
 import xyz.xfqlittlefan.notdeveloper.ADB_WIFI_ENABLED
 import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 import xyz.xfqlittlefan.notdeveloper.R
-import xyz.xfqlittlefan.notdeveloper.ui.composables.AppBar
 import xyz.xfqlittlefan.notdeveloper.ui.composables.rememberBooleanSharedPreference
 import xyz.xfqlittlefan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import xyz.xfqlittlefan.notdeveloper.util.allBars
@@ -42,12 +41,11 @@ class MainActivity : ComponentActivity() {
             IAmNotADeveloperTheme {
                 Scaffold(
                     topBar = {
-                        AppBar(
+                        TopAppBar(
                             title = {
                                 Text(stringResource(R.string.app_name))
-                            }, modifier = Modifier.windowInsetsPadding(
-                                WindowInsets.allBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                            )
+                            },
+                            windowInsets = WindowInsets.allBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
                         )
                     }
                 ) { padding ->
