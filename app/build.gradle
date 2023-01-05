@@ -3,9 +3,9 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
-def lifecycle_version = '2.6.0-alpha01'
-def compose_version = '1.3.0-alpha03'
-def compose_material3_version = '1.0.0-alpha16'
+def lifecycle_version = '2.6.0-alpha03'
+def compose_version = '1.4.0-alpha03'
+def compose_material3_version = '1.1.0-alpha03'
 def accompanist_version = '0.28.0'
 
 android {
@@ -54,7 +54,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.3.0'
+        kotlinCompilerExtensionVersion '1.4.0-alpha02'
     }
     packagingOptions {
         resources {
@@ -66,7 +66,7 @@ android {
 dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
-    implementation 'androidx.activity:activity-compose:1.5.1'
+    implementation 'androidx.activity:activity-compose:1.7.0-alpha02'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.foundation:foundation:$compose_version"
     implementation "androidx.compose.runtime:runtime:$compose_version"
