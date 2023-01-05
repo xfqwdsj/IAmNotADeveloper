@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: adopt
-          java-version: '11'
+          java-version: '17'
       - name: 设置缓存
         uses: actions/cache@v3
         with:
