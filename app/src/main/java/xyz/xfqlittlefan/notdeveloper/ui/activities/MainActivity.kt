@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
                                 defaultValue = true
                             )
 
-                            ListItem(headlineText = {
+                            ListItem(headlineContent = {
                                 Text(stringResource(R.string.hide_development_mode))
                             }, modifier = Modifier.clickable {
                                 devSettings = !devSettings
@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                                     onCheckedChange = { devSettings = it }
                                 )
                             })
-                            ListItem(headlineText = {
+                            ListItem(headlineContent = {
                                 Text(stringResource(R.string.hide_usb_debugging))
                             }, modifier = Modifier.clickable {
                                 usbDebugging = !usbDebugging
@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
                                     onCheckedChange = { usbDebugging = it }
                                 )
                             })
-                            ListItem(headlineText = {
+                            ListItem(headlineContent = {
                                 Text(stringResource(R.string.hide_wireless_debugging))
                             }, modifier = Modifier.clickable {
                                 wirelessDebugging = !wirelessDebugging
