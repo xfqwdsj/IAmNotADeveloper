@@ -141,7 +141,7 @@ class MainActivity : ComponentActivity() {
                             )
                         } else {
                             Text(
-                                stringResource(R.string.module_not_actived),
+                                stringResource(R.string.module_not_activated),
                                 modifier = Modifier.padding(horizontal = 20.dp),
                                 color = MaterialTheme.colorScheme.error
                             )
