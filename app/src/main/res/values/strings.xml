@@ -9,6 +9,6 @@
     <string name="dialog_test_content">Development mode status: %1$s\nUSB debugging status: %2$s\nWireless debugging status: %3$s</string>
     <string name="on">On</string>
     <string name="off">Off</string>
-    <string name="module_not_actived">Module not actived</string>
-    <string name="unable_to_save_settings">Unable to save settings, all features are enabled by default. Plese try to lower your Android version to below Android 8.1 or use the LSPosed Framwork and activate this module</string>
+    <string name="module_not_activated">Module not activated</string>
+    <string name="unable_to_save_settings">Unable to save settings, all features are enabled by default. Please try to lower your Android version to below Android 8.1 or use the LSPosed Framwork and activate this module.</string>
 </resources>
