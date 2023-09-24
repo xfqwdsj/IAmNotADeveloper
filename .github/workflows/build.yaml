@@ -3,8 +3,10 @@ name: Building Release
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -13,23 +15,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: 设置 JDK
-        uses: actions/setup-java@v2
+      - name: Setting up JDK
+        uses: actions/setup-java@v3
         with:
-          distribution: adopt
-          java-version: '17'
-      - name: 设置缓存
+          distribution: temurin
+          java-version: '19'
+      - name: Setting up cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
-      - name: 编译
+      - name: Building
         run: |
           chmod +x ./gradlew
           ./gradlew assembleRelease
-      - name: 上传
+      - name: Uploading artifact
         uses: actions/upload-artifact@v3
         with:
           name: ci-release
