@@ -17,16 +17,12 @@ import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith(
-                "com.android"
-            )
-        ) {
+        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
         }
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
-            XposedHelpers.findAndHookMethod(
-                "xyz.xfqlittlefan.notdeveloper.xposed.ModuleStatusKt",
+            XposedHelpers.findAndHookMethod("xyz.xfqlittlefan.notdeveloper.xposed.ModuleStatusKt",
                 lpparam.classLoader,
                 "isModuleActive",
                 object : XC_MethodHook() {
@@ -38,8 +34,7 @@ class Hook : IXposedHookLoadPackage {
 
         val preferences = XSharedPreferences(BuildConfig.APPLICATION_ID)
 
-        XposedHelpers.findAndHookMethod(
-            Settings.Global::class.java,
+        XposedHelpers.findAndHookMethod(Settings.Global::class.java,
             "getInt",
             ContentResolver::class.java,
             String::class.java,
@@ -49,20 +44,19 @@ class Hook : IXposedHookLoadPackage {
                     preferences.reload()
                     when {
                         preferences.getBoolean(
-                            DEVELOPMENT_SETTINGS_ENABLED,
-                            true
+                            DEVELOPMENT_SETTINGS_ENABLED, true
                         ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
+
                         preferences.getBoolean(
-                            ADB_ENABLED,
-                            true
+                            ADB_ENABLED, true
                         ) && param.args[1] == ADB_ENABLED -> {
                             param.result = 0
                         }
+
                         preferences.getBoolean(
-                            ADB_WIFI_ENABLED,
-                            true
+                            ADB_WIFI_ENABLED, true
                         ) && param.args[1] == ADB_WIFI_ENABLED -> {
                             param.result = 0
                         }
@@ -70,8 +64,7 @@ class Hook : IXposedHookLoadPackage {
                 }
             })
 
-        XposedHelpers.findAndHookMethod(
-            Settings.Global::class.java,
+        XposedHelpers.findAndHookMethod(Settings.Global::class.java,
             "getInt",
             ContentResolver::class.java,
             String::class.java,
@@ -80,20 +73,19 @@ class Hook : IXposedHookLoadPackage {
                     preferences.reload()
                     when {
                         preferences.getBoolean(
-                            DEVELOPMENT_SETTINGS_ENABLED,
-                            true
+                            DEVELOPMENT_SETTINGS_ENABLED, true
                         ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
+
                         preferences.getBoolean(
-                            ADB_ENABLED,
-                            true
+                            ADB_ENABLED, true
                         ) && param.args[1] == ADB_ENABLED -> {
                             param.result = 0
                         }
+
                         preferences.getBoolean(
-                            ADB_WIFI_ENABLED,
-                            true
+                            ADB_WIFI_ENABLED, true
                         ) && param.args[1] == ADB_WIFI_ENABLED -> {
                             param.result = 0
                         }
@@ -101,8 +93,7 @@ class Hook : IXposedHookLoadPackage {
                 }
             })
 
-        XposedHelpers.findAndHookMethod(
-            Settings.Secure::class.java,
+        XposedHelpers.findAndHookMethod(Settings.Secure::class.java,
             "getInt",
             ContentResolver::class.java,
             String::class.java,
@@ -112,14 +103,13 @@ class Hook : IXposedHookLoadPackage {
                     preferences.reload()
                     when {
                         preferences.getBoolean(
-                            DEVELOPMENT_SETTINGS_ENABLED,
-                            true
+                            DEVELOPMENT_SETTINGS_ENABLED, true
                         ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
+
                         preferences.getBoolean(
-                            ADB_ENABLED,
-                            true
+                            ADB_ENABLED, true
                         ) && param.args[1] == ADB_ENABLED -> {
                             param.result = 0
                         }
@@ -127,8 +117,7 @@ class Hook : IXposedHookLoadPackage {
                 }
             })
 
-        XposedHelpers.findAndHookMethod(
-            Settings.Secure::class.java,
+        XposedHelpers.findAndHookMethod(Settings.Secure::class.java,
             "getInt",
             ContentResolver::class.java,
             String::class.java,
@@ -137,14 +126,13 @@ class Hook : IXposedHookLoadPackage {
                     preferences.reload()
                     when {
                         preferences.getBoolean(
-                            DEVELOPMENT_SETTINGS_ENABLED,
-                            true
+                            DEVELOPMENT_SETTINGS_ENABLED, true
                         ) && param.args[1] == DEVELOPMENT_SETTINGS_ENABLED -> {
                             param.result = 0
                         }
+
                         preferences.getBoolean(
-                            ADB_ENABLED,
-                            true
+                            ADB_ENABLED, true
                         ) && param.args[1] == ADB_ENABLED -> {
                             param.result = 0
                         }
