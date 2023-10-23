@@ -118,6 +118,7 @@ class Hook : IXposedHookLoadPackage {
         val rebootFunc = "persist.sys.usb.reboot.func"
         val svcadbd= "init.svc.adbd"
         val methodGet = "get"
+        val methodGetProp = "getprop"
         val methodGetBoolean = "getBoolean"
         val methodGetInt = "getInt"
         val methodGetLong = "getLong"
@@ -141,6 +142,7 @@ class Hook : IXposedHookLoadPackage {
                             ffsReady -> {
                                 when (param.method.name) {
                                     methodGet -> param.result = "0"
+                                    methodGetProp -> param.result = "0"
                                     methodGetBoolean -> param.result = false
                                     methodGetInt -> param.result = 0
                                     methodGetLong -> param.result = 0L
@@ -168,12 +170,12 @@ class Hook : IXposedHookLoadPackage {
         vararg keys: String
     ) {
         val arg = param.args[1] as String
-        Log.i(tag, "processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
+        XposedBridge.log("$tag: processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
         keys.forEach { key ->
             if (preferences.getBoolean(key, true) && arg == key) {
                 param.result = 0
-                Log.i(tag, "hooked ${param.method.name}($arg): ${param.result}")
+                XposedBridge.log("$tag: hooked ${param.method.name}($arg): ${param.result}")
                 return
             }
         }
