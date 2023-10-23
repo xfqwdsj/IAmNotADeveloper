@@ -116,11 +116,13 @@ class Hook : IXposedHookLoadPackage {
         val usbState = "sys.usb.state"
         val usbConfig = "sys.usb.config"
         val rebootFunc = "persist.sys.usb.reboot.func"
+        val svcadbd= "init.svc.adbd"
         val methodGet = "get"
         val methodGetBoolean = "getBoolean"
         val methodGetInt = "getInt"
         val methodGetLong = "getLong"
         val overrideAdb = "mtp"
+        val overridesvcadbd = "stopped"
 
         listOf(methodGet, methodGetBoolean, methodGetInt, methodGetLong).forEach {
             XposedBridge.hookAllMethods(
@@ -128,10 +130,7 @@ class Hook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val arg = param.args[0] as String
-                        Log.i(
-                            tag,
-                            "processing ${param.method.name} from ${lpparam.packageName} with arg $arg"
-                        )
+                        XposedBridge.log("$tag: processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
                         if (arg != ffsReady && param.method.name != methodGet) {
                             XposedBridge.log("$tag: processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
@@ -151,9 +150,11 @@ class Hook : IXposedHookLoadPackage {
                             usbState -> param.result = overrideAdb
                             usbConfig -> param.result = overrideAdb
                             rebootFunc -> param.result = overrideAdb
+                            svcadbd -> param.result = overridesvcadbd
+                            
                         }
 
-                        Log.i(tag, "hooked ${param.method.name}($arg): ${param.result}")
+                        XposedBridge.log("$tag: hooked ${param.method.name}($arg): ${param.result} for ${lpparam.packageName}")
                     }
                 },
             )
