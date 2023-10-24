@@ -25,7 +25,7 @@ class Hook : IXposedHookLoadPackage {
             return
         }
 
-        Log.i(tag, "processing " + lpparam.packageName)
+        XposedBridge.log("$tag: processing " + lpparam.packageName)
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
@@ -125,7 +125,7 @@ class Hook : IXposedHookLoadPackage {
         val overrideAdb = "mtp"
         val overridesvcadbd = "stopped"
 
-        listOf(methodGet, methodGetBoolean, methodGetInt, methodGetLong).forEach {
+        listOf(methodGet, methodGetProp, methodGetBoolean, methodGetInt, methodGetLong).forEach {
             XposedBridge.hookAllMethods(
                 clazz, it,
                 object : XC_MethodHook() {
