@@ -108,7 +108,7 @@ class Hook : IXposedHookLoadPackage {
         )
 
         if (clazz == null) {
-            XposedBridge.log("$tag: cannot find SystemProperties class")
+            XposedBridge.log("$tag: props cannot find SystemProperties class")
             return
         }
 
@@ -131,10 +131,10 @@ class Hook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val arg = param.args[0] as String
-                        XposedBridge.log("$tag: processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
+                        XposedBridge.log("$tag: props processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
                         if (arg != ffsReady && param.method.name != methodGet) {
-                            XposedBridge.log("$tag: processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
+                            XposedBridge.log("$tag: props processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
                             return
                         }
 
@@ -156,9 +156,9 @@ class Hook : IXposedHookLoadPackage {
                             
                         }
 
-                        XposedBridge.log("$tag: hooked ${param.method.name}($arg): ${param.result} for ${lpparam.packageName}")
+                        XposedBridge.log("$tag: props hooked ${param.method.name}($arg): ${param.result} for ${lpparam.packageName}")
                     }
-                },
+                }
             )
         }
     }
