@@ -108,7 +108,7 @@ class Hook : IXposedHookLoadPackage {
         )
 
         if (clazz == null) {
-            XposedBridge.log("$tag: cannot find SystemProperties class")
+            XposedBridge.log("$tag: props cannot find SystemProperties class")
             return
         }
 
@@ -116,13 +116,16 @@ class Hook : IXposedHookLoadPackage {
         val usbState = "sys.usb.state"
         val usbConfig = "sys.usb.config"
         val rebootFunc = "persist.sys.usb.reboot.func"
+        val svcadbd= "init.svc.adbd"
         val methodGet = "get"
+        val methodGetProp = "getprop"
         val methodGetBoolean = "getBoolean"
         val methodGetInt = "getInt"
         val methodGetLong = "getLong"
         val overrideAdb = "mtp"
+        val overridesvcadbd = "stopped"
 
-        listOf(methodGet, methodGetBoolean, methodGetInt, methodGetLong).forEach {
+        listOf(methodGet, methodGetProp, methodGetBoolean, methodGetInt, methodGetLong).forEach {
             XposedBridge.hookAllMethods(
                 clazz, it,
                 object : XC_MethodHook() {
@@ -134,7 +137,7 @@ class Hook : IXposedHookLoadPackage {
                         )
 
                         if (arg != ffsReady && param.method.name != methodGet) {
-                            XposedBridge.log("$tag: processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
+                            XposedBridge.log("$tag: props processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
                             return
                         }
 
@@ -142,6 +145,7 @@ class Hook : IXposedHookLoadPackage {
                             ffsReady -> {
                                 when (param.method.name) {
                                     methodGet -> param.result = "0"
+                                    methodGetProp -> param.result = "0"
                                     methodGetBoolean -> param.result = false
                                     methodGetInt -> param.result = 0
                                     methodGetLong -> param.result = 0L
@@ -151,11 +155,13 @@ class Hook : IXposedHookLoadPackage {
                             usbState -> param.result = overrideAdb
                             usbConfig -> param.result = overrideAdb
                             rebootFunc -> param.result = overrideAdb
+                            svcadbd -> param.result = overridesvcadbd
+                            
                         }
 
                         Log.i(tag, "hooked ${param.method.name}($arg): ${param.result}")
                     }
-                },
+                }
             )
         }
     }
