@@ -15,24 +15,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setting up JDK
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '19'
-      - name: Setting up cache
+      - name: Set up cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
-      - name: Building
+      - name: Build
         run: |
           chmod +x ./gradlew
           ./gradlew assembleRelease
-      - name: Uploading artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ci-release
+          name: NotDeveloper-${{ github.sha }}
           path: app/build/outputs/apk/release/app-release.apk
