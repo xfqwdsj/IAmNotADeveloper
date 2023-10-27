@@ -25,7 +25,7 @@ class Hook : IXposedHookLoadPackage {
             return
         }
 
-        XposedBridge.log("$tag: processing " + lpparam.packageName)
+        Log.i(tag, "processing " + lpparam.packageName)
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
@@ -131,7 +131,10 @@ class Hook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val arg = param.args[0] as String
-                        XposedBridge.log("$tag: props processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
+                        Log.i(
+                            tag,
+                            "processing ${param.method.name} from ${lpparam.packageName} with arg $arg"
+                        )
 
                         if (arg != ffsReady && param.method.name != methodGet) {
                             XposedBridge.log("$tag: props processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
@@ -156,7 +159,7 @@ class Hook : IXposedHookLoadPackage {
                             
                         }
 
-                        XposedBridge.log("$tag: props hooked ${param.method.name}($arg): ${param.result} for ${lpparam.packageName}")
+                        Log.i(tag, "hooked ${param.method.name}($arg): ${param.result}")
                     }
                 }
             )
@@ -170,12 +173,12 @@ class Hook : IXposedHookLoadPackage {
         vararg keys: String
     ) {
         val arg = param.args[1] as String
-        XposedBridge.log("$tag: processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
+        Log.i(tag, "processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
         keys.forEach { key ->
             if (preferences.getBoolean(key, true) && arg == key) {
                 param.result = 0
-                XposedBridge.log("$tag: hooked ${param.method.name}($arg): ${param.result}")
+                Log.i(tag, "hooked ${param.method.name}($arg): ${param.result}")
                 return
             }
         }
