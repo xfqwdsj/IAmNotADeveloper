@@ -5,7 +5,7 @@
     <string name="hide_usb_debugging">Ocultar depuração USB</string>
     <string name="hide_wireless_debugging">Ocultar depuração sem fios</string>
     <string name="description">Todas as alterações entrarão em vigor imediatamente</string>
-    <string name="test">Teste</string>
+    <string name="test">Testar</string>
     <string name="dialog_test_content">Status das opções do desenvolvedor: %1$s\nStatus da depuração USB: %2$s\nStatus da depuração sem fios: %3$s</string>
     <string name="on">Ativado</string>
     <string name="off">Desativado</string>
