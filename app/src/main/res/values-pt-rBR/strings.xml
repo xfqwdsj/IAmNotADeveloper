@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">IAmNotADeveloper</string>
     <string name="hide_development_mode">Ocultar opções do desenvolvedor</string>
     <string name="hide_usb_debugging">Ocultar depuração USB</string>
     <string name="hide_wireless_debugging">Ocultar depuração sem fios</string>
