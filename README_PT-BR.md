@@ -7,4 +7,4 @@ A função "Testar" deste app obterá o status das chaves do sistema corresponde
 - Depuração USB
 - Depuração por Wi-Fi
 
-Mas este app não coletará nenhuma de suas informações.
+Este app não coletará nenhuma de suas informações.
