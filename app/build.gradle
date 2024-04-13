@@ -5,7 +5,7 @@ plugins {
 
 def lifecycle_version = '2.7.0'
 def compose_version = '1.6.1'
-def compose_material3_version = '1.1.2'
+def compose_material3_version = '1.2.1'
 def accompanist_version = '0.32.0'
 
 android {
