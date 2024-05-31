@@ -25,8 +25,8 @@ android {
         applicationId "xyz.xfqlittlefan.notdeveloper"
         minSdk 27
         targetSdk 34
-        versionCode 5
-        versionName '1.2.0'
+        versionCode 6
+        versionName '1.2.1'
         signingConfig signingConfigs.config
 
         vectorDrawables {
