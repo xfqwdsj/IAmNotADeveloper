@@ -1,3 +1,5 @@
+rootProject.name = "IAmNotADeveloper"
+
 pluginManagement {
     repositories {
         google()
@@ -10,8 +12,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://api.xposed.info/" }
+        maven("https://api.xposed.info/")
     }
 }
-rootProject.name = "IAmNotADeveloper"
-include ':app'
+
+include(":app")

@@ -11,6 +11,7 @@ val isModuleActive
 @SuppressLint("WorldReadableFiles")
 fun Context.isPreferencesReady(): Boolean {
     return try {
+        @Suppress("DEPRECATION")
         getSharedPreferences("testPreferences", Context.MODE_WORLD_READABLE)
         true
     } catch (e: Throwable) {
