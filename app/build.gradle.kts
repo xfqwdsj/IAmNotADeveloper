@@ -65,6 +65,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.kotlin.reflect)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.activity.compose)

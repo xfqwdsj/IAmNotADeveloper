@@ -4,59 +4,105 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.provider.Settings
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import xyz.xfqlittlefan.notdeveloper.ADB_ENABLED
 import xyz.xfqlittlefan.notdeveloper.ADB_WIFI_ENABLED
 import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 import xyz.xfqlittlefan.notdeveloper.R
 import xyz.xfqlittlefan.notdeveloper.ui.composables.rememberBooleanSharedPreference
 import xyz.xfqlittlefan.notdeveloper.ui.theme.IAmNotADeveloperTheme
-import xyz.xfqlittlefan.notdeveloper.util.allBars
 import xyz.xfqlittlefan.notdeveloper.xposed.isModuleActive
 import xyz.xfqlittlefan.notdeveloper.xposed.isPreferencesReady
+import kotlin.reflect.full.declaredFunctions
 
 class MainActivity : ComponentActivity() {
+    private val isMiui: Boolean
+        @SuppressLint("PrivateApi") get() {
+            val clazz = Class.forName("android.os.SystemProperties").kotlin
+            val method =
+                clazz.declaredFunctions.firstOrNull { it.name == "get" && it.parameters.size == 1 }
+            return method?.call("ro.miui.ui.version.name") != ""
+        }
+
     @SuppressLint("WorldReadableFiles")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
+        @Suppress("DEPRECATION") if (isMiui) {
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+            )
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+            )
+        }
         super.onCreate(savedInstanceState)
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             IAmNotADeveloperTheme {
+                val scrollBehavior =
+                    TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
                 Scaffold(
+                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                     topBar = {
-                        TopAppBar(
+                        LargeTopAppBar(
                             title = {
                                 Text(stringResource(R.string.app_name))
                             },
-                            windowInsets = WindowInsets.allBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
+                            windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
+                            scrollBehavior = scrollBehavior
                         )
                     }
                 ) { padding ->
                     Column(
                         modifier = Modifier
-                            .padding(padding)
+                            .consumeWindowInsets(padding)
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
-                            .windowInsetsPadding(WindowInsets.allBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)),
+                            .padding(padding)
+                            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         var testResult by remember { mutableStateOf<List<Boolean>?>(null) }
@@ -108,6 +154,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             })
                         } else {
+                            Spacer(Modifier.height(20.dp))
                             Text(
                                 stringResource(R.string.unable_to_save_settings),
                                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -148,13 +195,14 @@ class MainActivity : ComponentActivity() {
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
+                        Spacer(Modifier.height(20.dp))
 
                         if (testResult?.size == 3) {
                             fun getString(on: String, off: String, input: List<Boolean>) =
                                 input.map { if (it) on else off }.toTypedArray()
 
                             AlertDialog(onDismissRequest = { testResult = null }, confirmButton = {
-                                Button(onClick = { testResult = null }) {
+                                TextButton(onClick = { testResult = null }) {
                                     Text(stringResource(android.R.string.ok))
                                 }
                             }, title = {
@@ -164,8 +212,8 @@ class MainActivity : ComponentActivity() {
                                     Text(
                                         stringResource(
                                             R.string.dialog_test_content, *getString(
-                                                stringResource(R.string.on),
-                                                stringResource(R.string.off),
+                                                stringResource(R.string.status_on),
+                                                stringResource(R.string.status_off),
                                                 testResult ?: listOf(false, false, false)
                                             )
                                         )
