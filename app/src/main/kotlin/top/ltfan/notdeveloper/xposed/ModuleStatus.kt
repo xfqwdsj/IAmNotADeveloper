@@ -10,11 +10,13 @@ val isModuleActive
 @SuppressLint("WorldReadableFiles")
 fun Context.isPreferencesReady(): Boolean {
     return try {
-        @Suppress("DEPRECATION")
-        getSharedPreferences("testPreferences", Context.MODE_WORLD_READABLE)
+        @Suppress("DEPRECATION") getSharedPreferences(
+            "testPreferences",
+            Context.MODE_WORLD_READABLE
+        )
         true
-    } catch (e: Throwable) {
-        Log.w("failed to confirm SharedPreferences' state:", e)
+    } catch (t: Throwable) {
+        android.util.Log.e(Log.TAG, "failed to confirm SharedPreferences' state.", t)
         false
     }
 }
