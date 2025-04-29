@@ -26,7 +26,7 @@ class Hook : IXposedHookLoadPackage {
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
-                "top.ltfan.notdeveloper.xposed.ModuleStatusKt",
+                "${BuildConfig.APPLICATION_ID}.xposed.ModuleStatusKt",
                 lpparam.classLoader,
                 "isModuleActive",
                 object : XC_MethodHook() {
