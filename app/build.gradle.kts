@@ -13,7 +13,7 @@ kotlin {
 }
 
 android {
-    namespace = "xyz.xfqlittlefan.notdeveloper"
+    namespace = "top.ltfan.notdeveloper"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     signingConfigs {
@@ -26,7 +26,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "xyz.xfqlittlefan.notdeveloper"
+        applicationId = "top.ltfan.notdeveloper"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionName = libs.versions.app.versionName.get()

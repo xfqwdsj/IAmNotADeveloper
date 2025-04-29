@@ -1,4 +1,4 @@
-package xyz.xfqlittlefan.notdeveloper.ui.theme
+package top.ltfan.notdeveloper.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

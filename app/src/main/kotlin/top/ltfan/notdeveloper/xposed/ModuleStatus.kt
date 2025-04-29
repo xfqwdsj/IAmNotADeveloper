@@ -1,8 +1,7 @@
-package xyz.xfqlittlefan.notdeveloper.xposed
+package top.ltfan.notdeveloper.xposed
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
 import androidx.annotation.Keep
 
 val isModuleActive

@@ -1,4 +1,4 @@
-package xyz.xfqlittlefan.notdeveloper.xposed
+package top.ltfan.notdeveloper.xposed
 
 import de.robv.android.xposed.XposedBridge
 

@@ -1,4 +1,4 @@
-package xyz.xfqlittlefan.notdeveloper.xposed
+package top.ltfan.notdeveloper.xposed
 
 import android.content.ContentResolver
 import android.provider.Settings
@@ -10,10 +10,10 @@ import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
-import xyz.xfqlittlefan.notdeveloper.ADB_ENABLED
-import xyz.xfqlittlefan.notdeveloper.ADB_WIFI_ENABLED
-import xyz.xfqlittlefan.notdeveloper.BuildConfig
-import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
+import top.ltfan.notdeveloper.ADB_ENABLED
+import top.ltfan.notdeveloper.ADB_WIFI_ENABLED
+import top.ltfan.notdeveloper.BuildConfig
+import top.ltfan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 
 @Keep
 class Hook : IXposedHookLoadPackage {
@@ -26,7 +26,7 @@ class Hook : IXposedHookLoadPackage {
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
-                "xyz.xfqlittlefan.notdeveloper.xposed.ModuleStatusKt",
+                "top.ltfan.notdeveloper.xposed.ModuleStatusKt",
                 lpparam.classLoader,
                 "isModuleActive",
                 object : XC_MethodHook() {

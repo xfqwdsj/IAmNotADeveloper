@@ -1,4 +1,4 @@
-package xyz.xfqlittlefan.notdeveloper.ui.composables
+package top.ltfan.notdeveloper.ui.composables
 
 import android.content.Context
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener

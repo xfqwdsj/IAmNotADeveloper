@@ -1,4 +1,4 @@
-package xyz.xfqlittlefan.notdeveloper.ui.activities
+package top.ltfan.notdeveloper.ui.activities
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -44,14 +44,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import xyz.xfqlittlefan.notdeveloper.ADB_ENABLED
-import xyz.xfqlittlefan.notdeveloper.ADB_WIFI_ENABLED
-import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
-import xyz.xfqlittlefan.notdeveloper.R
-import xyz.xfqlittlefan.notdeveloper.ui.composables.rememberBooleanSharedPreference
-import xyz.xfqlittlefan.notdeveloper.ui.theme.IAmNotADeveloperTheme
-import xyz.xfqlittlefan.notdeveloper.xposed.isModuleActive
-import xyz.xfqlittlefan.notdeveloper.xposed.isPreferencesReady
+import top.ltfan.notdeveloper.ADB_ENABLED
+import top.ltfan.notdeveloper.ADB_WIFI_ENABLED
+import top.ltfan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
+import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.ui.composables.rememberBooleanSharedPreference
+import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
+import top.ltfan.notdeveloper.xposed.isModuleActive
+import top.ltfan.notdeveloper.xposed.isPreferencesReady
 import kotlin.reflect.full.declaredFunctions
 
 class MainActivity : ComponentActivity() {
