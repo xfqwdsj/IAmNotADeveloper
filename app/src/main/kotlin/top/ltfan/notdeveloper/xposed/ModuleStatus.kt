@@ -14,6 +14,7 @@ fun Context.isPreferencesReady(): Boolean {
         getSharedPreferences("testPreferences", Context.MODE_WORLD_READABLE)
         true
     } catch (e: Throwable) {
+        Log.w("failed to confirm SharedPreferences' state:", e)
         false
     }
 }
