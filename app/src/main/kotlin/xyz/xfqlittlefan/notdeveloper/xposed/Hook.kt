@@ -2,7 +2,6 @@ package xyz.xfqlittlefan.notdeveloper.xposed
 
 import android.content.ContentResolver
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.Keep
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
@@ -18,14 +17,12 @@ import xyz.xfqlittlefan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 
 @Keep
 class Hook : IXposedHookLoadPackage {
-    private val tag = "NotDeveloper"
-
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
         if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
             return
         }
 
-        Log.i(tag, "processing " + lpparam.packageName)
+        Log.d("processing ${lpparam.packageName}")
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
@@ -108,7 +105,7 @@ class Hook : IXposedHookLoadPackage {
         )
 
         if (clazz == null) {
-            XposedBridge.log("$tag: props cannot find SystemProperties class")
+            Log.w("cannot find SystemProperties class")
             return
         }
 
@@ -131,13 +128,10 @@ class Hook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val arg = param.args[0] as String
-                        Log.i(
-                            tag,
-                            "processing ${param.method.name} from ${lpparam.packageName} with arg $arg"
-                        )
+                        Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
                         if (arg != ffsReady && param.method.name != methodGet) {
-                            XposedBridge.log("$tag: props processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
+                            Log.i("props processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
                             return
                         }
 
@@ -159,7 +153,7 @@ class Hook : IXposedHookLoadPackage {
                             
                         }
 
-                        Log.i(tag, "hooked ${param.method.name}($arg): ${param.result}")
+                        Log.d("hooked ${param.method.name}($arg): ${param.result}")
                     }
                 }
             )
@@ -173,16 +167,16 @@ class Hook : IXposedHookLoadPackage {
         vararg keys: String
     ) {
         val arg = param.args[1] as String
-        Log.i(tag, "processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
+        Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
         keys.forEach { key ->
             if (preferences.getBoolean(key, true) && arg == key) {
                 param.result = 0
-                Log.i(tag, "hooked ${param.method.name}($arg): ${param.result}")
+                Log.d("hooked ${param.method.name}($arg): ${param.result}")
                 return
             }
         }
 
-        XposedBridge.log("$tag: processed ${param.method.name} without changing result")
+        Log.i("processed ${param.method.name} without changing result")
     }
 }
