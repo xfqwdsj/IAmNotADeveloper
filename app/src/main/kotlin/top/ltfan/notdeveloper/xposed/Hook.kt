@@ -22,7 +22,7 @@ class Hook : IXposedHookLoadPackage {
             return
         }
 
-        Log.d("processing ${lpparam.packageName}")
+        Log.d("processing package ${lpparam.packageName}")
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
@@ -150,7 +150,6 @@ class Hook : IXposedHookLoadPackage {
                             usbConfig -> param.result = overrideAdb
                             rebootFunc -> param.result = overrideAdb
                             svcadbd -> param.result = overridesvcadbd
-                            
                         }
 
                         Log.d("hooked ${param.method.name}($arg): ${param.result}")
