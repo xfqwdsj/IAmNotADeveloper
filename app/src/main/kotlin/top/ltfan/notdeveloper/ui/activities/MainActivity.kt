@@ -1,7 +1,6 @@
 package top.ltfan.notdeveloper.ui.activities
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
@@ -108,17 +107,17 @@ class MainActivity : ComponentActivity() {
                         var testResult by remember { mutableStateOf<List<Boolean>?>(null) }
                         if (isPreferencesReady()) {
                             @Suppress("DEPRECATION") var devSettings by rememberBooleanSharedPreference(
-                                mode = Context.MODE_WORLD_READABLE,
+                                mode = MODE_WORLD_READABLE,
                                 key = DEVELOPMENT_SETTINGS_ENABLED,
                                 defaultValue = true
                             )
                             @Suppress("DEPRECATION") var usbDebugging by rememberBooleanSharedPreference(
-                                mode = Context.MODE_WORLD_READABLE,
+                                mode = MODE_WORLD_READABLE,
                                 key = ADB_ENABLED,
                                 defaultValue = true
                             )
                             @Suppress("DEPRECATION") var wirelessDebugging by rememberBooleanSharedPreference(
-                                mode = Context.MODE_WORLD_READABLE,
+                                mode = MODE_WORLD_READABLE,
                                 key = ADB_WIFI_ENABLED,
                                 defaultValue = true
                             )
