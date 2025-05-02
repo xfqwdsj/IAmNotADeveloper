@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name" translatable="false">IAmNotADeveloper</string>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="app_name">IAmNotADeveloper</string>
     <string name="hide_development_mode">Hide development mode</string>
     <string name="hide_usb_debugging">Hide USB debugging</string>
     <string name="hide_wireless_debugging">Hide wireless debugging</string>
