@@ -10,10 +10,8 @@ import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
-import top.ltfan.notdeveloper.ADB_ENABLED
-import top.ltfan.notdeveloper.ADB_WIFI_ENABLED
 import top.ltfan.notdeveloper.BuildConfig
-import top.ltfan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
+import top.ltfan.notdeveloper.Item
 
 @Keep
 class Hook : IXposedHookLoadPackage {
@@ -46,9 +44,7 @@ class Hook : IXposedHookLoadPackage {
                     lpparam,
                     prefs,
                     param,
-                    DEVELOPMENT_SETTINGS_ENABLED,
-                    ADB_ENABLED,
-                    ADB_WIFI_ENABLED
+                    *(Item.oldApiItems.toTypedArray() + Item.newApiItems.toTypedArray())
                 )
             }
         }
@@ -56,7 +52,7 @@ class Hook : IXposedHookLoadPackage {
         val oldApiCallback = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 prefs.reload()
-                changeResultToZero(lpparam, prefs, param, DEVELOPMENT_SETTINGS_ENABLED, ADB_ENABLED)
+                changeResultToZero(lpparam, prefs, param, *Item.oldApiItems.toTypedArray())
             }
         }
 
@@ -128,7 +124,7 @@ class Hook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         prefs.reload()
-                        if (!prefs.getBoolean(ADB_ENABLED, true)) return
+                        if (!prefs.getBoolean(Item.AdbEnabled.key, true)) return
 
                         val arg = param.args[0] as String
                         Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
@@ -166,12 +162,13 @@ class Hook : IXposedHookLoadPackage {
         lpparam: LoadPackageParam,
         prefs: XSharedPreferences,
         param: MethodHookParam,
-        vararg keys: String
+        vararg items: Item
     ) {
         val arg = param.args[1] as String
         Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
-        keys.forEach { key ->
+        items.forEach { item ->
+            val key = item.key
             if (prefs.getBoolean(key, true) && arg == key) {
                 param.result = 0
                 Log.d("processed ${param.method.name}($arg): ${param.result}")

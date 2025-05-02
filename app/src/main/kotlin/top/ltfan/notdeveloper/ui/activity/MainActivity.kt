@@ -132,7 +132,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun check() {
-        listOf(Item.DevelopmentSettingsEnabled, Item.AdbEnabled, Item.AdbWifiEnabled).forEach {
+        Item.settingGlobalItems.forEach {
             testResults[it] = Settings.Global.getInt(
                 contentResolver,
                 it.key,
