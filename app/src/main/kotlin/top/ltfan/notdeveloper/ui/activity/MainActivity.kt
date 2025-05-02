@@ -1,4 +1,4 @@
-package top.ltfan.notdeveloper.ui.activities
+package top.ltfan.notdeveloper.ui.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -30,7 +30,6 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,9 +38,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.Item
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.ui.composables.PreferenceItem
-import top.ltfan.notdeveloper.ui.composables.StatusCard
-import top.ltfan.notdeveloper.ui.composables.rememberBooleanSharedPreference
+import top.ltfan.notdeveloper.ui.composable.PreferenceItem
+import top.ltfan.notdeveloper.ui.composable.StatusCard
+import top.ltfan.notdeveloper.ui.composable.rememberBooleanSharedPreference
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady

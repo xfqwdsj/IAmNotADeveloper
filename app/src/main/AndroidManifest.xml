@@ -12,7 +12,7 @@
         android:theme="@style/Theme.IAmNotADeveloper"
         android:windowSoftInputMode="adjustResize">
         <activity
-            android:name=".ui.activities.MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
             android:exported="true"
             android:theme="@style/Theme.IAmNotADeveloper">

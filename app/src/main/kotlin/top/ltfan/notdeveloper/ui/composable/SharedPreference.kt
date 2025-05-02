@@ -1,4 +1,4 @@
-package top.ltfan.notdeveloper.ui.composables
+package top.ltfan.notdeveloper.ui.composable
 
 import android.content.Context
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -12,7 +12,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.reflect.KProperty
 

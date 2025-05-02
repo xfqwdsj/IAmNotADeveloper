@@ -1,4 +1,4 @@
-package top.ltfan.notdeveloper.ui.composables
+package top.ltfan.notdeveloper.ui.composable
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
