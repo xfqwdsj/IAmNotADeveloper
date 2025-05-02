@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.annotation.Keep
 
-val isModuleActive
+val isModuleActivated
     @Keep get() = false
 
 @SuppressLint("WorldReadableFiles")

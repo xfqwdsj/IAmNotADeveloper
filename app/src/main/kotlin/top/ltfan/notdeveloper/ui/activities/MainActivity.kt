@@ -49,7 +49,7 @@ import top.ltfan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.composables.rememberBooleanSharedPreference
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
-import top.ltfan.notdeveloper.xposed.isModuleActive
+import top.ltfan.notdeveloper.xposed.isModuleActivated
 import top.ltfan.notdeveloper.xposed.isPreferencesReady
 import kotlin.reflect.full.declaredFunctions
 
@@ -182,7 +182,7 @@ class MainActivity : ComponentActivity() {
                             Text(stringResource(R.string.test))
                         }
                         Spacer(Modifier.height(20.dp))
-                        if (isModuleActive) {
+                        if (isModuleActivated) {
                             Text(
                                 stringResource(R.string.description),
                                 modifier = Modifier.padding(horizontal = 20.dp)
