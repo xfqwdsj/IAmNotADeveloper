@@ -27,7 +27,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -47,13 +46,15 @@ import top.ltfan.notdeveloper.ADB_ENABLED
 import top.ltfan.notdeveloper.ADB_WIFI_ENABLED
 import top.ltfan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.ui.composables.StatusCard
 import top.ltfan.notdeveloper.ui.composables.rememberBooleanSharedPreference
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.util.isMiui
-import top.ltfan.notdeveloper.xposed.isModuleActivated
-import top.ltfan.notdeveloper.xposed.isPreferencesReady
+import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class MainActivity : ComponentActivity() {
+    private var isPreferencesReady by mutableStateOf(statusIsPreferencesReady)
+
     @SuppressLint("WorldReadableFiles")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,61 +98,78 @@ class MainActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         var testResult by remember { mutableStateOf<List<Boolean>?>(null) }
-                        if (isPreferencesReady()) {
-                            @Suppress("DEPRECATION") var devSettings by rememberBooleanSharedPreference(
-                                mode = MODE_WORLD_READABLE,
-                                key = DEVELOPMENT_SETTINGS_ENABLED,
-                                defaultValue = true
-                            )
-                            @Suppress("DEPRECATION") var usbDebugging by rememberBooleanSharedPreference(
-                                mode = MODE_WORLD_READABLE,
-                                key = ADB_ENABLED,
-                                defaultValue = true
-                            )
-                            @Suppress("DEPRECATION") var wirelessDebugging by rememberBooleanSharedPreference(
-                                mode = MODE_WORLD_READABLE,
-                                key = ADB_WIFI_ENABLED,
-                                defaultValue = true
-                            )
 
-                            ListItem(headlineContent = {
+                        Spacer(Modifier.height(16.dp))
+
+                        StatusCard(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            isPreferencesReady = isPreferencesReady
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        @Suppress("DEPRECATION") var devSettings by rememberBooleanSharedPreference(
+                            mode = MODE_WORLD_READABLE,
+                            key = DEVELOPMENT_SETTINGS_ENABLED,
+                            defaultValue = true
+                        )
+                        @Suppress("DEPRECATION") var usbDebugging by rememberBooleanSharedPreference(
+                            mode = MODE_WORLD_READABLE,
+                            key = ADB_ENABLED,
+                            defaultValue = true
+                        )
+                        @Suppress("DEPRECATION") var wirelessDebugging by rememberBooleanSharedPreference(
+                            mode = MODE_WORLD_READABLE,
+                            key = ADB_WIFI_ENABLED,
+                            defaultValue = true
+                        )
+
+                        ListItem(
+                            headlineContent = {
                                 Text(stringResource(R.string.toggle_hide_development_mode))
-                            }, modifier = Modifier.clickable {
+                            },
+                            modifier = Modifier.clickable(enabled = isPreferencesReady) {
                                 devSettings = !devSettings
-                            }, trailingContent = {
+                            },
+                            trailingContent = {
                                 Switch(
                                     checked = devSettings,
-                                    onCheckedChange = { devSettings = it }
+                                    onCheckedChange = null,
+                                    enabled = isPreferencesReady
                                 )
-                            })
-                            ListItem(headlineContent = {
+                            }
+                        )
+                        ListItem(
+                            headlineContent = {
                                 Text(stringResource(R.string.toggle_hide_usb_debugging))
-                            }, modifier = Modifier.clickable {
+                            },
+                            modifier = Modifier.clickable(enabled = isPreferencesReady) {
                                 usbDebugging = !usbDebugging
-                            }, trailingContent = {
+                            },
+                            trailingContent = {
                                 Switch(
                                     checked = usbDebugging,
-                                    onCheckedChange = { usbDebugging = it }
+                                    onCheckedChange = null,
+                                    enabled = isPreferencesReady
                                 )
-                            })
-                            ListItem(headlineContent = {
+                            }
+                        )
+                        ListItem(
+                            headlineContent = {
                                 Text(stringResource(R.string.toggle_hide_wireless_debugging))
-                            }, modifier = Modifier.clickable {
+                            },
+                            modifier = Modifier.clickable(enabled = isPreferencesReady) {
                                 wirelessDebugging = !wirelessDebugging
-                            }, trailingContent = {
+                            },
+                            trailingContent = {
                                 Switch(
                                     checked = wirelessDebugging,
-                                    onCheckedChange = { wirelessDebugging = it }
+                                    onCheckedChange = null,
+                                    enabled = isPreferencesReady
                                 )
-                            })
-                        } else {
-                            Spacer(Modifier.height(20.dp))
-                            Text(
-                                stringResource(R.string.unable_to_save_settings),
-                                modifier = Modifier.padding(horizontal = 20.dp)
-                            )
-                        }
-                        Spacer(Modifier.height(20.dp))
+                            }
+                        )
+                        Spacer(Modifier.height(16.dp))
                         Button(onClick = {
                             val result = mutableListOf<Boolean>()
                             result.add(
@@ -173,48 +191,45 @@ class MainActivity : ComponentActivity() {
                         }) {
                             Text(stringResource(R.string.test))
                         }
-                        Spacer(Modifier.height(20.dp))
-                        if (isModuleActivated) {
-                            Text(
-                                stringResource(R.string.description_changes_application),
-                                modifier = Modifier.padding(horizontal = 20.dp)
-                            )
-                        } else {
-                            Text(
-                                stringResource(R.string.module_not_activated),
-                                modifier = Modifier.padding(horizontal = 20.dp),
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                        Spacer(Modifier.height(20.dp))
+                        Spacer(Modifier.height(16.dp))
 
                         if (testResult?.size == 3) {
                             fun getString(on: String, off: String, input: List<Boolean>) =
                                 input.map { if (it) on else off }.toTypedArray()
 
-                            AlertDialog(onDismissRequest = { testResult = null }, confirmButton = {
-                                TextButton(onClick = { testResult = null }) {
-                                    Text(stringResource(android.R.string.ok))
-                                }
-                            }, title = {
-                                Text(stringResource(R.string.test))
-                            }, text = {
-                                Column {
-                                    Text(
-                                        stringResource(
-                                            R.string.dialog_test_content, *getString(
-                                                stringResource(R.string.status_on),
-                                                stringResource(R.string.status_off),
-                                                testResult ?: listOf(false, false, false)
+                            AlertDialog(
+                                onDismissRequest = { testResult = null },
+                                confirmButton = {
+                                    TextButton(onClick = { testResult = null }) {
+                                        Text(stringResource(android.R.string.ok))
+                                    }
+                                },
+                                title = {
+                                    Text(stringResource(R.string.test))
+                                },
+                                text = {
+                                    Column {
+                                        Text(
+                                            stringResource(
+                                                R.string.dialog_test_content, *getString(
+                                                    stringResource(R.string.status_on),
+                                                    stringResource(R.string.status_off),
+                                                    testResult ?: listOf(false, false, false)
+                                                )
                                             )
                                         )
-                                    )
+                                    }
                                 }
-                            })
+                            )
                         }
                     }
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isPreferencesReady = statusIsPreferencesReady
     }
 }

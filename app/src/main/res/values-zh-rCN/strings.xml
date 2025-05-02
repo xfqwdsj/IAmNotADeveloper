@@ -2,13 +2,21 @@
 <resources>
     <string name="app_name">我不是开发者</string>
     <string name="toggle_hide_development_mode">隐藏开发者模式</string>
-    <string name="toggle_hide_usb_debugging">隐藏 USB 调试</string>
+    <string name="toggle_hide_usb_debugging">隐藏USB调试</string>
     <string name="toggle_hide_wireless_debugging">隐藏无线调试</string>
+    <string name="status_normal">正常工作中</string>
+    <string name="status_partial">部分功能可用</string>
+    <string name="status_error">可能无法工作</string>
+    <string name="status_entry_activation_y">模块已激活</string>
+    <string name="status_entry_activation_n">模块未激活</string>
+    <string name="status_entry_activation_description">模块的激活状态直接影响其功能。如果模块未被激活，它将完全无法运行。</string>
+    <string name="status_entry_prefs_y">偏好设置正常</string>
+    <string name="status_entry_prefs_n">偏好设置不可用</string>
+    <string name="status_entry_prefs_description">偏好设置的状态决定了模块设置是否可以被保存。通常，正确使用LSPosed不会导致此状态异常。如果此状态异常，所有模块功能将默认启用。</string>
     <string name="description_changes_application">所有更改将即时生效</string>
+    <string name="description_more_info">点击查看更多信息</string>
     <string name="test">测试</string>
     <string name="dialog_test_content">开发者模式状态：%1$s\nUSB 调试状态：%2$s\n无线调试状态：%3$s</string>
     <string name="status_on">开启</string>
     <string name="status_off">关闭</string>
-    <string name="module_not_activated">模块未激活</string>
-    <string name="unable_to_save_settings">无法保存设置，默认启用全部功能。请尝试降低 Android 版本至 Android 8.1 以下或使用 LSPosed 框架并激活本模块。</string>
 </resources>

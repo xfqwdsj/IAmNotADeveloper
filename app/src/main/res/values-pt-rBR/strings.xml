@@ -8,6 +8,4 @@
     <string name="dialog_test_content">Status das opções do desenvolvedor: %1$s\nStatus da depuração USB: %2$s\nStatus da depuração por Wi-Fi: %3$s</string>
     <string name="status_on">Ativado</string>
     <string name="status_off">Desativado</string>
-    <string name="module_not_activated">O módulo não está ativo</string>
-    <string name="unable_to_save_settings">Não foi possível salvar as configurações, todos os recursos estão ativados por padrão. Por favor, tente usar uma versão abaixo do Android 8.1 ou use o LSPosed para ativar o módulo.</string>
 </resources>

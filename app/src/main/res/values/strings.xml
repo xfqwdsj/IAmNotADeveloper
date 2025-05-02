@@ -4,11 +4,19 @@
     <string name="toggle_hide_development_mode">Hide development mode</string>
     <string name="toggle_hide_usb_debugging">Hide USB debugging</string>
     <string name="toggle_hide_wireless_debugging">Hide wireless debugging</string>
+    <string name="status_normal">Working normally</string>
+    <string name="status_partial">Partially working</string>
+    <string name="status_error">May not work</string>
+    <string name="status_entry_activation_y">Module activated</string>
+    <string name="status_entry_activation_n">Module not activated</string>
+    <string name="status_entry_activation_description">The activation status of the module directly affects its functionality. If the module is not activated, it will not function at all.</string>
+    <string name="status_entry_prefs_y">Preferences ready</string>
+    <string name="status_entry_prefs_n">Preferences not working</string>
+    <string name="status_entry_prefs_description">The state of Preferences determines whether the module settings can be saved. Generally, proper usage of LSPosed will not cause this state to be abnormal. If this state is abnormal, all module features will be enabled by default.</string>
     <string name="description_changes_application">All changes will take effect immediately</string>
+    <string name="description_more_info">Click to view more information</string>
     <string name="test">Test</string>
     <string name="dialog_test_content">Development mode status: %1$s\nUSB debugging status: %2$s\nWireless debugging status: %3$s</string>
     <string name="status_on">On</string>
     <string name="status_off">Off</string>
-    <string name="module_not_activated">Module not activated</string>
-    <string name="unable_to_save_settings">Unable to save settings, all features are enabled by default. Please try to lower your Android version to below Android 8.1 or use the LSPosed Framwork and activate this module.</string>
 </resources>

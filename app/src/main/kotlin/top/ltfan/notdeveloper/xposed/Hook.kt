@@ -28,7 +28,7 @@ class Hook : IXposedHookLoadPackage {
             XposedHelpers.findAndHookMethod(
                 "${BuildConfig.APPLICATION_ID}.xposed.ModuleStatusKt",
                 lpparam.classLoader,
-                "isModuleActivated",
+                "getStatusIsModuleActivated",
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         param.result = true
