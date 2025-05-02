@@ -3,9 +3,6 @@
     <string name="toggle_hide_development_mode">Ocultar opções do desenvolvedor</string>
     <string name="toggle_hide_usb_debugging">Ocultar depuração USB</string>
     <string name="toggle_hide_wireless_debugging">Ocultar depuração por Wi-Fi</string>
+    <string name="status_entry_activation_n">O módulo não está ativo</string>
     <string name="description_changes_application">Todas as alterações entrarão em vigor imediatamente</string>
-    <string name="test">Testar</string>
-    <string name="dialog_test_content">Status das opções do desenvolvedor: %1$s\nStatus da depuração USB: %2$s\nStatus da depuração por Wi-Fi: %3$s</string>
-    <string name="status_on">Ativado</string>
-    <string name="status_off">Desativado</string>
 </resources>

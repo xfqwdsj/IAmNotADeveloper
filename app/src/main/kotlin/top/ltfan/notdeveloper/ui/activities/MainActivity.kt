@@ -7,7 +7,6 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,18 +21,14 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,10 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import top.ltfan.notdeveloper.ADB_ENABLED
-import top.ltfan.notdeveloper.ADB_WIFI_ENABLED
-import top.ltfan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
+import top.ltfan.notdeveloper.Item
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.ui.composables.PreferenceItem
 import top.ltfan.notdeveloper.ui.composables.StatusCard
 import top.ltfan.notdeveloper.ui.composables.rememberBooleanSharedPreference
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
@@ -53,7 +47,8 @@ import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class MainActivity : ComponentActivity() {
-    private var isPreferencesReady by mutableStateOf(statusIsPreferencesReady)
+    private var isPreferencesReady by mutableStateOf(false)
+    private val testResults = mutableStateMapOf<Item, Boolean>()
 
     @SuppressLint("WorldReadableFiles")
     @OptIn(ExperimentalMaterial3Api::class)
@@ -97,8 +92,6 @@ class MainActivity : ComponentActivity() {
                             .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        var testResult by remember { mutableStateOf<List<Boolean>?>(null) }
-
                         Spacer(Modifier.height(16.dp))
 
                         StatusCard(
@@ -108,120 +101,25 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(Modifier.height(16.dp))
 
-                        @Suppress("DEPRECATION") var devSettings by rememberBooleanSharedPreference(
-                            mode = MODE_WORLD_READABLE,
-                            key = DEVELOPMENT_SETTINGS_ENABLED,
-                            defaultValue = true
-                        )
-                        @Suppress("DEPRECATION") var usbDebugging by rememberBooleanSharedPreference(
-                            mode = MODE_WORLD_READABLE,
-                            key = ADB_ENABLED,
-                            defaultValue = true
-                        )
-                        @Suppress("DEPRECATION") var wirelessDebugging by rememberBooleanSharedPreference(
-                            mode = MODE_WORLD_READABLE,
-                            key = ADB_WIFI_ENABLED,
-                            defaultValue = true
-                        )
-
-                        ListItem(
-                            headlineContent = {
-                                Text(stringResource(R.string.toggle_hide_development_mode))
-                            },
-                            modifier = Modifier.clickable(enabled = isPreferencesReady) {
-                                devSettings = !devSettings
-                            },
-                            trailingContent = {
-                                Switch(
-                                    checked = devSettings,
-                                    onCheckedChange = null,
-                                    enabled = isPreferencesReady
-                                )
-                            }
-                        )
-                        ListItem(
-                            headlineContent = {
-                                Text(stringResource(R.string.toggle_hide_usb_debugging))
-                            },
-                            modifier = Modifier.clickable(enabled = isPreferencesReady) {
-                                usbDebugging = !usbDebugging
-                            },
-                            trailingContent = {
-                                Switch(
-                                    checked = usbDebugging,
-                                    onCheckedChange = null,
-                                    enabled = isPreferencesReady
-                                )
-                            }
-                        )
-                        ListItem(
-                            headlineContent = {
-                                Text(stringResource(R.string.toggle_hide_wireless_debugging))
-                            },
-                            modifier = Modifier.clickable(enabled = isPreferencesReady) {
-                                wirelessDebugging = !wirelessDebugging
-                            },
-                            trailingContent = {
-                                Switch(
-                                    checked = wirelessDebugging,
-                                    onCheckedChange = null,
-                                    enabled = isPreferencesReady
-                                )
-                            }
-                        )
-                        Spacer(Modifier.height(16.dp))
-                        Button(onClick = {
-                            val result = mutableListOf<Boolean>()
-                            result.add(
-                                Settings.Global.getInt(
-                                    contentResolver,
-                                    DEVELOPMENT_SETTINGS_ENABLED,
-                                    0
-                                ) == 1
+                        for (item in Item.entries) {
+                            @Suppress("DEPRECATION") var pref by rememberBooleanSharedPreference(
+                                mode = MODE_WORLD_READABLE,
+                                key = item.key,
+                                defaultValue = true,
+                                afterSet = { check() }
                             )
-                            result.add(Settings.Global.getInt(contentResolver, ADB_ENABLED, 0) == 1)
-                            result.add(
-                                Settings.Global.getInt(
-                                    contentResolver,
-                                    ADB_WIFI_ENABLED,
-                                    0
-                                ) == 1
-                            )
-                            testResult = result
-                        }) {
-                            Text(stringResource(R.string.test))
-                        }
-                        Spacer(Modifier.height(16.dp))
+                            val testResult = testResults[item] ?: false
 
-                        if (testResult?.size == 3) {
-                            fun getString(on: String, off: String, input: List<Boolean>) =
-                                input.map { if (it) on else off }.toTypedArray()
-
-                            AlertDialog(
-                                onDismissRequest = { testResult = null },
-                                confirmButton = {
-                                    TextButton(onClick = { testResult = null }) {
-                                        Text(stringResource(android.R.string.ok))
-                                    }
-                                },
-                                title = {
-                                    Text(stringResource(R.string.test))
-                                },
-                                text = {
-                                    Column {
-                                        Text(
-                                            stringResource(
-                                                R.string.dialog_test_content, *getString(
-                                                    stringResource(R.string.status_on),
-                                                    stringResource(R.string.status_off),
-                                                    testResult ?: listOf(false, false, false)
-                                                )
-                                            )
-                                        )
-                                    }
-                                }
+                            PreferenceItem(
+                                nameId = item.nameId,
+                                testResult = testResult,
+                                checked = pref,
+                                onClick = { pref = !pref },
+                                enabled = isPreferencesReady
                             )
                         }
+
+                        Spacer(Modifier.height(16.dp))
                     }
                 }
             }
@@ -231,5 +129,16 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         isPreferencesReady = statusIsPreferencesReady
+        check()
+    }
+
+    private fun check() {
+        listOf(Item.DevelopmentSettingsEnabled, Item.AdbEnabled, Item.AdbWifiEnabled).forEach {
+            testResults[it] = Settings.Global.getInt(
+                contentResolver,
+                it.key,
+                0
+            ) == 1
+        }
     }
 }
