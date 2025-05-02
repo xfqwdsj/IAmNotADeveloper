@@ -5,6 +5,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import kotlin.reflect.KProperty
+import androidx.core.content.edit
 
 @Composable
 fun rememberBooleanSharedPreference(
@@ -62,7 +63,7 @@ class BooleanSharedPreference(
     operator fun getValue(thisObj: Any?, property: KProperty<*>) = value
 
     operator fun setValue(thisObj: Any?, property: KProperty<*>, value: Boolean) {
-        sharedPreferences.edit().putBoolean(key, value).apply()
+        sharedPreferences.edit { putBoolean(key, value) }
         this.value = value
     }
 
