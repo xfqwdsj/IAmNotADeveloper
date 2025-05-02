@@ -42,7 +42,7 @@ class Hook : IXposedHookLoadPackage {
         val newApiCallback = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 prefs.reload()
-                hookResultToZero(
+                changeResultToZero(
                     lpparam,
                     prefs,
                     param,
@@ -56,7 +56,7 @@ class Hook : IXposedHookLoadPackage {
         val oldApiCallback = object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 prefs.reload()
-                hookResultToZero(lpparam, prefs, param, DEVELOPMENT_SETTINGS_ENABLED, ADB_ENABLED)
+                changeResultToZero(lpparam, prefs, param, DEVELOPMENT_SETTINGS_ENABLED, ADB_ENABLED)
             }
         }
 
@@ -94,12 +94,10 @@ class Hook : IXposedHookLoadPackage {
             oldApiCallback,
         )
 
-        if (prefs.getBoolean(ADB_ENABLED, true)) {
-            hideSystemProps(lpparam)
-        }
+        processSystemProps(prefs, lpparam)
     }
 
-    private fun hideSystemProps(lpparam: LoadPackageParam) {
+    private fun processSystemProps(prefs: XSharedPreferences, lpparam: LoadPackageParam) {
         val clazz = XposedHelpers.findClassIfExists(
             "android.os.SystemProperties", lpparam.classLoader
         )
@@ -113,24 +111,29 @@ class Hook : IXposedHookLoadPackage {
         val usbState = "sys.usb.state"
         val usbConfig = "sys.usb.config"
         val rebootFunc = "persist.sys.usb.reboot.func"
-        val svcadbd= "init.svc.adbd"
+        val svcAdbd = "init.svc.adbd"
+
         val methodGet = "get"
-        val methodGetProp = "getprop"
+        val methodGetprop = "getprop"
         val methodGetBoolean = "getBoolean"
         val methodGetInt = "getInt"
         val methodGetLong = "getLong"
-        val overrideAdb = "mtp"
-        val overridesvcadbd = "stopped"
 
-        listOf(methodGet, methodGetProp, methodGetBoolean, methodGetInt, methodGetLong).forEach {
+        val overrideAdb = "mtp"
+        val overrideSvcAdbd = "stopped"
+
+        listOf(methodGet, methodGetprop, methodGetBoolean, methodGetInt, methodGetLong).forEach {
             XposedBridge.hookAllMethods(
                 clazz, it,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
+                        prefs.reload()
+                        if (!prefs.getBoolean(ADB_ENABLED, true)) return
+
                         val arg = param.args[0] as String
                         Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
-                        if (arg != ffsReady && param.method.name != methodGet) {
+                        if (param.method.name != methodGet && arg != ffsReady) {
                             Log.i("props processed ${param.method.name} from ${lpparam.packageName} receiving invalid arg $arg")
                             return
                         }
@@ -139,7 +142,7 @@ class Hook : IXposedHookLoadPackage {
                             ffsReady -> {
                                 when (param.method.name) {
                                     methodGet -> param.result = "0"
-                                    methodGetProp -> param.result = "0"
+                                    methodGetprop -> param.result = "0"
                                     methodGetBoolean -> param.result = false
                                     methodGetInt -> param.result = 0
                                     methodGetLong -> param.result = 0L
@@ -149,19 +152,19 @@ class Hook : IXposedHookLoadPackage {
                             usbState -> param.result = overrideAdb
                             usbConfig -> param.result = overrideAdb
                             rebootFunc -> param.result = overrideAdb
-                            svcadbd -> param.result = overridesvcadbd
+                            svcAdbd -> param.result = overrideSvcAdbd
                         }
 
-                        Log.d("hooked ${param.method.name}($arg): ${param.result}")
+                        Log.d("processed ${param.method.name}($arg): ${param.result}")
                     }
                 }
             )
         }
     }
 
-    private fun hookResultToZero(
+    private fun changeResultToZero(
         lpparam: LoadPackageParam,
-        preferences: XSharedPreferences,
+        prefs: XSharedPreferences,
         param: MethodHookParam,
         vararg keys: String
     ) {
@@ -169,13 +172,13 @@ class Hook : IXposedHookLoadPackage {
         Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
         keys.forEach { key ->
-            if (preferences.getBoolean(key, true) && arg == key) {
+            if (prefs.getBoolean(key, true) && arg == key) {
                 param.result = 0
-                Log.d("hooked ${param.method.name}($arg): ${param.result}")
+                Log.d("processed ${param.method.name}($arg): ${param.result}")
                 return
             }
         }
 
-        Log.i("processed ${param.method.name} without changing result")
+        Log.d("processed ${param.method.name}($arg) without changing result")
     }
 }
