@@ -33,7 +33,6 @@ android {
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionName = libs.versions.app.versionName.get()
         versionCode = libs.versions.app.versionCode.get().toInt()
-        signingConfig = signingConfigs.getByName("config")
     }
 
     buildTypes {
@@ -43,6 +42,11 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("config")
+        }
+
+        debug {
+            signingConfig = signingConfigs.getByName("config")
         }
     }
 
