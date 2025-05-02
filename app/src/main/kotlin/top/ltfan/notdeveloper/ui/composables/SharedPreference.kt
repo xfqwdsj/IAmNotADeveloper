@@ -28,7 +28,7 @@ fun rememberBooleanSharedPreference(
 
     DisposableEffect(preference) {
         onDispose {
-            preference.clear()
+            preference.clean()
         }
     }
 
@@ -71,7 +71,7 @@ class BooleanSharedPreference(
         this.value = prefsValue
     }
 
-    fun clear() {
+    fun clean() {
         sharedPreferences?.unregisterOnSharedPreferenceChangeListener(listener)
     }
 }
