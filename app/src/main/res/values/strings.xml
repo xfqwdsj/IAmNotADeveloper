@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">IAmNotADeveloper</string>
-    <string name="hide_development_mode">Hide development mode</string>
-    <string name="hide_usb_debugging">Hide USB debugging</string>
-    <string name="hide_wireless_debugging">Hide wireless debugging</string>
-    <string name="description">All changes will take effect immediately</string>
+    <string name="toggle_hide_development_mode">Hide development mode</string>
+    <string name="toggle_hide_usb_debugging">Hide USB debugging</string>
+    <string name="toggle_hide_wireless_debugging">Hide wireless debugging</string>
+    <string name="description_changes_application">All changes will take effect immediately</string>
     <string name="test">Test</string>
     <string name="dialog_test_content">Development mode status: %1$s\nUSB debugging status: %2$s\nWireless debugging status: %3$s</string>
     <string name="status_on">On</string>

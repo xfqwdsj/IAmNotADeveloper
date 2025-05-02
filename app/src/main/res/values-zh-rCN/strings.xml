@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">我不是开发者</string>
-    <string name="hide_development_mode">隐藏开发者模式</string>
-    <string name="hide_usb_debugging">隐藏 USB 调试</string>
-    <string name="hide_wireless_debugging">隐藏无线调试</string>
-    <string name="description">所有更改将即时生效</string>
+    <string name="toggle_hide_development_mode">隐藏开发者模式</string>
+    <string name="toggle_hide_usb_debugging">隐藏 USB 调试</string>
+    <string name="toggle_hide_wireless_debugging">隐藏无线调试</string>
+    <string name="description_changes_application">所有更改将即时生效</string>
     <string name="test">测试</string>
     <string name="dialog_test_content">开发者模式状态：%1$s\nUSB 调试状态：%2$s\n无线调试状态：%3$s</string>
     <string name="status_on">开启</string>

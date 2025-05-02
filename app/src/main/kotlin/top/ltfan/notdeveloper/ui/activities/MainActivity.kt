@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
                             )
 
                             ListItem(headlineContent = {
-                                Text(stringResource(R.string.hide_development_mode))
+                                Text(stringResource(R.string.toggle_hide_development_mode))
                             }, modifier = Modifier.clickable {
                                 devSettings = !devSettings
                             }, trailingContent = {
@@ -125,7 +125,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             })
                             ListItem(headlineContent = {
-                                Text(stringResource(R.string.hide_usb_debugging))
+                                Text(stringResource(R.string.toggle_hide_usb_debugging))
                             }, modifier = Modifier.clickable {
                                 usbDebugging = !usbDebugging
                             }, trailingContent = {
@@ -135,7 +135,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             })
                             ListItem(headlineContent = {
-                                Text(stringResource(R.string.hide_wireless_debugging))
+                                Text(stringResource(R.string.toggle_hide_wireless_debugging))
                             }, modifier = Modifier.clickable {
                                 wirelessDebugging = !wirelessDebugging
                             }, trailingContent = {
@@ -176,7 +176,7 @@ class MainActivity : ComponentActivity() {
                         Spacer(Modifier.height(20.dp))
                         if (isModuleActivated) {
                             Text(
-                                stringResource(R.string.description),
+                                stringResource(R.string.description_changes_application),
                                 modifier = Modifier.padding(horizontal = 20.dp)
                             )
                         } else {
