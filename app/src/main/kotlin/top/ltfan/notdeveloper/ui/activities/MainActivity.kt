@@ -49,19 +49,11 @@ import top.ltfan.notdeveloper.DEVELOPMENT_SETTINGS_ENABLED
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.composables.rememberBooleanSharedPreference
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
+import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.isModuleActivated
 import top.ltfan.notdeveloper.xposed.isPreferencesReady
-import kotlin.reflect.full.declaredFunctions
 
 class MainActivity : ComponentActivity() {
-    private val isMiui: Boolean
-        @SuppressLint("PrivateApi") get() {
-            val clazz = Class.forName("android.os.SystemProperties").kotlin
-            val method =
-                clazz.declaredFunctions.firstOrNull { it.name == "get" && it.parameters.size == 1 }
-            return method?.call("ro.miui.ui.version.name") != ""
-        }
-
     @SuppressLint("WorldReadableFiles")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
