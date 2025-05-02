@@ -2,7 +2,7 @@
 app-versionName = "1.4.0"
 app-versionCode = "8"
 kotlin = "2.1.20"
-agp = "8.9.2"
+agp = "8.10.0-rc04"
 compileSdk = "36"
 targetSdk = "36"
 minSdk = "27"
