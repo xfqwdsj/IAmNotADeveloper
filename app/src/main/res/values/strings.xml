@@ -9,10 +9,10 @@
     <string name="status_error">May not work</string>
     <string name="status_entry_activation_y">Module activated</string>
     <string name="status_entry_activation_n">Module not activated</string>
-    <string name="status_entry_activation_description">The activation status of the module directly affects its functionality. If the module is not activated, it will not function at all. The module reports its activation status by hooking its own members. If you believe there is a false report, please force stop the application and reopen it.</string>
+    <string name="status_entry_activation_description">The module\'s activation status directly affects its functionality. If the module isn\'t activated, it won\'t work. The module reports its activation status by hooking its own components. If you suspect a false report, force stop the app and reopen it.</string>
     <string name="status_entry_prefs_y">Preferences ready</string>
     <string name="status_entry_prefs_n">Preferences not working</string>
-    <string name="status_entry_prefs_description">The state of Preferences determines whether the module settings can be saved. Generally, proper usage of LSPosed will not cause this state to be abnormal. If this state is abnormal, all module features will be enabled by default.</string>
+    <string name="status_entry_prefs_description">The state of Preferences determines whether the module\'s settings can be saved. Normally, proper usage of LSPosed won\'t cause this state to be abnormal. If the state is abnormal, all module features will be enabled by default.</string>
     <string name="description_changes_application">All changes will take effect immediately</string>
     <string name="description_more_info">Click to view more information</string>
     <string name="test_result_on">Test result of this item: On</string>

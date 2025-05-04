@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">IAmNotADeveloper</string>
     <string name="toggle_hide_development_mode">Ocultar opções do desenvolvedor</string>
     <string name="toggle_hide_usb_debugging">Ocultar depuração USB</string>
     <string name="toggle_hide_wireless_debugging">Ocultar depuração por Wi-Fi</string>
-    <string name="status_entry_activation_n">O módulo não está ativo</string>
+    <string name="status_normal">Funcionando normalmente</string>
+    <string name="status_partial">Funcionando parcialmente</string>
+    <string name="status_error">Não está funcionando</string>
+    <string name="status_entry_activation_y">Módulo ativado</string>
+    <string name="status_entry_activation_n">Módulo não ativado</string>
+    <string name="status_entry_activation_description">O status de ativação do módulo afeta diretamente sua funcionalidade. Se o módulo não estiver ativado, ele não funcionará. O módulo relata seu status de ativação conectando seus próprios componentes. Se você suspeitar de um relatório falso, force a parada do app e abra-o novamente.</string>
+    <string name="status_entry_prefs_y">Preferências prontas</string>
+    <string name="status_entry_prefs_n">Preferências não funcionam</string>
+    <string name="status_entry_prefs_description">O estado de preferência determina se as configurações do módulo podem ser salvas. Normalmente, o uso adequado do LSPosed não torna esse estado anormal. Se o estado for anormal, todos os recursos do módulo serão ativados por padrão.</string>
     <string name="description_changes_application">Todas as alterações entrarão em vigor imediatamente</string>
+    <string name="description_more_info">Clique para ver mais informações</string>
+    <string name="test_result_on">Resultado do teste deste item: Ligado</string>
+    <string name="test_result_off">Resultado do teste deste item: Desligado</string>
 </resources>
