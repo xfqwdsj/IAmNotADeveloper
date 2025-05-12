@@ -1,0 +1,50 @@
+name: Feature request
+description: Suggest an idea for this project
+title: '[Feature] '
+labels: ['enhancement']
+assignees:
+    - xfqwdsj
+body:
+  - type: markdown
+    attributes:
+      value: |
+        *(For Chinese users)* **Issue标题请使用英文，内容可为中文**
+  - type: input
+    id: problem_description
+    attributes:
+      label: Problem Description
+      description: Clearly describe the problem.
+      placeholder: e.g., Difficulty navigating settings
+    validations:
+      required: true
+  - type: textarea
+    id: solution_description
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed solution.
+      placeholder: e.g., Add a search bar in settings
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions.
+      placeholder: e.g., Group settings into categories
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Add any other relevant information.
+      placeholder: e.g., Screenshots, related issues
+  - type: textarea
+    id: images
+    attributes:
+      label: Images
+      description: Attach images to support your feature request.
+      placeholder: Paste your image here.
+      value: |
+        <details><summary>Images</summary>
+        <!-- Paste your images below -->
+
+        </details>

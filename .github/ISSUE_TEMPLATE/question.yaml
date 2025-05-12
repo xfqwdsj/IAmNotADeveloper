@@ -1,0 +1,19 @@
+name: Question?
+description: Please ask a question using Discussions
+title: Question
+labels: ['question']
+assignees:
+  - xfqwdsj
+body:
+  - type: markdown
+    attributes:
+      value: |
+        *For questions, please use [Discussions](https://github.com/xfqwdsj/IAmNotADeveloper/discussions) and don't submit an issue.*
+  - type: checkboxes
+    id: read
+    attributes:
+      label: Read the text above
+      description: Please confirm you have read the text above.
+      options:
+        - label: I have read the text above and will not submit an issue for a question.
+          required: true
