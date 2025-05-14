@@ -1,6 +1,6 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/xfqwdsj/IAmNotADeveloper)
 
-[简体中文](README.md) | **Português (Brasil)**
+[简体中文](README.md) | [English](README_EN.md) | **Português (Brasil)**
 
 # Acordo de privacidade
 
