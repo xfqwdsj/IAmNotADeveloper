@@ -58,7 +58,7 @@ body:
     attributes:
       label: Screenshots
       description: Attach screenshots to help illustrate the issue.
-      placeholder: Follow the format above to provide screenshots.
+      placeholder: Follow the format above to provide screenshots
   - type: textarea
     id: device_info
     attributes:
@@ -91,7 +91,7 @@ body:
     attributes:
       label: Logs
       description: Provide logs to help diagnose the issue.
-      placeholder: Refer to the guidance above to provide logs.
+      placeholder: Refer to the guidance above to provide logs
     validations:
       required: true
   - type: textarea

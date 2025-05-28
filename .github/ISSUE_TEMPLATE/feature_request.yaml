@@ -64,7 +64,7 @@ body:
     attributes:
       label: Images
       description: Attach images or screenshots to support your feature request.
-      placeholder: Follow the format above to provide images.
+      placeholder: Follow the format above to provide images
   - type: textarea
     id: additional_context
     attributes:
