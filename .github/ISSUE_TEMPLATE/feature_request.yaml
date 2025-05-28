@@ -65,26 +65,6 @@ body:
       label: Images
       description: Attach images or screenshots to support your feature request.
       placeholder: Follow the format above to provide images.
-  - type: markdown
-    attributes:
-      value: |
-        **How to provide logs or additional files correctly?**
-
-        Since logs or files can be lengthy, please use the following format to provide them:
-
-        - **Option 1**: Paste the log/file directly in the text area below.
-        - **Option 2**: Use the following format to provide log/file text:
-
-          ````markdown
-          <details><summary>Logs or Files</summary>
-          <!-- Paste your text in the code block below -->
-          ```
-
-          ```
-          </details>
-          ````
-
-        This helps us understand your request more effectively.
   - type: textarea
     id: additional_context
     attributes:

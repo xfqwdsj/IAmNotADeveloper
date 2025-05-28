@@ -58,7 +58,7 @@ body:
     attributes:
       label: Screenshots
       description: Attach screenshots to help illustrate the issue.
-      placeholder: Follow the format below to provide screenshots.
+      placeholder: Follow the format above to provide screenshots.
   - type: textarea
     id: device_info
     attributes:
@@ -71,7 +71,7 @@ body:
       value: |
         **How to provide logs correctly?**
 
-        Since logs can be lengthy, please use the following format to provide logs:
+        Since logs can be lengthy, please refer to the following guidance to provide logs:
 
         - **Option 1**: Paste the log file directly in the text area below.
         - **Option 2**: Use the following format to provide log text:
@@ -91,7 +91,7 @@ body:
     attributes:
       label: Logs
       description: Provide logs to help diagnose the issue.
-      placeholder: Follow the format below to provide logs.
+      placeholder: Refer to the guidance above to provide logs.
     validations:
       required: true
   - type: textarea
