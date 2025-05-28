@@ -3,17 +3,25 @@ description: Suggest an idea for this project
 title: '[Feature] '
 labels: ['enhancement']
 assignees:
-    - xfqwdsj
+  - xfqwdsj
 body:
   - type: markdown
     attributes:
       value: |
-        *(For Chinese users)* **Issue标题请使用英文，内容可为中文**
-  - type: input
+        *(For Chinese users)* **Issue标题请使用英文，内容可用中文**
+  - type: checkboxes
+    id: searched_existing_issues
+    attributes:
+      label: Existing Issues Search Confirmation
+      description: Please confirm you have searched for existing issues before submitting a new one.
+      options:
+        - label: I have searched for existing issues and did not find a similar one.
+          required: true
+  - type: textarea
     id: problem_description
     attributes:
       label: Problem Description
-      description: Clearly describe the problem.
+      description: Clearly describe the problem you want to solve.
       placeholder: e.g., Difficulty navigating settings
     validations:
       required: true
@@ -21,30 +29,45 @@ body:
     id: solution_description
     attributes:
       label: Proposed Solution
-      description: Describe your proposed solution.
+      description: Describe your proposed solution in detail.
       placeholder: e.g., Add a search bar in settings
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: Describe what you expect to happen after the feature is implemented.
+      placeholder: e.g., Users can quickly find settings using the search bar
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
       label: Alternatives Considered
-      description: Describe any alternative solutions.
+      description: Describe any alternative solutions or features you've considered.
       placeholder: e.g., Group settings into categories
-  - type: textarea
-    id: additional_context
+  - type: markdown
     attributes:
-      label: Additional Context
-      description: Add any other relevant information.
-      placeholder: e.g., Screenshots, related issues
+      value: |
+        **How to provide images correctly?**
+
+        Since an image may be too long to read, please use the following format to provide images:
+
+        ```markdown
+        <details><summary>Images</summary>
+        <!-- Paste your images here -->
+        </details>
+        ```
   - type: textarea
     id: images
     attributes:
       label: Images
-      description: Attach images to support your feature request.
-      placeholder: Paste your image here.
-      value: |
-        <details><summary>Images</summary>
-        <!-- Paste your images below -->
-
-        </details>
+      description: Attach images or screenshots to support your feature request.
+      placeholder: Follow the format above to provide images
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Add any other relevant information (e.g., logs, related issues, references).
+      placeholder: e.g., Related issues, logs, references

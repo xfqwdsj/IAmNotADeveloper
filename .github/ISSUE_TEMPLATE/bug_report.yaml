@@ -8,8 +8,16 @@ body:
   - type: markdown
     attributes:
       value: |
-        *(For Chinese users)* **Issue标题请使用英文，内容可为中文**
-  - type: input
+        *(For Chinese users)* **Issue标题请使用英文，内容可用中文**
+  - type: checkboxes
+    id: searched_existing_issues
+    attributes:
+      label: Existing Issues Search Confirmation
+      description: Please confirm you have searched for existing issues before submitting a new one.
+      options:
+        - label: I have searched for existing issues and did not find a similar one.
+          required: true
+  - type: textarea
     id: bug_description
     attributes:
       label: Bug Description
@@ -25,7 +33,7 @@ body:
       placeholder: e.g., 1. Open the app 2. Tap on 'Hide USB debugging' 3. Observe crash
     validations:
       required: true
-  - type: input
+  - type: textarea
     id: expected_behavior
     attributes:
       label: Expected Behavior
@@ -33,43 +41,61 @@ body:
       placeholder: e.g., The switch state changed without crashing
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: |
+        **How to provide screenshots correctly?**
+
+        Since a screenshot may be too long to read, please use the following format to provide screenshots:
+
+        ```markdown
+        <details><summary>Screenshots</summary>
+        <!-- Paste your screenshots here -->
+        </details>
+        ```
   - type: textarea
     id: screenshots
     attributes:
       label: Screenshots
-      description: Attach screenshots to help explain the issue.
-      placeholder: Paste your screenshot here.
-      value: |
-        <details><summary>Screenshots</summary>
-        <!-- Paste your screenshots below -->
-
-        </details>
-  - type: input
-    id: smartphone_info
+      description: Attach screenshots to help illustrate the issue.
+      placeholder: Follow the format above to provide screenshots
+  - type: textarea
+    id: device_info
     attributes:
-      label: Smartphone Details
+      label: Device Details
       description: Provide device and OS details.
       placeholder: |
         e.g., Device: Xiaomi 14, OS: Xiaomi Hyper OS 1.0.23.12.4.DEV; Android 14
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        **How to provide logs correctly?**
+
+        Since logs can be lengthy, please refer to the following guidance to provide logs:
+
+        - **Option 1**: Paste the log file directly in the text area below.
+        - **Option 2**: Use the following format to provide log text:
+
+          ````markdown
+          <details><summary>Logs</summary>
+          <!-- Paste your log text in the code block below -->
+          ```
+
+          ```
+          </details>
+          ````
+
+        This helps us diagnose the issue more effectively.
   - type: textarea
     id: logs
     attributes:
       label: Logs
       description: Provide logs to help diagnose the issue.
-      placeholder: Paste your logs here.
-      value: |
-        <!-- Option 1: Paste the log file below -->
-
-
-        <!-- Option 2: Use the following format for log text -->
-        <details><summary>Logs</summary>
-
-        <!-- Paste your log text in the code block below -->
-        ```
-
-        ```
-
-        </details>
+      placeholder: Refer to the guidance above to provide logs
+    validations:
+      required: true
   - type: textarea
     id: additional_context
     attributes:
