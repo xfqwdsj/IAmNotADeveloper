@@ -66,6 +66,8 @@ body:
       description: Provide device and OS details.
       placeholder: |
         e.g., Device: Xiaomi 14, OS: Xiaomi Hyper OS 1.0.23.12.4.DEV; Android 14
+    validations:
+      required: true
   - type: markdown
     attributes:
       value: |
