@@ -44,7 +44,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## How to provide screenshots correctly?
+        **How to provide screenshots correctly?**
 
         Since a screenshot may be too long to read, please use the following format to provide screenshots:
 
@@ -69,7 +69,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## How to provide logs correctly?
+        **How to provide logs correctly?**
 
         Since logs can be lengthy, please use the following format to provide logs:
 
@@ -92,8 +92,8 @@ body:
       label: Logs
       description: Provide logs to help diagnose the issue.
       placeholder: Follow the format below to provide logs.
-      validations:
-        required: true
+    validations:
+      required: true
   - type: textarea
     id: additional_context
     attributes:
