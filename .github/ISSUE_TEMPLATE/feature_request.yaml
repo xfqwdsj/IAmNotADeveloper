@@ -12,7 +12,7 @@ body:
   - type: checkboxes
     id: searched_existing_issues
     attributes:
-      label: Searched Existing Issues
+      label: Existing Issues Search Confirmation
       description: Please confirm you have searched for existing issues before submitting a new one.
       options:
         - label: I have searched for existing issues and did not find a similar one.
@@ -52,7 +52,7 @@ body:
       value: |
         **How to provide images correctly?**
 
-        Since a screenshot may be too long to read, please use the following format to provide images:
+        Since an image may be too long to read, please use the following format to provide images:
 
         ```markdown
         <details><summary>Images</summary>
