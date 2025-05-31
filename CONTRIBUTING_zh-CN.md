@@ -20,7 +20,7 @@
 
 4. **推送分支并发起Pull Request**
 
-   将你的分支推送到GitHub，并在本仓库发起[Pull Request（简称PR）](https://github.com/xfqwdsj/IAmNotADeveloper/pulls)。请在PR描述中详细说明你的更改内容和动机。
+   将你的分支推送到GitHub，并在本仓库发起[Pull request（简称PR）](https://github.com/xfqwdsj/IAmNotADeveloper/pulls)。请在PR描述中详细说明你的更改内容和动机。
 
 5. **代码评审**
 
