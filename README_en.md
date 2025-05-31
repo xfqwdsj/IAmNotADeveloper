@@ -47,10 +47,10 @@ If you want to contribute code to this project, please refer to [CONTRIBUTING.md
 
 ## Privacy Agreement
 
-The "test" function of this application will obtain the status of your corresponding system switch, including:
+The "Test" function of this application will obtain the status of your corresponding system switch, including:
 
 - Developer mode
 - USB debugging
 - Wireless debugging
 
-However, this app will not collect any information about you.
+However, this application will not collect any information about you.
