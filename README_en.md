@@ -32,7 +32,7 @@ You can capture logs by following these steps:
 
 1. Launch the LSPosed Manager by any means.
 2. On the "Logs" page, tap the "Save" icon button in the upper right corner.
-3. Choose a suitable save location, such as "Downloads", and don't change the file name.
+3. Choose a suitable save location, such as "Downloads", and do not change the file name.
 4. Tap the "Save" button.
 
 ### Q: I activated the module for a certain app, but the app crashes/has no effect/is detected by a detector app. What should I do?
