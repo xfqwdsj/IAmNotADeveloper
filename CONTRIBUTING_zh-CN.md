@@ -1,4 +1,4 @@
-[English](CONTRIBUTING.md) | [Português (Brasil)](CONTRIBUTING_pt-BR.md) | **简体中文**
+[English](CONTRIBUTING.md) | **简体中文** | [Português (Brasil)](CONTRIBUTING_pt-BR.md)
 
 # 贡献指南
 
