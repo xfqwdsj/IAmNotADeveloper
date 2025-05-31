@@ -1,4 +1,4 @@
-[English](CONTRIBUTING.md) | **简体中文**
+[English](CONTRIBUTING.md) | **简体中文** | [Português (Brasil)](CONTRIBUTING_pt-BR.md)
 
 # 贡献指南
 
@@ -18,9 +18,9 @@
 
    保持提交记录清晰、简洁。每次提交请编写有意义的提交信息。
 
-4. **推送分支并发起Pull Request**
+4. **推送分支并发起Pull request**
 
-   将你的分支推送到GitHub，并在本仓库发起[Pull Request（简称PR）](https://github.com/xfqwdsj/IAmNotADeveloper/pulls)。请在PR描述中详细说明你的更改内容和动机。
+   将你的分支推送到GitHub，并在本仓库发起[Pull request（简称PR）](https://github.com/xfqwdsj/IAmNotADeveloper/pulls)。请在PR描述中详细说明你的更改内容和动机。
 
 5. **代码评审**
 

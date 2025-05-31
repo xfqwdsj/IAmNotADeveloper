@@ -8,7 +8,7 @@ A module for hiding the status of Android system developer options.
 
 ## FAQ
 
-### Q: I have activated the module, but it reports "not activated". What should I do?
+### Q: I have activated the module, but it reports "Module not activated". What should I do?
 
 Troubleshooting steps:
 
@@ -24,7 +24,7 @@ You can confirm by following these steps:
 
 1. Launch the LSPosed Manager by any means.
 2. On the "Modules" page, find the "IAmNotADeveloper" module.
-3. Make sure the "Enable Module" switch is turned on.
+3. Make sure the "Enable module" switch is turned on.
 
 ### Q: How do I capture logs?
 
@@ -39,7 +39,7 @@ You can capture logs by following these steps:
 
 This module works by directly injecting into the target app. For apps with built-in injection protection, the module may not work or may cause the app to refuse to run.
 
-Solution: None. [#104](https://github.com/xfqwdsj/IAmNotADeveloper/issues/104) has been created for this problem. Please wait patiently; there is no ETA (Estimated Time of Arrival). **Do not submit any issues regarding this problem; they will be closed without further explanation.**
+Solution: None at the moment. See [Issue #104](https://github.com/xfqwdsj/IAmNotADeveloper/issues/104) for details. Please wait patiently; there is currently no ETA (Estimated Time of Arrival). **Do not submit any issues regarding this problem; they will be closed without further explanation.**
 
 ## How to Contribute
 
@@ -47,9 +47,9 @@ If you want to contribute code to this project, please refer to [CONTRIBUTING.md
 
 ## Privacy Agreement
 
-The "test" function of this application will obtain the status of your corresponding system switch, including:
+The "Test" function of this application will obtain the status of your corresponding system switch, including:
 
-- Developer Mode
+- Developer mode
 - USB debugging
 - Wireless debugging
 
