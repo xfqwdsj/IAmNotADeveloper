@@ -1,14 +1,14 @@
-**English** | [简体中文](CONTRIBUTING_zh-CN.md)
+**English** | [Português (Brasil)](CONTRIBUTING_pt-BR.md) | [简体中文](CONTRIBUTING_zh-CN.md)
 
 # Contributing Guide
 
-Thank you for your interest in contributing to this project! Please follow the steps below to participate:
+Thank you for your interest in contributing to this project! Please follow the steps below to get started:
 
 ## How to Contribute
 
 1. **Fork this repository**
 
-   Click the Fork button at the top right to fork this project to your GitHub account.
+   Click the Fork button at the top right corner to fork this project to your GitHub account.
 
 2. **Create a branch**
 
@@ -18,9 +18,9 @@ Thank you for your interest in contributing to this project! Please follow the s
 
    Keep your commit history clear and concise. Please write meaningful commit messages for each change.
 
-4. **Push your branch and open a Pull Request**
+4. **Push your branch and open a Pull request**
 
-   Push your branch to GitHub and open a [Pull Request (PR)](https://github.com/xfqwdsj/IAmNotADeveloper/pulls) in this repository. Please describe your changes and motivation in detail in the PR description.
+   Push your branch to GitHub and open a [Pull request (PR)](https://github.com/xfqwdsj/IAmNotADeveloper/pulls) in this repository. Please describe your changes and the motivation in detail in the PR description.
 
 5. **Code review**
 
