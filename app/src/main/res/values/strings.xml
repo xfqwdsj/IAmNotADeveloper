@@ -17,7 +17,7 @@
     <string name="toggle_hide_adb_reboot_func">Hide ADB reboot function (prop)</string>
     <string name="toggle_hide_adb_svc_adbd">Hide ADB service daemon (prop)</string>
     <string name="toggle_hide_adb_ffs_ready">Hide ADB FFS ready state (prop)</string>
-    <string name="toggle_hide_wireless_debugging">Hide wireless debugging (prop)</string>
+    <string name="toggle_hide_wireless_debugging">Hide wireless debugging</string>
 
     <!-- Status -->
     <string name="status_normal">Working normally</string>
