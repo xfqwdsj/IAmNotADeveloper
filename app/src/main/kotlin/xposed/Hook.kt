@@ -13,11 +13,9 @@ import kotlin.reflect.jvm.javaMethod
 @Keep
 class Hook : IXposedHookLoadPackage {
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
-        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
-            return
-        }
-
-        Log.d("processing package ${lpparam.packageName}")
+//        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
+//            return
+//        }
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
@@ -32,14 +30,18 @@ class Hook : IXposedHookLoadPackage {
             )
         }
 
+        if (lpparam.packageName != "android") return
+
+        Log.d("processing package ${lpparam.packageName}")
+
         val prefs = XSharedPreferences(BuildConfig.APPLICATION_ID)
 
         DetectionCategory.allMethods.forEach { method ->
             try {
                 method.hook(prefs, lpparam)
                 Log.d("Applied hook for ${method::class.simpleName}")
-            } catch (e: Exception) {
-                Log.w("Failed to apply hook for ${method::class.simpleName}: ${e.message}")
+            } catch (e: Throwable) {
+                Log.e("Failed to apply hook for ${method::class.simpleName}: ${e.message}", e)
             }
         }
     }
