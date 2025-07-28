@@ -33,7 +33,6 @@ class Hook : IXposedHookLoadPackage {
 
         val prefs = XSharedPreferences(BuildConfig.APPLICATION_ID)
 
-        // 应用所有检测方法的hook逻辑，现在使用统一的基类扩展方法
         DetectionCategory.allMethods.forEach { method ->
             try {
                 method.hook(prefs, lpparam)
