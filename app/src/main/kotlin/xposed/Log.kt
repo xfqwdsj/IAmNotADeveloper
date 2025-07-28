@@ -5,19 +5,27 @@ import de.robv.android.xposed.XposedBridge
 object Log {
     const val TAG = "NotDeveloper"
 
+    fun v(message: String, throwable: Throwable? = null) {
+        android.util.Log.v(TAG, message, throwable)
+    }
+
     fun d(message: String, throwable: Throwable? = null) {
-        log("DEBUG", message, throwable)
+        android.util.Log.d(TAG, message, throwable)
     }
 
     fun i(message: String, throwable: Throwable? = null) {
-        log("INFO", message, throwable)
+        android.util.Log.i(TAG, message, throwable)
     }
 
     fun w(message: String, throwable: Throwable? = null) {
-        log("WARN", message, throwable)
+        bridgeLog("WARN", message, throwable)
     }
 
-    private fun log(level: String, message: String, throwable: Throwable? = null) {
+    fun e(message: String, throwable: Throwable? = null) {
+        bridgeLog("ERROR", message, throwable)
+    }
+
+    private fun bridgeLog(level: String, message: String, throwable: Throwable? = null) {
         XposedBridge.log("[$level] $TAG: $message")
         if (throwable != null) {
             XposedBridge.log(throwable)
