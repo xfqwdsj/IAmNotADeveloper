@@ -1,26 +1,25 @@
 package top.ltfan.notdeveloper.ui.activity
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
@@ -34,22 +33,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import top.ltfan.notdeveloper.Item
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.ui.composable.PreferenceItem
+import top.ltfan.notdeveloper.detection.DetectionCategory
+import top.ltfan.notdeveloper.detection.DetectionMethod
+import top.ltfan.notdeveloper.ui.composable.CategoryCard
 import top.ltfan.notdeveloper.ui.composable.StatusCard
-import top.ltfan.notdeveloper.ui.composable.rememberBooleanSharedPreference
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class MainActivity : ComponentActivity() {
     private var isPreferencesReady by mutableStateOf(false)
-    private val testResults = mutableStateMapOf<Item, Boolean>()
+    private val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
 
-    @SuppressLint("WorldReadableFiles")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -80,45 +79,41 @@ class MainActivity : ComponentActivity() {
                             windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
                             scrollBehavior = scrollBehavior
                         )
-                    }
+                    },
                 ) { padding ->
-                    Column(
-                        modifier = Modifier
-                            .consumeWindowInsets(padding)
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(padding)
-                            .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    val layoutDirection = LocalLayoutDirection.current
+                    val insets = WindowInsets.displayCutout
+                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+                        .asPaddingValues()
+                    val contentPadding = PaddingValues(
+                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(layoutDirection),
+                        top = padding.calculateTopPadding() + insets.calculateTopPadding() + 16.dp,
+                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(layoutDirection),
+                        bottom = padding.calculateBottomPadding() + insets.calculateBottomPadding() + 16.dp,
+                    )
+                    LazyColumn(
+                        modifier = Modifier.consumeWindowInsets(contentPadding)
+                            .fillMaxSize(),
+                        contentPadding = contentPadding,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Spacer(Modifier.height(16.dp))
-
-                        StatusCard(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            isPreferencesReady = isPreferencesReady
-                        )
-
-                        Spacer(Modifier.height(16.dp))
-
-                        for (item in Item.entries) {
-                            @Suppress("DEPRECATION") var pref by rememberBooleanSharedPreference(
-                                mode = MODE_WORLD_READABLE,
-                                key = item.key,
-                                defaultValue = true,
-                                afterSet = { check() }
-                            )
-                            val testResult = testResults[item] ?: false
-
-                            PreferenceItem(
-                                nameId = item.nameId,
-                                testResult = testResult,
-                                checked = pref,
-                                onClick = { pref = !pref },
-                                enabled = isPreferencesReady
+                        item {
+                            StatusCard(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                isPreferencesReady = isPreferencesReady
                             )
                         }
 
-                        Spacer(Modifier.height(16.dp))
+                        items(DetectionCategory.values) { category ->
+                            CategoryCard(
+                                category = category,
+                                testResults = testResults,
+                                afterChange = ::check,
+                                isPreferencesReady = isPreferencesReady,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -132,12 +127,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun check() {
-        Item.settingGlobalItems.forEach {
-            testResults[it] = Settings.Global.getInt(
-                contentResolver,
-                it.key,
-                0
-            ) == 1
+        DetectionCategory.allMethods.forEach { method ->
+            testResults[method] = method.test(this)
         }
     }
 }

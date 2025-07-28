@@ -1,20 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">我不是开发者</string>
+
+    <!-- Categories -->
+    <string name="category_development_mode">开发者模式</string>
+    <string name="category_usb_debugging">USB调试</string>
+    <string name="category_wireless_debugging">无线调试</string>
+
+    <!-- Detection methods -->
     <string name="toggle_hide_development_mode">隐藏开发者模式</string>
+    <string name="toggle_hide_development_mode_legacy">隐藏开发者模式（旧API）</string>
     <string name="toggle_hide_usb_debugging">隐藏USB调试</string>
+    <string name="toggle_hide_usb_debugging_legacy">隐藏USB调试（旧API）</string>
+    <string name="toggle_hide_adb_usb_state">隐藏ADB USB状态（属性）</string>
+    <string name="toggle_hide_adb_usb_config">隐藏ADB USB配置（属性）</string>
+    <string name="toggle_hide_adb_reboot_func">隐藏ADB重启函数（属性）</string>
+    <string name="toggle_hide_adb_svc_adbd">隐藏ADB服务守护进程（属性）</string>
+    <string name="toggle_hide_adb_ffs_ready">隐藏ADB FFS就绪状态（属性）</string>
     <string name="toggle_hide_wireless_debugging">隐藏无线调试</string>
+
+    <!-- Status -->
     <string name="status_normal">正常工作中</string>
     <string name="status_partial">部分功能可用</string>
     <string name="status_error">可能无法工作</string>
+
+    <!-- Activation status -->
     <string name="status_entry_activation_y">模块已激活</string>
     <string name="status_entry_activation_n">模块未激活</string>
     <string name="status_entry_activation_description">模块的激活状态直接影响其功能。如果模块未被激活，它将完全无法运行。模块通过Hook自身的成员实现报告模块激活状态，如果你认为存在误报，请强行停止应用再重新打开。</string>
+
+    <!-- Preferences status -->
     <string name="status_entry_prefs_y">偏好设置正常</string>
     <string name="status_entry_prefs_n">偏好设置不可用</string>
     <string name="status_entry_prefs_description">偏好设置的状态决定了模块设置是否可以被保存。通常，正确使用LSPosed不会导致此状态异常。如果此状态异常，所有模块功能将默认启用。</string>
+
+    <!-- Descriptions -->
     <string name="description_changes_application">所有更改将即时生效</string>
     <string name="description_more_info">点击查看更多信息</string>
+
+    <!-- Test results -->
     <string name="test_result_on">该项测试结果：开启</string>
     <string name="test_result_off">该项测试结果：关闭</string>
 </resources>
