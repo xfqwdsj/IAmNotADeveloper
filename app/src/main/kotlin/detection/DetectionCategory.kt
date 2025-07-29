@@ -1,21 +1,27 @@
 package top.ltfan.notdeveloper.detection
 
 import android.content.Context
+import android.os.Parcel
+import androidx.annotation.Keep
 import androidx.annotation.StringRes
-import top.ltfan.notdeveloper.util.SystemPropsUtil
 
+@Keep
 sealed class DetectionCategory(
     @param:StringRes val nameId: Int
 ) {
     val methods: List<DetectionMethod> = this::class.nestedClasses
         .map { it.objectInstance!! as DetectionMethod }
 
+    @Keep
     object DevelopmentMode : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_development_mode
     ) {
-        object Development : DetectionMethod(
+        @Keep
+        object Development : DetectionMethod.SettingsMethod(
             preferenceKey = "development_settings_enabled",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode,
+            settingsClass = android.provider.Settings.Global::class.java,
+            settingKey = "development_settings_enabled",
         ) {
             override fun test(context: Context): Boolean {
                 return android.provider.Settings.Global.getInt(
@@ -26,9 +32,12 @@ sealed class DetectionCategory(
             }
         }
 
-        object DevelopmentLegacy : DetectionMethod(
+        @Keep
+        object DevelopmentLegacy : DetectionMethod.SettingsMethod(
             preferenceKey = "development_settings_enabled_legacy",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode_legacy
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode_legacy,
+            settingsClass = android.provider.Settings.Secure::class.java,
+            settingKey = "development_settings_enabled",
         ) {
             override fun test(context: Context): Boolean {
                 return android.provider.Settings.Secure.getInt(
@@ -40,12 +49,16 @@ sealed class DetectionCategory(
         }
     }
 
+    @Keep
     object UsbDebugging : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_usb_debugging
     ) {
-        object Adb : DetectionMethod(
+        @Keep
+        object Adb : DetectionMethod.SettingsMethod(
             preferenceKey = "adb_enabled",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_debugging
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_debugging,
+            settingsClass = android.provider.Settings.Global::class.java,
+            settingKey = "adb_enabled",
         ) {
             override fun test(context: Context): Boolean {
                 return android.provider.Settings.Global.getInt(
@@ -56,9 +69,12 @@ sealed class DetectionCategory(
             }
         }
 
-        object AdbLegacy : DetectionMethod(
+        @Keep
+        object AdbLegacy : DetectionMethod.SettingsMethod(
             preferenceKey = "adb_enabled_legacy",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_debugging_legacy
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_debugging_legacy,
+            settingsClass = android.provider.Settings.Secure::class.java,
+            settingKey = "adb_enabled",
         ) {
             override fun test(context: Context): Boolean {
                 return android.provider.Settings.Secure.getInt(
@@ -69,58 +85,85 @@ sealed class DetectionCategory(
             }
         }
 
-        object AdbSystemPropsUsbState : DetectionMethod(
+        @Keep
+        object AdbSystemPropsUsbState : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_usb_state",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_usb_state
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_usb_state,
+            propertyKey = "sys.usb.state",
+            overrideValue = "mtp",
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtil.containsValue("sys.usb.state", "adb")
+                return SystemPropsUtils.containsValue("sys.usb.state", "adb")
             }
         }
 
-        object AdbSystemPropsUsbConfig : DetectionMethod(
+        @Keep
+        object AdbSystemPropsUsbConfig : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_usb_config",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_usb_config
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_usb_config,
+            propertyKey = "sys.usb.config",
+            overrideValue = "mtp",
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtil.containsValue("sys.usb.config", "adb")
+                return SystemPropsUtils.containsValue("sys.usb.config", "adb")
             }
         }
 
-        object AdbSystemPropsRebootFunc : DetectionMethod(
+        @Keep
+        object AdbSystemPropsRebootFunc : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_reboot_func",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_reboot_func
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_reboot_func,
+            propertyKey = "persist.sys.usb.reboot.func",
+            overrideValue = "mtp",
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtil.containsValue("persist.sys.usb.reboot.func", "adb")
+                return SystemPropsUtils.containsValue("persist.sys.usb.reboot.func", "adb")
             }
         }
 
-        object AdbSystemPropsSvcAdbd : DetectionMethod(
+        @Keep
+        object AdbSystemPropsSvcAdbd : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_svc_adbd",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_svc_adbd
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_svc_adbd,
+            propertyKey = "init.svc.adbd",
+            overrideValue = "stopped",
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtil.equalsValue("init.svc.adbd", "running")
+                return SystemPropsUtils.equalsValue("init.svc.adbd", "running")
             }
         }
 
-        object AdbSystemPropsFfsReady : DetectionMethod(
+        @Keep
+        object AdbSystemPropsFfsReady : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_ffs_ready",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_ffs_ready
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_ffs_ready,
+            propertyKey = "sys.usb.ffs.ready",
+            overrideValue = "0",
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtil.equalsValue("sys.usb.ffs.ready", "1")
+                return SystemPropsUtils.equalsValue("sys.usb.ffs.ready", "1")
+            }
+
+            override fun getOverrideValue(methodName: String): Any? = when (methodName) {
+                "get", "getprop" -> "0"
+                "getBoolean" -> false
+                "getInt" -> 0
+                "getLong" -> 0L
+                else -> "0"
             }
         }
     }
 
+    @Keep
     object WirelessDebugging : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_wireless_debugging
     ) {
-        object AdbWifiEnabled : DetectionMethod(
+        @Keep
+        object AdbWifiEnabled : DetectionMethod.SettingsMethod(
             preferenceKey = "adb_wifi_enabled",
-            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_wireless_debugging
+            nameId = top.ltfan.notdeveloper.R.string.toggle_hide_wireless_debugging,
+            settingsClass = android.provider.Settings.Global::class.java,
+            settingKey = "adb_wifi_enabled",
         ) {
             override fun test(context: Context): Boolean {
                 return android.provider.Settings.Global.getInt(

@@ -24,7 +24,7 @@ import top.ltfan.notdeveloper.detection.DetectionMethod
 fun CategoryCard(
     category: DetectionCategory,
     testResults: SnapshotStateMap<DetectionMethod, Boolean>,
-    afterChange: () -> Unit,
+    afterChange: (DetectionMethod) -> Unit,
     isPreferencesReady: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -50,7 +50,7 @@ fun CategoryCard(
                     mode = android.content.Context.MODE_WORLD_READABLE,
                     key = method.preferenceKey,
                     defaultValue = true,
-                    afterSet = { afterChange() }
+                    afterSet = { afterChange(method) }
                 )
 
                 val testResult = testResults[method] ?: false
