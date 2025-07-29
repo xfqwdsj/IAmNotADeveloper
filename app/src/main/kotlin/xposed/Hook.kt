@@ -11,10 +11,6 @@ import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.broadcast.receiveChangeBroadcast
 import top.ltfan.notdeveloper.detection.DetectionCategory
@@ -22,13 +18,7 @@ import top.ltfan.notdeveloper.detection.DetectionMethod
 
 @Keep
 class Hook : IXposedHookLoadPackage {
-    private val notification = MutableSharedFlow<Pair<SettingsChange, () -> Unit>>()
-
     override fun handleLoadPackage(lpparam: LoadPackageParam) {
-//        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) {
-//            return
-//        }
-
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
                 "${BuildConfig.APPLICATION_ID}.xposed.ModuleStatusKt",
@@ -40,110 +30,8 @@ class Hook : IXposedHookLoadPackage {
                     }
                 },
             )
-
-//            val notificationClass = XposedHelpers.findClass(
-//                "${BuildConfig.APPLICATION_ID}.xposed.Notification",
-//                lpparam.classLoader,
-//            )
-//
-//            XposedBridge.hookAllMethods(
-//                notificationClass,
-//                Notification::notifySettingsChange.name,
-//                object : XC_MethodHook() {
-//                    override fun beforeHookedMethod(param: MethodHookParam) {
-//                        Log.d("MainActivity notifyChange called")
-//                        val type = param.args[0] as Int
-//                        val name = param.args[1] as String
-//                        val change = SettingsChange(type, name)
-//                        val callback: () -> Unit = {
-//                            XposedHelpers.callMethod(param.args[2], "invoke")
-//                        }
-//                        CoroutineScope(Dispatchers.Main).launch {
-//                            Log.d("Emitting notification for change: type=$type, name=$name")
-//                            notification.emit(change to callback)
-//                            Log.d("Notification emitted for change: type=$type, name=$name")
-//                        }
-//                    }
-//                }
-//            )
         }
 
-//        if (lpparam.packageName != "android") return
-        if (lpparam.packageName != "com.android.providers.settings") return
-
-        Log.d("processing package ${lpparam.packageName}")
-        Log.d("processing process ${lpparam.processName}")
-
-//        val f = File("/data/system/notdev.log")
-//        if (!f.exists()) {
-//            f.createNewFile()
-//        }
-//        @OptIn(ExperimentalTime::class)
-//        f.appendText("===${Clock.System.now()} Started logging===\n")
-//
-//        @OptIn(ExperimentalTime::class)
-//        fun testLog(msg: String) {
-//            f.appendText("${Clock.System.now()} $msg\n")
-//        }
-//
-//        val hook = object : XC_MethodHook() {
-//            override fun afterHookedMethod(param: MethodHookParam) {
-//                testLog("Hooked method: ${param.method.name} in ${lpparam.packageName}")
-//                param.args.forEach {
-//                    testLog("Argument: $it")
-//                    if (it is Uri) {
-//                        testLog("Found URI")
-//                        if (it.authority != "settings") {
-//                            testLog("URI authority is not 'settings', skipping")
-//                            return
-//                        }
-//                    }
-//                }
-//                val uid = Binder.getCallingUid()
-//                val packages = AndroidAppHelper.currentApplication().packageManager
-//                    .getPackagesForUid(uid) ?: emptyArray()
-//                packages.forEach {
-//                    if (it != BuildConfig.APPLICATION_ID) return@forEach
-//                    testLog("Calling package: $it")
-//                }
-//                val packageName = AndroidAppHelper.currentPackageName()
-//                testLog("Calling package name: $packageName")
-////                Thread.currentThread().getStackTrace().forEach {
-////                    testLog("Stack trace: ${it.className}.${it.methodName} at line ${it.lineNumber}")
-////                }
-//                testLog("Result: ${param.result}")
-//            }
-//        }
-//
-//        Log.d("Try settings provider")
-//
-//        val settingsProvider = XposedHelpers.findClass(
-//            "com.android.providers.settings.SettingsProvider",
-//            lpparam.classLoader,
-//        )
-//
-//        XposedBridge.hookAllMethods(
-//            settingsProvider,
-//            "getSettingLocked",
-//            hook,
-//        )
-//
-//        XposedBridge.hookAllMethods(
-//            settingsProvider,
-//            "packageValueForCallResult",
-//            hook,
-//        )
-//
-//        val settingsState = XposedHelpers.findClass(
-//            "com.android.providers.settings.SettingsState",
-//            lpparam.classLoader,
-//        )
-//
-//        XposedBridge.hookAllMethods(
-//            settingsState,
-//            "getSettingLocked",
-//            hook,
-//        )
         notifyChange(lpparam)
 
         val prefs = XSharedPreferences(BuildConfig.APPLICATION_ID)
@@ -151,7 +39,6 @@ class Hook : IXposedHookLoadPackage {
         DetectionCategory.allMethods.forEach { method ->
             try {
                 method.hook(prefs, lpparam)
-                Log.d("Applied hook for ${method::class.simpleName}")
             } catch (e: Throwable) {
                 Log.e("Failed to apply hook for ${method::class.simpleName}: ${e.message}", e)
             }
@@ -162,6 +49,10 @@ class Hook : IXposedHookLoadPackage {
         prefs: XSharedPreferences,
         lpparam: LoadPackageParam
     ) {
+        if (lpparam.packageName != "com.android.providers.settings") return
+
+        Log.d("Processing SettingsMethod: $this")
+
         val settingsProviderClass = XposedHelpers.findClass(
             "com.android.providers.settings.SettingsProvider",
             lpparam.classLoader,
@@ -177,28 +68,30 @@ class Hook : IXposedHookLoadPackage {
 
                     if (arg == settingKey) {
                         val uid = Binder.getCallingUid()
-                        val packages = AndroidAppHelper.currentApplication().packageManager
-                            .getPackagesForUid(uid) ?: return
-                        if (packages.none { it == BuildConfig.APPLICATION_ID }) {
-                            Log.d("Calling package is not the app itself, skipping hook $arg")
+                        val packageName = AndroidAppHelper.currentApplication().packageManager
+                            .getPackagesForUid(uid)?.firstOrNull() ?: return
+
+//                        if (packageName != BuildConfig.APPLICATION_ID) {
+//                            Log.d("Calling package is not the app itself, skipping hook $arg")
+//                            return
+//                        }
+
+                        if (packageName.startsWith("android") || packageName.startsWith("com.android")) {
+                            Log.d("Calling package is a system package, skipping hook $arg")
+                            return
+                        }
+
+                        if (!prefs.getBoolean(preferenceKey, true)) {
+                            Log.d("Skipping ${param.method.name}($arg) as preference is disabled")
                             return
                         }
 
                         Log.d("processing ${param.method.name} from ${lpparam.packageName} with arg $arg")
 
-                        if (prefs.getBoolean(preferenceKey, true)) {
-//            val resultClass = param.result::class.java
-//            val valueField = XposedHelpers.findField(resultClass, "value")
-//            valueField.isAccessible = true
-//            valueField.set(param.result, "0")
+                        val result = param.result as Bundle
+                        result.putString("value", "0")
 
-                            val result = param.result as Bundle
-                            result.putString("value", "0") // Override the value to "0"
-
-                            Log.d("processed ${param.method.name}($arg): ${param.result}")
-                        } else {
-                            Log.d("Skipping ${param.method.name}($arg) as preference is disabled")
-                        }
+                        Log.d("processed ${param.method.name}($arg): ${param.result}")
                     }
                 }
             }
@@ -209,7 +102,9 @@ class Hook : IXposedHookLoadPackage {
         prefs: XSharedPreferences,
         lpparam: LoadPackageParam,
     ) {
-        return
+        if (lpparam.packageName.startsWith("android") || lpparam.packageName.startsWith("com.android")) return
+
+        Log.d("Processing SystemPropertiesMethod: $this for package ${lpparam.packageName}")
 
         val clazz = XposedHelpers.findClassIfExists(
             "android.os.SystemProperties", lpparam.classLoader
@@ -220,6 +115,7 @@ class Hook : IXposedHookLoadPackage {
             return
         }
 
+        // TODO: Native hooks
         val methods = listOf("get", "getprop", "getBoolean", "getInt", "getLong")
 
         methods.forEach { methodName ->
@@ -244,6 +140,8 @@ class Hook : IXposedHookLoadPackage {
     }
 
     private fun notifyChange(lpparam: LoadPackageParam) {
+        if (lpparam.packageName != "com.android.providers.settings") return
+
         val settingsProviderClass = XposedHelpers.findClass(
             "com.android.providers.settings.SettingsProvider",
             lpparam.classLoader,
@@ -306,18 +204,6 @@ class Hook : IXposedHookLoadPackage {
                             }
 
                             else -> Unit
-                        }
-                    }
-
-                    CoroutineScope(Dispatchers.IO).launch {
-                        Log.d("Launched coroutine to handle notifications")
-
-                        notification.collect { (change, callback) ->
-                            Log.d("Received notification for change: $change")
-
-
-
-                            callback()
                         }
                     }
 
