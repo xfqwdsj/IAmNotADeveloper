@@ -23,7 +23,7 @@ import top.ltfan.notdeveloper.detection.DetectionMethod
 fun CategoryCard(
     category: DetectionCategory,
     testResults: SnapshotStateMap<DetectionMethod, Boolean>,
-    afterChange: () -> Unit,
+    afterChange: (DetectionMethod) -> Unit,
     isPreferencesReady: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -46,13 +46,12 @@ fun CategoryCard(
             Spacer(Modifier.height(12.dp))
 
             category.methods.forEach { method ->
-                var pref by
-                    rememberBooleanSharedPreference(
-                        preferences = ModuleService.preferences,
-                        key = method.preferenceKey,
-                        defaultValue = true,
-                        afterSet = { afterChange() },
-                    )
+                var pref by rememberBooleanSharedPreference(
+                    preferences = ModuleService.preferences,
+                    key = method.preferenceKey,
+                    defaultValue = true,
+                    afterSet = { afterChange(method) }
+                )
 
                 val testResult = testResults[method] ?: false
 

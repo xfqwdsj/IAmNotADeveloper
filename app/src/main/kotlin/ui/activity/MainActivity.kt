@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.broadcast.broadcastChange
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.ui.composable.CategoryCard
@@ -129,7 +130,7 @@ class MainActivity : ComponentActivity() {
                             CategoryCard(
                                 category = category,
                                 testResults = testResults,
-                                afterChange = ::check,
+                                afterChange = ::afterChange,
                                 isPreferencesReady = isPreferencesReady,
                                 modifier = Modifier.padding(horizontal = 16.dp),
                             )
@@ -137,6 +138,12 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun afterChange(method: DetectionMethod) {
+        broadcastChange(method) {
+            check()
         }
     }
 
