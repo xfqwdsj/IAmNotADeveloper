@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    alias(libs.plugins.kotlin)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.spotless)
@@ -9,7 +10,7 @@ plugins {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
-        freeCompilerArgs.add("-Xexplicit-context-arguments")
+        freeCompilerArgs.add("-Xcontext-parameters")
     }
 }
 
@@ -17,12 +18,7 @@ android {
     val appId = "top.ltfan.notdeveloper"
 
     namespace = appId
-    compileSdk {
-        version =
-            release(37) {
-                minorApiLevel = 2
-            }
-    }
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     signingConfigs {
         create("config") {
@@ -35,10 +31,10 @@ android {
 
     defaultConfig {
         applicationId = appId
-        minSdk = 27
-        targetSdk = 37
-        versionName = "1.7.0"
-        versionCode = 13
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
+        versionName = libs.versions.app.versionName.get()
+        versionCode = libs.versions.app.versionCode.get().toInt()
     }
 
     buildTypes {
@@ -81,10 +77,10 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
-    implementation(libs.activity.compose)
-
+    implementation(libs.activity)
+    implementation(libs.navigation.runtime)
+    implementation(libs.navigation.ui)
     implementation(platform(libs.compose))
-
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui)
@@ -92,8 +88,7 @@ dependencies {
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
     implementation(libs.preference)
-    compileOnly(libs.libxposed.api)
-    implementation(libs.libxposed.service)
+    compileOnly(libs.xposed.api)
 }
 
 spotless {
