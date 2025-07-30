@@ -7,7 +7,6 @@ import androidx.annotation.Keep
 val statusIsModuleActivated
     @Keep get() = false
 
-
 val Context.statusIsPreferencesReady: Boolean
     @SuppressLint("WorldReadableFiles")get() {
         return try {
@@ -17,7 +16,7 @@ val Context.statusIsPreferencesReady: Boolean
             )
             true
         } catch (t: Throwable) {
-            android.util.Log.e(Log.TAG, "failed to confirm SharedPreferences' state.", t)
+            Log.Android.e("failed to confirm SharedPreferences' state.", t)
             false
         }
     }

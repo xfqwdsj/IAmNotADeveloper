@@ -43,6 +43,7 @@ import top.ltfan.notdeveloper.ui.composable.CategoryCard
 import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.util.isMiui
+import top.ltfan.notdeveloper.xposed.Log
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class MainActivity : ComponentActivity() {
@@ -128,7 +129,9 @@ class MainActivity : ComponentActivity() {
 
     private fun check() {
         DetectionCategory.allMethods.forEach { method ->
-            testResults[method] = method.test(this)
+            val result = method.test(this)
+            testResults[method] = result
+            Log.v("${method.preferenceKey} test result: $result")
         }
     }
 }
