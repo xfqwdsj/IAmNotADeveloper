@@ -8,6 +8,7 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.detection.DetectionCategory
+import kotlin.reflect.jvm.javaMethod
 
 @Keep
 class Hook : IXposedHookLoadPackage {
@@ -20,9 +21,9 @@ class Hook : IXposedHookLoadPackage {
 
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
-                "${BuildConfig.APPLICATION_ID}.xposed.ModuleStatusKt",
+                StatusProxy::class.java.name,
                 lpparam.classLoader,
-                "getStatusIsModuleActivated",
+                StatusProxy::get.javaMethod?.name,
                 object : XC_MethodHook() {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         param.result = true

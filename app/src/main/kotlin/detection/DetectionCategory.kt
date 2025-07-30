@@ -1,21 +1,18 @@
 package top.ltfan.notdeveloper.detection
 
 import android.content.Context
-import androidx.annotation.Keep
 import androidx.annotation.StringRes
+import top.ltfan.notdeveloper.util.SystemPropsUtil
 
-@Keep
 sealed class DetectionCategory(
     @param:StringRes val nameId: Int
 ) {
     val methods: List<DetectionMethod> = this::class.nestedClasses
         .map { it.objectInstance!! as DetectionMethod }
 
-    @Keep
     object DevelopmentMode : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_development_mode
     ) {
-        @Keep
         object Development : DetectionMethod(
             preferenceKey = "development_settings_enabled",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode
@@ -29,7 +26,6 @@ sealed class DetectionCategory(
             }
         }
 
-        @Keep
         object DevelopmentLegacy : DetectionMethod(
             preferenceKey = "development_settings_enabled_legacy",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode_legacy
@@ -44,11 +40,9 @@ sealed class DetectionCategory(
         }
     }
 
-    @Keep
     object UsbDebugging : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_usb_debugging
     ) {
-        @Keep
         object Adb : DetectionMethod(
             preferenceKey = "adb_enabled",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_debugging
@@ -62,7 +56,6 @@ sealed class DetectionCategory(
             }
         }
 
-        @Keep
         object AdbLegacy : DetectionMethod(
             preferenceKey = "adb_enabled_legacy",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_debugging_legacy
@@ -76,62 +69,55 @@ sealed class DetectionCategory(
             }
         }
 
-        @Keep
         object AdbSystemPropsUsbState : DetectionMethod(
             preferenceKey = "adb_system_props_usb_state",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_usb_state
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtils.containsValue("sys.usb.state", "adb")
+                return SystemPropsUtil.containsValue("sys.usb.state", "adb")
             }
         }
 
-        @Keep
         object AdbSystemPropsUsbConfig : DetectionMethod(
             preferenceKey = "adb_system_props_usb_config",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_usb_config
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtils.containsValue("sys.usb.config", "adb")
+                return SystemPropsUtil.containsValue("sys.usb.config", "adb")
             }
         }
 
-        @Keep
         object AdbSystemPropsRebootFunc : DetectionMethod(
             preferenceKey = "adb_system_props_reboot_func",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_reboot_func
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtils.containsValue("persist.sys.usb.reboot.func", "adb")
+                return SystemPropsUtil.containsValue("persist.sys.usb.reboot.func", "adb")
             }
         }
 
-        @Keep
         object AdbSystemPropsSvcAdbd : DetectionMethod(
             preferenceKey = "adb_system_props_svc_adbd",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_svc_adbd
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtils.equalsValue("init.svc.adbd", "running")
+                return SystemPropsUtil.equalsValue("init.svc.adbd", "running")
             }
         }
 
-        @Keep
         object AdbSystemPropsFfsReady : DetectionMethod(
             preferenceKey = "adb_system_props_ffs_ready",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_ffs_ready
         ) {
             override fun test(context: Context): Boolean {
-                return SystemPropsUtils.equalsValue("sys.usb.ffs.ready", "1")
+                return SystemPropsUtil.equalsValue("sys.usb.ffs.ready", "1")
             }
         }
     }
 
-    @Keep
     object WirelessDebugging : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_wireless_debugging
     ) {
-        @Keep
         object AdbWifiEnabled : DetectionMethod(
             preferenceKey = "adb_wifi_enabled",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_wireless_debugging

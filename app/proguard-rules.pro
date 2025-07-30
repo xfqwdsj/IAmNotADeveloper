@@ -19,3 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep,allowobfuscation class top.ltfan.notdeveloper.detection.** {
+    *;
+}
+
+-keepclassmembers class top.ltfan.notdeveloper.detection.** {
+    public static top.ltfan.notdeveloper.detection.** INSTANCE;
+}
+
+-keepclassmembers class top.ltfan.notdeveloper.xposed.StatusProxy {
+    boolean get();
+}

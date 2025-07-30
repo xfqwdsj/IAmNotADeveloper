@@ -1,8 +1,8 @@
-package top.ltfan.notdeveloper.detection
+package top.ltfan.notdeveloper.util
 
 import android.annotation.SuppressLint
 
-object SystemPropsUtils {
+object SystemPropsUtil {
     @SuppressLint("PrivateApi")
     inline fun getProperty(
         key: String,

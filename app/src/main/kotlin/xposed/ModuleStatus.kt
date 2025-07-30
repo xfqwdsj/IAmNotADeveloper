@@ -2,13 +2,16 @@ package top.ltfan.notdeveloper.xposed
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.annotation.Keep
 
-val statusIsModuleActivated
-    @Keep get() = false
+@Suppress("MayBeConstant", "RedundantSuppression")
+val statusIsModuleActivated get() = StatusProxy.get()
+
+object StatusProxy {
+    fun get() = false
+}
 
 val Context.statusIsPreferencesReady: Boolean
-    @SuppressLint("WorldReadableFiles")get() {
+    @SuppressLint("WorldReadableFiles") get() {
         return try {
             @Suppress("DEPRECATION") getSharedPreferences(
                 "testPreferences",
@@ -16,7 +19,7 @@ val Context.statusIsPreferencesReady: Boolean
             )
             true
         } catch (t: Throwable) {
-            Log.Android.e("failed to confirm SharedPreferences' state.", t)
+            Log.Android.e("failed to confirm the state of SharedPreferences", t)
             false
         }
     }
