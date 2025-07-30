@@ -33,10 +33,9 @@ class Hook : IXposedHookLoadPackage {
             )
         }
 
-        notifyChange(lpparam)
+        registerSettingChangeNotifier(lpparam)
 
         val prefs = XSharedPreferences(BuildConfig.APPLICATION_ID)
-
         DetectionCategory.allMethods.forEach { method ->
             try {
                 method.hook(prefs, lpparam)
@@ -136,7 +135,7 @@ private fun DetectionMethod.SystemPropertiesMethod.doHook(
     }
 }
 
-private fun notifyChange(lpparam: LoadPackageParam) {
+private fun registerSettingChangeNotifier(lpparam: LoadPackageParam) {
     if (lpparam.packageName != "com.android.providers.settings") return
 
     val settingsProviderClass = XposedHelpers.findClass(
@@ -145,7 +144,8 @@ private fun notifyChange(lpparam: LoadPackageParam) {
     )
 
     XposedBridge.hookAllMethods(
-        settingsProviderClass, "onCreate", object : XC_MethodHook() {
+        settingsProviderClass, "onCreate",
+        object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 Log.d("Got SettingsProvider")
 
@@ -203,7 +203,8 @@ private fun notifyChange(lpparam: LoadPackageParam) {
 
                 Log.d("Registered change broadcast receiver")
             }
-        })
+        },
+    )
 }
 
 private fun DetectionMethod.hook(prefs: XSharedPreferences, lpparam: LoadPackageParam) {
