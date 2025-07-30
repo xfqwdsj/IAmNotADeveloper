@@ -75,11 +75,10 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
-    implementation(libs.activity.compose)
-
-    val compose = platform(libs.compose)
-    implementation(compose)
-
+    implementation(libs.activity)
+    implementation(libs.navigation.runtime)
+    implementation(libs.navigation.ui)
+    implementation(platform(libs.compose))
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui)
