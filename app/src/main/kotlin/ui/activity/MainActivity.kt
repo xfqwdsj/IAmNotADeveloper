@@ -36,6 +36,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import top.ltfan.notdeveloper.service.INotDevService
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
@@ -51,7 +52,7 @@ import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 class MainActivity : ComponentActivity() {
     private var isPreferencesReady by mutableStateOf(false)
     private val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
-    private var service by mutableStateOf(notDevService)
+    private var service: INotDevService? by mutableStateOf(null)
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,10 +135,17 @@ class MainActivity : ComponentActivity() {
 //        broadcastChange(method) {
 //            check()
 //        }
-        service?.notifySettingChange(method) {
-            check()
-        } ?: run {
-            Log.Android.w("Service is null, cannot notify setting change for ${method.preferenceKey}")
+        when (method) {
+            is DetectionMethod.SettingsMethod -> {
+                service?.notifySettingChange(method) {
+                    check()
+                } ?: run {
+                    Log.Android.w("Service is null, cannot notify setting change for ${method.preferenceKey}")
+                    check()
+                }
+            }
+
+            is DetectionMethod.SystemPropertiesMethod -> check()
         }
     }
 

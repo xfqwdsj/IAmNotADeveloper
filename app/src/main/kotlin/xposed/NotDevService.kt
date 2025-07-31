@@ -1,8 +1,10 @@
 package top.ltfan.notdeveloper.xposed
 
 import android.content.Context
-import top.ltfan.notdeveloper.INotDevService
-import top.ltfan.notdeveloper.INotificationCallback
+import android.os.IBinder
+import android.provider.Settings
+import top.ltfan.notdeveloper.service.INotDevService
+import top.ltfan.notdeveloper.service.INotificationCallback
 import top.ltfan.notdeveloper.detection.DetectionMethod
 
 //abstract class NotDevService : Service() {
@@ -24,31 +26,48 @@ const val CallMethodNotify = "NOTIFY"
 const val BundleExtraType = "type"
 
 abstract class NotDevService : INotDevService.Stub() {
-    override fun notifySettingChange(method: DetectionMethod, callback: INotificationCallback) {
-        notify(method)
+    override fun notifySettingChange(name: String, type: Int, callback: INotificationCallback) {
+        notify(name, type)
         callback()
     }
 
-    protected abstract fun notify(method: DetectionMethod)
+    protected abstract fun notify(name: String, type: Int)
 }
 
-inline fun NotDevService(crossinline notify: (DetectionMethod) -> Unit) = object : NotDevService() {
-    override fun notify(method: DetectionMethod) = notify(method)
-}
+inline fun NotDevService(crossinline notify: (name: String, type: Int) -> Unit) =
+    object : NotDevService() {
+        override fun notify(name: String, type: Int) = notify(name, type)
+    }
 
-val Context.notDevService get() = runCatching {
-    INotDevService.Stub.asInterface(
-        getSystemService(NotDevService::class.java.name) as android.os.IBinder
+val Context.notDevService
+    get() = runCatching {
+        INotDevService.Stub.asInterface(
+            getSystemService(NotDevService::class.java.name) as IBinder
+        )
+    }.getOrElse {
+        Log.Android.e("Failed to get NotDevService: ${it.message}", it)
+        null
+    }
+
+inline fun INotDevService.notifySettingChange(
+    method: DetectionMethod.SettingsMethod,
+    crossinline callback: () -> Unit
+) {
+    notifySettingChange(
+        method.settingKey,
+        when (method.settingsClass) {
+            Settings.Global::class.java -> 0
+            Settings.System::class.java -> 1
+            Settings.Secure::class.java -> 2
+            else -> {
+                Log.Android.e("Unknown settings class: ${method.settingsClass}")
+                return
+            }
+        },
+        object : INotificationCallback.Stub() {
+            override fun invoke() {
+                callback()
+            }
+        },
     )
-}.getOrElse {
-    Log.Android.e("Failed to get NotDevService: ${it.message}", it)
-    null
-}
-
-inline fun INotDevService.notifySettingChange(method: DetectionMethod, crossinline callback: () -> Unit) {
-    notifySettingChange(method, object : INotificationCallback.Stub() {
-        override fun invoke() {
-            callback()
-        }
-    })
 }
