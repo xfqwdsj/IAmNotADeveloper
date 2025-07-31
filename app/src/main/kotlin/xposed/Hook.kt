@@ -1,6 +1,9 @@
 package top.ltfan.notdeveloper.xposed
 
 import android.app.AndroidAppHelper
+import android.content.ContentProvider
+import android.content.Context
+import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.os.UserHandle
@@ -16,6 +19,7 @@ import top.ltfan.notdeveloper.broadcast.receiveChangeBroadcast
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import kotlin.reflect.jvm.javaMethod
+import androidx.core.net.toUri
 
 @Keep
 class Hook : IXposedHookLoadPackage {
@@ -33,7 +37,9 @@ class Hook : IXposedHookLoadPackage {
             )
         }
 
-        registerSettingChangeNotifier(lpparam)
+//        registerSettingChangeNotifier(lpparam)
+        patchSystem(lpparam)
+        patchSettingsProvider(lpparam)
 
         val prefs = XSharedPreferences(BuildConfig.APPLICATION_ID)
         DetectionCategory.allMethods.forEach { method ->
@@ -59,7 +65,8 @@ private fun DetectionMethod.SettingsMethod.doHook(
     )
 
     XposedBridge.hookAllMethods(
-        settingsProviderClass, "packageValueForCallResult", object : XC_MethodHook() {
+        settingsProviderClass, "packageValueForCallResult",
+        object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 prefs.reload()
                 val arg = param.args[1] as String
@@ -93,7 +100,8 @@ private fun DetectionMethod.SettingsMethod.doHook(
                     Log.d("processed ${param.method.name}($arg): ${param.result}")
                 }
             }
-        })
+        },
+    )
 }
 
 private fun DetectionMethod.SystemPropertiesMethod.doHook(
@@ -205,6 +213,209 @@ private fun registerSettingChangeNotifier(lpparam: LoadPackageParam) {
             }
         },
     )
+}
+
+private fun patchSystem(lpparam: LoadPackageParam) {
+    if (lpparam.packageName != "android") return
+
+    val systemServiceRegistryClass = XposedHelpers.findClass(
+        "android.os.SystemServiceRegistry",
+        lpparam.classLoader,
+    )
+
+    val service = NotDevService { method ->
+        when (method) {
+            is DetectionMethod.SettingsMethod -> {
+                Log.d("Received notification request for ${method.preferenceKey}")
+
+                val uid = Binder.getCallingUid()
+                val packageName =
+                    AndroidAppHelper.currentApplication().packageManager.getPackagesForUid(uid)
+                        ?.firstOrNull() ?: run {
+                        Log.d("Calling package not found, skipping hook for ${method.preferenceKey}")
+                        return@NotDevService
+                    }
+
+                if (packageName != BuildConfig.APPLICATION_ID) {
+                    Log.d("Invalid calling package: $packageName, skipping hook for ${method.preferenceKey}")
+                    return@NotDevService
+                }
+
+//                val providerHolder =
+//                    XposedHelpers.getStaticObjectField(method.settingsClass, "sProviderHolder")
+
+                val application = AndroidAppHelper.currentApplication()
+
+//                val provider = XposedHelpers.callMethod(
+//                    providerHolder, "getProvider", application.contentResolver
+//                ) as ContentProvider
+
+                val userId = XposedHelpers.callStaticMethod(
+                    UserHandle::class.java, "getUserId", uid
+                ) as Int
+
+                val type = when (method.settingsClass) {
+                    android.provider.Settings.Global::class.java -> 0
+                    android.provider.Settings.System::class.java -> 1
+                    android.provider.Settings.Secure::class.java -> 2
+                    else -> return@NotDevService
+                }
+
+                val bundle = Bundle().apply {
+                    putInt(BundleExtraType, type)
+                    putInt("_user", userId)
+                }
+
+                val uri = "content://settings".toUri()
+                application.contentResolver.call(
+                    uri,
+                    CallMethodNotify,
+                    method.settingKey,
+                    bundle,
+                )
+
+                Log.d("Notified settings change for key: ${method.settingKey}, type: $type, userId: $userId")
+            }
+
+            else -> Unit
+        }
+    }
+
+    XposedBridge.hookAllMethods(
+        systemServiceRegistryClass, "getSystemService",
+        object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val context = param.args[0] as Context
+                if (context.packageName != BuildConfig.APPLICATION_ID) return
+                val name = param.args[1] as String
+                if (name != NotDevService::class.qualifiedName) return
+
+                Log.d("Intercepted request for NotDevService")
+
+                param.result = service
+            }
+        },
+    )
+}
+
+private fun patchSettingsProvider(lpparam: LoadPackageParam) {
+    if (lpparam.packageName != "com.android.providers.settings") return
+
+    val settingsProviderClass = XposedHelpers.findClass(
+        "com.android.providers.settings.SettingsProvider",
+        lpparam.classLoader,
+    )
+
+    XposedBridge.hookAllMethods(
+        settingsProviderClass, "call",
+        object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val method = param.args[0] as String
+                if (method != CallMethodNotify) return
+                val name = param.args[1] as String
+                val args = param.args[2] as Bundle
+                val type = args.getInt(BundleExtraType, 0)
+
+                val settingsProvider = param.thisObject
+
+                val userId = XposedHelpers.callStaticMethod(
+                    settingsProvider::class.java, "getRequestingUserId", args
+                ) as Int
+
+                val settingsRegistryField = XposedHelpers.findField(
+                    settingsProvider::class.java, "mSettingsRegistry"
+                )
+                val settingsRegistry = settingsRegistryField.get(settingsProvider)
+
+                val notify = XposedHelpers.findMethodExact(
+                    settingsRegistry::class.java,
+                    "notifyForSettingsChange",
+                    Int::class.java,
+                    String::class.java,
+                )
+
+                val settingsStateClass = XposedHelpers.findClass(
+                    "com.android.providers.settings.SettingsState",
+                    lpparam.classLoader,
+                )
+
+                val key = XposedHelpers.callStaticMethod(
+                    settingsStateClass, "makeKey", type, userId
+                )
+
+                notify.invoke(settingsRegistry, key, name)
+
+                Log.d("Notified settings change for key: $key, setting: $name")
+
+                param.result = Bundle()
+            }
+        },
+    )
+
+//    XposedBridge.hookAllMethods(
+//        settingsProviderClass, "onCreate",
+//        object : XC_MethodHook() {
+//            override fun afterHookedMethod(param: MethodHookParam) {
+//                Log.d("Got SettingsProvider")
+//
+////                val application = AndroidAppHelper.currentApplication()
+//                NotDevService { method ->
+//                    Log.d("Received notification request for ${method.preferenceKey}")
+//
+//                    when (method) {
+//                        is DetectionMethod.SettingsMethod -> {
+//                            val settingsProvider = param.thisObject
+//
+//                            val settingsRegistryField = XposedHelpers.findField(
+//                                settingsProvider::class.java, "mSettingsRegistry"
+//                            )
+//                            val settingsRegistry = settingsRegistryField.get(settingsProvider)
+//
+//                            val notify = XposedHelpers.findMethodExact(
+//                                settingsRegistry::class.java,
+//                                "notifyForSettingsChange",
+//                                Int::class.java,
+//                                String::class.java,
+//                            )
+//
+//                            val settingsStateClass = XposedHelpers.findClass(
+//                                "com.android.providers.settings.SettingsState",
+//                                lpparam.classLoader,
+//                            )
+//
+//                            val userId = XposedHelpers.callStaticMethod(
+//                                UserHandle::class.java,
+//                                "myUserId",
+//                            ) as Int
+//
+//                            val key = XposedHelpers.callStaticMethod(
+//                                settingsStateClass,
+//                                "makeKey",
+//                                when (method.settingsClass) {
+//                                    android.provider.Settings.Global::class.java -> 0
+//                                    android.provider.Settings.System::class.java -> 1
+//                                    android.provider.Settings.Secure::class.java -> 2
+//                                    else -> return@NotDevService
+//                                },
+//                                userId,
+//                            )
+//
+//                            notify.invoke(settingsRegistry, key, method.settingKey)
+//
+//                            Log.d("Notified settings change for key: $key, setting: ${method.settingKey}")
+//                        }
+//
+//                        else -> Unit
+//                    }
+//                }
+//
+////                val intent = Intent(application, service::class.java)
+////                application.startService(intent)
+//
+//                Log.d("Started NotDevService")
+//            }
+//        },
+//    )
 }
 
 private fun DetectionMethod.hook(prefs: XSharedPreferences, lpparam: LoadPackageParam) {

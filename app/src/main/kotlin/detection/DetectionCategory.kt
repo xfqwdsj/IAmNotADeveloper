@@ -2,6 +2,7 @@ package top.ltfan.notdeveloper.detection
 
 import android.content.Context
 import androidx.annotation.StringRes
+import kotlinx.parcelize.Parcelize
 import top.ltfan.notdeveloper.util.SystemPropsUtil
 
 sealed class DetectionCategory(
@@ -13,6 +14,7 @@ sealed class DetectionCategory(
     object DevelopmentMode : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_development_mode
     ) {
+        @Parcelize
         object Development : DetectionMethod.SettingsMethod(
             preferenceKey = "development_settings_enabled",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode,
@@ -33,6 +35,7 @@ sealed class DetectionCategory(
             }
         }
 
+        @Parcelize
         object DevelopmentLegacy : DetectionMethod.SettingsMethod(
             preferenceKey = "development_settings_enabled_legacy",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode_legacy,
@@ -52,6 +55,7 @@ sealed class DetectionCategory(
     object UsbDebugging : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_usb_debugging
     ) {
+        @Parcelize
         object Adb : DetectionMethod.SettingsMethod(
             preferenceKey = "adb_enabled",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_debugging,
@@ -72,6 +76,7 @@ sealed class DetectionCategory(
             }
         }
 
+        @Parcelize
         object AdbLegacy : DetectionMethod.SettingsMethod(
             preferenceKey = "adb_enabled_legacy",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_debugging_legacy,
@@ -87,6 +92,7 @@ sealed class DetectionCategory(
             }
         }
 
+        @Parcelize
         object AdbSystemPropsUsbState : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_usb_state",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_usb_state,
@@ -98,6 +104,7 @@ sealed class DetectionCategory(
             }
         }
 
+        @Parcelize
         object AdbSystemPropsUsbConfig : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_usb_config",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_usb_config,
@@ -109,6 +116,7 @@ sealed class DetectionCategory(
             }
         }
 
+        @Parcelize
         object AdbSystemPropsRebootFunc : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_reboot_func",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_reboot_func,
@@ -120,6 +128,7 @@ sealed class DetectionCategory(
             }
         }
 
+        @Parcelize
         object AdbSystemPropsSvcAdbd : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_svc_adbd",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_svc_adbd,
@@ -131,6 +140,7 @@ sealed class DetectionCategory(
             }
         }
 
+        @Parcelize
         object AdbSystemPropsFfsReady : DetectionMethod.SystemPropertiesMethod(
             preferenceKey = "adb_system_props_ffs_ready",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_ffs_ready,
@@ -154,6 +164,7 @@ sealed class DetectionCategory(
     object WirelessDebugging : DetectionCategory(
         nameId = top.ltfan.notdeveloper.R.string.category_wireless_debugging
     ) {
+        @Parcelize
         object AdbWifiEnabled : DetectionMethod.SettingsMethod(
             preferenceKey = "adb_wifi_enabled",
             nameId = top.ltfan.notdeveloper.R.string.toggle_hide_wireless_debugging,
