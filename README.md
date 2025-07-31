@@ -1,6 +1,6 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/xfqwdsj/IAmNotADeveloper)
 
-**简体中文** | [English](README_en.md) | [Português (Brasil)](README_pt-BR.md)
+**简体中文** | [English](README_en.md) | [Português (Brasil)](README_pt-BR.md) | [Türkçe](README_tr-TR.md)
 
 # 我不是开发者
 
