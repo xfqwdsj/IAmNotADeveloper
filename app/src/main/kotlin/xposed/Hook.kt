@@ -17,6 +17,7 @@ import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.broadcast.receiveChangeBroadcast
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
+import java.lang.reflect.Proxy
 import kotlin.reflect.jvm.javaMethod
 
 @Keep
@@ -218,10 +219,15 @@ private fun registerSettingChangeNotifier(lpparam: LoadPackageParam) {
 private fun patchSystem(lpparam: LoadPackageParam) {
     if (lpparam.packageName != "android") return
 
-    Log.d("Hooking into system service registry for NotDevService")
+    Log.d("Patching system service registry for NotDevService")
 
     val systemServiceRegistryClass = XposedHelpers.findClass(
         "android.app.SystemServiceRegistry",
+        lpparam.classLoader,
+    )
+
+    val serviceFetcherInterface = XposedHelpers.findClass(
+        "android.app.SystemServiceRegistry\$ServiceFetcher",
         lpparam.classLoader,
     )
 
@@ -270,24 +276,59 @@ private fun patchSystem(lpparam: LoadPackageParam) {
         Log.d("Notified settings change for key: $name, type: $type, userId: $userId")
     }
 
-    XposedBridge.hookAllMethods(
-        systemServiceRegistryClass, "getSystemService",
-        object : XC_MethodHook() {
-            override fun beforeHookedMethod(param: MethodHookParam) {
-                val context = param.args[0] as Context
-                if (context.packageName != BuildConfig.APPLICATION_ID) return
-                val name = param.args[1] as String
-                if (name != NotDevService::class.java.name) {
-                    Log.d("NotDevService not requested, skipping hook for $name")
-                    return
-                }
-
-                Log.d("Intercepted request for NotDevService")
-
-                param.result = service
+    val fetcher = Proxy.newProxyInstance(
+        serviceFetcherInterface.classLoader,
+        arrayOf(serviceFetcherInterface),
+    ) { _, method, args ->
+        if (method.name == "getService") {
+            Log.d("Intercepted getSystemService call for NotDevService")
+            val context = args[0] as Context
+            if (context.packageName != BuildConfig.APPLICATION_ID) {
+                Log.d("Other package requested NotDevService, skipping hook")
+                return@newProxyInstance null
             }
-        },
+            return@newProxyInstance service.asBinder()
+        }
+    }
+
+    XposedHelpers.callStaticMethod(
+        systemServiceRegistryClass,
+        "registerService",
+        NotDevService::class.java.name,
+        NotDevService::class.java,
+        fetcher,
     )
+
+    val serviceManagerClass = XposedHelpers.findClass(
+        "android.os.ServiceManager",
+        lpparam.classLoader,
+    )
+
+    XposedHelpers.callStaticMethod(
+        serviceManagerClass,
+        "addService",
+        NotDevService::class.java.name,
+        service.asBinder(),
+    )
+
+//    XposedBridge.hookAllMethods(
+//        systemServiceRegistryClass, "getSystemService",
+//        object : XC_MethodHook() {
+//            override fun beforeHookedMethod(param: MethodHookParam) {
+//                val context = param.args[0] as Context
+//                if (context.packageName != BuildConfig.APPLICATION_ID) return
+//                val name = param.args[1] as String
+//                if (name != NotDevService::class.java.name) {
+//                    Log.d("NotDevService not requested, skipping hook for $name")
+//                    return
+//                }
+//
+//                Log.d("Intercepted request for NotDevService")
+//
+//                param.result = service
+//            }
+//        },
+//    )
 
     Log.d("Patched system service registry for NotDevService")
 }
