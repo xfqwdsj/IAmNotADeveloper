@@ -1,5 +1,6 @@
 package top.ltfan.notdeveloper.xposed
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.IBinder
 import android.provider.Settings
@@ -41,9 +42,11 @@ inline fun NotDevService(crossinline notify: (name: String, type: Int) -> Unit) 
 
 val Context.notDevService
     get() = runCatching {
-        INotDevService.Stub.asInterface(
-            getSystemService(NotDevService::class.java.name) as IBinder
-        )
+        @SuppressLint("PrivateApi")
+        val systemManagerClass = Class.forName("android.os.ServiceManager")
+        val getServiceMethod = systemManagerClass.getMethod("getService", String::class.java)
+        val binder = getServiceMethod.invoke(null, NotDevService::class.java.name) as IBinder
+        INotDevService.Stub.asInterface(binder)
     }.getOrElse {
         Log.Android.e("Failed to get NotDevService: ${it.message}", it)
         null

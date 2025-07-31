@@ -1,6 +1,8 @@
 package top.ltfan.notdeveloper.ui.activity
 
 import android.os.Bundle
+import android.os.UserHandle
+import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,6 +38,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import top.ltfan.notdeveloper.service.INotDevService
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.detection.DetectionCategory
@@ -44,6 +47,8 @@ import top.ltfan.notdeveloper.ui.composable.CategoryCard
 import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.util.isMiui
+import top.ltfan.notdeveloper.xposed.BundleExtraType
+import top.ltfan.notdeveloper.xposed.CallMethodNotify
 import top.ltfan.notdeveloper.xposed.Log
 import top.ltfan.notdeveloper.xposed.notDevService
 import top.ltfan.notdeveloper.xposed.notifySettingChange
@@ -137,12 +142,40 @@ class MainActivity : ComponentActivity() {
 //        }
         when (method) {
             is DetectionMethod.SettingsMethod -> {
-                service?.notifySettingChange(method) {
-                    check()
-                } ?: run {
-                    Log.Android.w("Service is null, cannot notify setting change for ${method.preferenceKey}")
-                    check()
+//                service?.notifySettingChange(method) {
+//                    check()
+//                } ?: run {
+//                    Log.Android.w("Service is null, cannot notify setting change for ${method.preferenceKey}")
+//                    check()
+//                }
+
+                val type = when (method.settingsClass) {
+                    Settings.Global::class.java -> 0
+                    Settings.System::class.java -> 1
+                    Settings.Secure::class.java -> 2
+                    else -> {
+                        Log.Android.e("Unknown settings class: ${method.settingsClass}")
+                        return
+                    }
                 }
+
+                val getUserId = UserHandle::class.java.getMethod("myUserId")
+                getUserId.isAccessible = true
+                val userId = getUserId(null) as Int
+
+                val bundle = Bundle().apply {
+                    putInt(BundleExtraType, type)
+                    putInt("_user", userId)
+                }
+
+                val uri = "content://settings".toUri()
+                contentResolver.call(
+                    uri,
+                    CallMethodNotify,
+                    method.settingKey,
+                    bundle,
+                )
+                check()
             }
 
             is DetectionMethod.SystemPropertiesMethod -> check()
