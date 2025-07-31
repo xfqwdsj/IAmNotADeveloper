@@ -1,4 +1,4 @@
-package top.ltfan.notdeveloper;
+package top.ltfan.notdeveloper.service;
 
 interface INotificationCallback {
     void invoke();
