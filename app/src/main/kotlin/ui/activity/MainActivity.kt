@@ -26,7 +26,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -34,7 +37,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.broadcast.broadcastChange
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.ui.composable.CategoryCard
@@ -42,11 +44,14 @@ import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.Log
-import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
+import top.ltfan.notdeveloper.xposed.notDevService
+import top.ltfan.notdeveloper.xposed.notifySettingChange
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class MainActivity : ComponentActivity() {
+    private var isPreferencesReady by mutableStateOf(false)
     private val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
+    private var service by mutableStateOf(notDevService)
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,8 +72,6 @@ class MainActivity : ComponentActivity() {
             IAmNotADeveloperTheme {
                 val scrollBehavior =
                     TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-                val isModuleActivated = statusIsModuleActivated
-                val isPreferencesReady = statusIsPreferencesReady
 
                 Scaffold(
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -107,8 +110,8 @@ class MainActivity : ComponentActivity() {
                         item {
                             StatusCard(
                                 modifier = Modifier.padding(horizontal = 16.dp),
-                                isModuleActivated = isModuleActivated,
-                                isPreferencesReady = isPreferencesReady
+                                isPreferencesReady = isPreferencesReady,
+                                isServiceConnected = service != null,
                             )
                         }
 
@@ -118,7 +121,7 @@ class MainActivity : ComponentActivity() {
                                 testResults = testResults,
                                 afterChange = ::afterChange,
                                 isPreferencesReady = isPreferencesReady,
-                                modifier = Modifier.padding(horizontal = 16.dp)
+                                modifier = Modifier.padding(horizontal = 16.dp),
                             )
                         }
                     }
@@ -128,13 +131,22 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun afterChange(method: DetectionMethod) {
-        broadcastChange(method) {
+//        broadcastChange(method) {
+//            check()
+//        }
+        service?.notifySettingChange(method) {
             check()
+        } ?: run {
+            Log.Android.w("Service is null, cannot notify setting change for ${method.preferenceKey}")
         }
     }
 
     override fun onResume() {
         super.onResume()
+        isPreferencesReady = statusIsPreferencesReady
+        if (service == null) {
+            service = notDevService
+        }
         check()
     }
 
@@ -142,7 +154,7 @@ class MainActivity : ComponentActivity() {
         DetectionCategory.allMethods.forEach { method ->
             val result = method.test(this)
             testResults[method] = result
-            Log.Android.v("${method.preferenceKey} test result: $result")
+            Log.v("${method.preferenceKey} test result: $result")
         }
     }
 }

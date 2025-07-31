@@ -1,12 +1,13 @@
 package top.ltfan.notdeveloper.detection
 
 import android.content.Context
+import android.os.Parcelable
 import androidx.annotation.StringRes
 
 sealed class DetectionMethod(
     val preferenceKey: String,
     @param:StringRes val nameId: Int
-) {
+) : Parcelable {
     abstract fun test(context: Context): Boolean
 
     abstract class SettingsMethod(
