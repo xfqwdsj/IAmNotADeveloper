@@ -8,7 +8,7 @@ import top.ltfan.notdeveloper.xposed.hook.Hook
 sealed class DetectionMethod(
     val preferenceKey: String,
     @param:StringRes val nameId: Int
-) : Parcelable {
+) {
     abstract fun test(context: Context): Boolean
 
     abstract class SettingsMethod(
