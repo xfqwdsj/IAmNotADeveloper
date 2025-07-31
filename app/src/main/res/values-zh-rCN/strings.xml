@@ -29,6 +29,11 @@
     <string name="status_entry_activation_n">模块未激活</string>
     <string name="status_entry_activation_description">模块的激活状态直接影响其功能。如果模块未被激活，它将完全无法运行。模块通过Hook自身的成员实现报告模块激活状态，如果你认为存在误报，请强行停止应用再重新打开。</string>
 
+    <!-- Service status -->
+    <string name="status_entry_service_y">服务已连接</string>
+    <string name="status_entry_service_n">服务未连接</string>
+    <string name="status_entry_service_description">服务状态决定了系统级隐藏是否可以正常工作。如果服务异常，系统级隐藏将无法工作。</string>
+
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">偏好设置正常</string>
     <string name="status_entry_prefs_n">偏好设置不可用</string>
