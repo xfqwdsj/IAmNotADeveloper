@@ -37,7 +37,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.broadcast.broadcastChange
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.ui.composable.CategoryCard
@@ -45,11 +44,14 @@ import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.Log
+import top.ltfan.notdeveloper.xposed.notDevService
+import top.ltfan.notdeveloper.xposed.notifySettingChange
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class MainActivity : ComponentActivity() {
     private var isPreferencesReady by mutableStateOf(false)
     private val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
+    private var service by mutableStateOf(notDevService)
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,13 +90,18 @@ class MainActivity : ComponentActivity() {
                         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
                         .asPaddingValues()
                     val contentPadding = PaddingValues(
-                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(layoutDirection),
+                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(
+                            layoutDirection
+                        ),
                         top = padding.calculateTopPadding() + insets.calculateTopPadding() + 16.dp,
-                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(layoutDirection),
+                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(
+                            layoutDirection
+                        ),
                         bottom = padding.calculateBottomPadding() + insets.calculateBottomPadding() + 16.dp,
                     )
                     LazyColumn(
-                        modifier = Modifier.consumeWindowInsets(contentPadding)
+                        modifier = Modifier
+                            .consumeWindowInsets(contentPadding)
                             .fillMaxSize(),
                         contentPadding = contentPadding,
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -103,7 +110,8 @@ class MainActivity : ComponentActivity() {
                         item {
                             StatusCard(
                                 modifier = Modifier.padding(horizontal = 16.dp),
-                                isPreferencesReady = isPreferencesReady
+                                isPreferencesReady = isPreferencesReady,
+                                isServiceConnected = service != null,
                             )
                         }
 
@@ -113,7 +121,7 @@ class MainActivity : ComponentActivity() {
                                 testResults = testResults,
                                 afterChange = ::afterChange,
                                 isPreferencesReady = isPreferencesReady,
-                                modifier = Modifier.padding(horizontal = 16.dp)
+                                modifier = Modifier.padding(horizontal = 16.dp),
                             )
                         }
                     }
@@ -123,14 +131,22 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun afterChange(method: DetectionMethod) {
-        broadcastChange(method) {
+//        broadcastChange(method) {
+//            check()
+//        }
+        service?.notifySettingChange(method) {
             check()
+        } ?: run {
+            Log.Android.w("Service is null, cannot notify setting change for ${method.preferenceKey}")
         }
     }
 
     override fun onResume() {
         super.onResume()
         isPreferencesReady = statusIsPreferencesReady
+        if (service == null) {
+            service = notDevService
+        }
         check()
     }
 

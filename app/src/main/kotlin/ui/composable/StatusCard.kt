@@ -1,9 +1,11 @@
 package top.ltfan.notdeveloper.ui.composable
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
@@ -38,9 +39,10 @@ import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
 fun StatusCard(
     modifier: Modifier = Modifier,
     isModuleActivated: Boolean = statusIsModuleActivated,
-    isPreferencesReady: Boolean
+    isPreferencesReady: Boolean,
+    isServiceConnected: Boolean,
 ) {
-    val status = Status.from(isModuleActivated, isPreferencesReady)
+    val status = Status.from(isModuleActivated, isPreferencesReady, isServiceConnected)
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -66,65 +68,76 @@ fun StatusCard(
                     Text(stringResource(R.string.description_more_info))
                 }
 
-                AnimatedVisibility(
-                    visible = status != Status.Normal || expanded,
-                    enter = expandVertically(expandFrom = Alignment.CenterVertically),
-                    exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
-                ) {
-                    Spacer(Modifier.height(8.dp))
-                }
-                AnimatedVisibility(visible = expanded && isModuleActivated) {
-                    Text(stringResource(R.string.status_entry_activation_y))
-                }
-                AnimatedVisibility(visible = !isModuleActivated) {
-                    Text(
-                        stringResource(R.string.status_entry_activation_n),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                AnimatedVisibility(visible = expanded) {
-                    Text(
-                        stringResource(R.string.status_entry_activation_description),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-
-                AnimatedVisibility(
-                    visible = expanded,
-                    enter = expandVertically(expandFrom = Alignment.CenterVertically),
-                    exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
-                ) {
-                    Spacer(Modifier.height(8.dp))
-                }
-
-                AnimatedVisibility(visible = expanded && isPreferencesReady) {
-                    Text(stringResource(R.string.status_entry_prefs_y))
-                }
-                AnimatedVisibility(visible = !isPreferencesReady) {
-                    Text(
-                        stringResource(R.string.status_entry_prefs_n),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                AnimatedVisibility(visible = expanded) {
-                    Text(
-                        stringResource(R.string.status_entry_prefs_description),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
+                DynamicSpacer(status != Status.Normal || expanded)
+                StatusEntry(
+                    expanded,
+                    working = isModuleActivated,
+                    workingText = R.string.status_entry_activation_y,
+                    notWorkingText = R.string.status_entry_activation_n,
+                    descriptionText = R.string.status_entry_activation_description,
+                )
+                DynamicSpacer(expanded)
+                StatusEntry(
+                    expanded,
+                    working = isServiceConnected,
+                    workingText = R.string.status_entry_service_y,
+                    notWorkingText = R.string.status_entry_service_n,
+                    descriptionText = R.string.status_entry_service_description,
+                )
+                DynamicSpacer(expanded)
+                StatusEntry(
+                    expanded,
+                    working = isPreferencesReady,
+                    workingText = R.string.status_entry_prefs_y,
+                    notWorkingText = R.string.status_entry_prefs_n,
+                    descriptionText = R.string.status_entry_prefs_description,
+                )
             }
         }
     }
 }
 
-@Preview(device = "id:pixel_5", locale = "zh-rCN", showSystemUi = false, showBackground = false)
 @Composable
-fun StatusCardPreview() {
-    Column {
-        StatusCard(isModuleActivated = true, isPreferencesReady = true)
-        StatusCard(isModuleActivated = true, isPreferencesReady = false)
-        StatusCard(isModuleActivated = false, isPreferencesReady = true)
-        StatusCard(isModuleActivated = false, isPreferencesReady = false)
+private fun ColumnScope.DynamicSpacer(expanded: Boolean) {
+    AnimatedVisibility(
+        visible = expanded,
+        enter = expandVertically(expandFrom = Alignment.CenterVertically),
+        exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+    ) {
+        Spacer(Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun ColumnScope.StatusEntry(
+    expanded: Boolean,
+    working: Boolean,
+    @StringRes workingText: Int,
+    @StringRes notWorkingText: Int,
+    @StringRes descriptionText: Int,
+) {
+    AnimatedVisibility(
+        visible = expanded,
+        enter = expandVertically(expandFrom = Alignment.CenterVertically),
+        exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+    ) {
+        Spacer(Modifier.height(8.dp))
+    }
+
+    AnimatedVisibility(visible = expanded && working) {
+        Text(stringResource(workingText))
+    }
+    AnimatedVisibility(visible = !working) {
+        Text(
+            stringResource(notWorkingText),
+            color = MaterialTheme.colorScheme.error
+        )
+    }
+    AnimatedVisibility(visible = expanded) {
+        Text(
+            stringResource(descriptionText),
+            style = MaterialTheme.typography.labelSmall
+        )
     }
 }
 
@@ -132,11 +145,15 @@ enum class Status {
     Normal, Partial, Error;
 
     companion object {
-        fun from(isModuleActivated: Boolean, isPreferencesReady: Boolean): Status {
+        fun from(
+            isModuleActivated: Boolean,
+            isPreferencesReady: Boolean,
+            isServiceConnected: Boolean,
+        ): Status {
             if (!isModuleActivated) return Error
-            return if (isPreferencesReady) {
-                Normal
-            } else Partial
+            if (!isPreferencesReady) return Partial
+            if (!isServiceConnected) return Partial
+            return Normal
         }
     }
 

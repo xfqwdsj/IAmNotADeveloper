@@ -2,8 +2,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    id("kotlin-parcelize")
 }
 
 kotlin {
@@ -61,6 +63,7 @@ android {
     }
 
     buildFeatures {
+        aidl = true
         compose = true
     }
 
