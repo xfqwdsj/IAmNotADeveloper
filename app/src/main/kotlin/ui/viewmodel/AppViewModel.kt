@@ -1,0 +1,56 @@
+package top.ltfan.notdeveloper.ui.viewmodel
+
+import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
+import top.ltfan.notdeveloper.detection.DetectionCategory
+import top.ltfan.notdeveloper.detection.DetectionMethod
+import top.ltfan.notdeveloper.service.INotDevService
+import top.ltfan.notdeveloper.ui.page.Main
+import top.ltfan.notdeveloper.ui.page.Page
+import top.ltfan.notdeveloper.xposed.Log
+import top.ltfan.notdeveloper.xposed.notifySettingChange
+
+class AppViewModel(app: Application) : AndroidViewModel(app) {
+    val backStack = mutableStateListOf<Page>(Main)
+
+    var isPreferencesReady by mutableStateOf(false)
+    val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
+    var service: INotDevService? by mutableStateOf(null)
+
+    fun test() {
+        DetectionCategory.allMethods.forEach { method ->
+            val result = method.test(application)
+            testResults[method] = result
+            Log.v("${method.preferenceKey} test result: $result")
+        }
+    }
+
+    fun afterStatusChange(method: DetectionMethod) {
+        when (method) {
+            is DetectionMethod.SettingsMethod -> {
+                val service = service
+                if (service == null) {
+                    Log.Android.w("Service not connected, cannot notify settings changes")
+                    return
+                }
+
+                try {
+                    service.notifySettingChange(method) {
+                        test()
+                    }
+                } catch (e: Throwable) {
+                    Log.Android.e("Failed to notify setting change for ${method.preferenceKey}", e)
+                    test()
+                }
+            }
+
+            is DetectionMethod.SystemPropertiesMethod -> test()
+        }
+    }
+}
