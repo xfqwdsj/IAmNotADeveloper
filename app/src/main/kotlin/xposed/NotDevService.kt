@@ -23,7 +23,9 @@ import top.ltfan.notdeveloper.detection.DetectionMethod
 //    override fun notify(method: DetectionMethod) = notify(method)
 //}
 
+const val CallMethodGet = "GET"
 const val CallMethodNotify = "NOTIFY"
+const val BundleExtraService = "service"
 const val BundleExtraType = "type"
 
 abstract class NotDevService : INotDevService.Stub() {
@@ -42,10 +44,14 @@ inline fun NotDevService(crossinline notify: (name: String, type: Int) -> Unit) 
 
 val Context.notDevService
     get() = runCatching {
-        @SuppressLint("PrivateApi")
-        val systemManagerClass = Class.forName("android.os.ServiceManager")
-        val getServiceMethod = systemManagerClass.getMethod("getService", String::class.java)
-        val binder = getServiceMethod.invoke(null, NotDevService::class.java.name) as IBinder
+//        @SuppressLint("PrivateApi")
+//        val systemManagerClass = Class.forName("android.os.ServiceManager")
+//        val getServiceMethod = systemManagerClass.getMethod("getService", String::class.java)
+//        val binder = getServiceMethod.invoke(null, NotDevService::class.java.name) as IBinder
+        val binder = contentResolver.call(
+            NotDevServiceProvider.uri, CallMethodGet, null, null
+        )?.getBinder(BundleExtraService)
+            ?: error("Failed to get NotDevService binder")
         INotDevService.Stub.asInterface(binder)
     }.getOrElse {
         Log.Android.e("Failed to get NotDevService: ${it.message}", it)
