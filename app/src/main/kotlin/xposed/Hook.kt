@@ -152,39 +152,40 @@ private fun patchSystem(lpparam: LoadPackageParam) {
 
     Log.d("Patching system for NotDevService")
 
-    val service = NotDevService { name, type ->
-        Log.d("Received notification request for $name")
+    val service = NotDevService {
+        notify { name, type ->
+            Log.d("Received notification request for $name")
 
-        val application = AndroidAppHelper.currentApplication()
-        val uid = Binder.getCallingUid()
-        val packageName = application.packageManager.getPackagesForUid(uid)?.firstOrNull() ?: run {
-            Log.d("Calling package not found, skipping notification for $name")
-            return@NotDevService
+            val application = AndroidAppHelper.currentApplication()
+            val uid = Binder.getCallingUid()
+            val packageName = application.packageManager.getPackagesForUid(uid)?.firstOrNull() ?: run {
+                Log.d("Calling package not found, skipping notification for $name")
+                return@notify
+            }
+
+            if (packageName != BuildConfig.APPLICATION_ID) {
+                Log.d("Invalid package $packageName, skipping notification for $name")
+                return@notify
+            }
+
+            val userId = XposedHelpers.callStaticMethod(
+                UserHandle::class.java, "getUserId", uid
+            ) as Int
+
+            val bundle = Bundle().apply {
+                putInt(BundleExtraType, type)
+                putInt("_user", userId)
+            }
+
+            application.contentResolver.call(
+                "content://settings".toUri(),
+                CallMethodNotify,
+                name,
+                bundle,
+            )
+
+            Log.d("Requested notification for $name with type $type from package $packageName, user ID: $userId")
         }
-
-        if (packageName != BuildConfig.APPLICATION_ID) {
-            Log.d("Invalid package $packageName, skipping notification for $name")
-            return@NotDevService
-        }
-
-        val userId = XposedHelpers.callStaticMethod(
-            UserHandle::class.java, "getUserId", uid
-        ) as Int
-
-        val bundle = Bundle().apply {
-            putInt(BundleExtraType, type)
-            putInt("_user", userId)
-        }
-
-        val uri = "content://settings".toUri()
-        application.contentResolver.call(
-            uri,
-            CallMethodNotify,
-            name,
-            bundle,
-        )
-
-        Log.d("Requested notification for $name with type $type from package $packageName, user ID: $userId")
     }
 
     val activityManagerServiceClass = XposedHelpers.findClass(
