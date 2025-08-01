@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
     implementation(libs.preference)
+    implementation(libs.dslUtilities)
     compileOnly(libs.xposed.api)
 }
 
