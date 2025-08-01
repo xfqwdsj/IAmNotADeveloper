@@ -12,16 +12,37 @@ import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.service.INotDevService
 import top.ltfan.notdeveloper.ui.page.Main
+import top.ltfan.notdeveloper.ui.page.Overview
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.xposed.Log
 import top.ltfan.notdeveloper.xposed.notifySettingChange
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
-    val backStack = mutableStateListOf<Page>(Main)
+    val backStack = mutableStateListOf<Page>(Overview)
+    val currentPage inline get() = backStack.last()
+    val navBarEntry inline get() = backStack.last { it is Main }
 
     var isPreferencesReady by mutableStateOf(false)
     val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
     var service: INotDevService? by mutableStateOf(null)
+
+    fun navigateMain(page: Main) {
+        if (currentPage == page) return
+        val existingIndex = backStack.indexOfFirst { it == page }
+
+        if (existingIndex == -1) {
+            backStack.add(page)
+            return
+        }
+
+        val nextMainIndex = backStack.subList(existingIndex + 1, backStack.size)
+            .indexOfFirst { it is Main }
+            .let { if (it == -1) backStack.size else existingIndex + 1 + it }
+
+        val pagesToMove = backStack.subList(existingIndex, nextMainIndex)
+        backStack.addAll(pagesToMove)
+        backStack.removeRange(existingIndex, nextMainIndex)
+    }
 
     fun test() {
         DetectionCategory.allMethods.forEach { method ->
