@@ -2,6 +2,7 @@ package top.ltfan.notdeveloper.xposed
 
 import android.content.Context
 import android.provider.Settings
+import top.ltfan.dslutilities.LockableValueDsl
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.service.INotDevService
 import top.ltfan.notdeveloper.service.INotificationCallback
@@ -20,10 +21,34 @@ abstract class NotDevService : INotDevService.Stub() {
     protected abstract fun notify(name: String, type: Int)
 }
 
-inline fun NotDevService(crossinline notify: (name: String, type: Int) -> Unit) =
-    object : NotDevService() {
-        override fun notify(name: String, type: Int) = notify(name, type)
+@NotDevServiceBuilder.Dsl
+class NotDevServiceBuilder : LockableValueDsl() {
+    var notify by required<(name: String, type: Int) -> Unit>()
+
+    fun notify(block: (name: String, type: Int) -> Unit) {
+        notify = block
     }
+
+    fun build(): NotDevService {
+        lock()
+        return object : NotDevService() {
+            override fun notify(name: String, type: Int) {
+                notify.invoke(name, type)
+            }
+        }
+    }
+
+    companion object {
+        inline fun build(block: NotDevServiceBuilder.() -> Unit): NotDevService =
+            NotDevServiceBuilder().apply(block).build()
+    }
+
+    @DslMarker
+    annotation class Dsl
+}
+
+inline fun NotDevService(block: NotDevServiceBuilder.() -> Unit) =
+    NotDevServiceBuilder.build(block)
 
 val Context.notDevService
     get() = runCatching {
