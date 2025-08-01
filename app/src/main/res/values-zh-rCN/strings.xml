@@ -46,4 +46,7 @@
     <!-- Test results -->
     <string name="test_result_on">该项测试结果：开启</string>
     <string name="test_result_off">该项测试结果：关闭</string>
+
+    <!-- Overview -->
+    <string name="label_nav_overview">概览</string>
 </resources>
