@@ -319,14 +319,15 @@ private fun patchSettingsProvider(lpparam: LoadPackageParam) {
                 val method = param.args[0] as String
                 if (method != CallMethodNotify) return
                 val uid = Binder.getCallingUid()
-                val packageName =
+                val packageNames =
                     AndroidAppHelper.currentApplication().packageManager
                         .getPackagesForUid(uid) ?: return
-                val valid = packageName.any {
+                val valid = packageNames.any {
                     it == BuildConfig.APPLICATION_ID || it == "android"
                 }
-                if (valid) {
-                    Log.d("Invalid calling package: $packageName, skipping hook")
+                if (!valid) {
+                    val string = packageNames.toString()
+                    Log.d("Invalid calling package: $string, skipping hook")
                     return
                 }
 
