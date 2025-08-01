@@ -18,6 +18,7 @@ import top.ltfan.notdeveloper.xposed.Log
 import top.ltfan.notdeveloper.xposed.notifySettingChange
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
+    var showNavBar by mutableStateOf(true)
     val backStack = mutableStateListOf<Page>(Overview)
     val currentPage inline get() = backStack.last()
     val navBarEntry inline get() = backStack.last { it is Main }
