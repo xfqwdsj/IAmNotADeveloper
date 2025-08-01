@@ -6,31 +6,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.ui.NavDisplay
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
+import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.notDevService
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     private val viewModel: AppViewModel by viewModels()
@@ -52,51 +51,56 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             IAmNotADeveloperTheme {
-                Column {
-                    Scaffold(
-                        topBar = {
-                            var lastLabel by remember { mutableStateOf(viewModel.currentPage.appBarLabel) }
+                val insets = AppWindowInsets
+                val navBarHeightFactor by animateFloatAsState(if (viewModel.showNavBar) 1f else 0f)
+                SubcomposeLayout { constraints ->
+                    val insetsBottom = insets.getBottom(this)
 
-                            LaunchedEffect(viewModel.currentPage.appBarLabel) {
-                                if (viewModel.currentPage.appBarLabel != null) {
-                                    lastLabel = viewModel.currentPage.appBarLabel
-                                }
-                            }
-
-                            AnimatedVisibility(
-                                visible = viewModel.currentPage.appBarLabel != null,
-                                enter = expandVertically(),
-                                exit = shrinkVertically(),
-                            ) {
-                                TopAppBar(
-                                    title = { Text(stringResource(lastLabel!!)) }
+                    val navBar = subcompose("navBar") {
+                        NavigationBar(
+                            windowInsets = insets.only { horizontal + bottom }
+                        ) {
+                            Main.pages.forEach { page ->
+                                NavigationBarItem(
+                                    selected = viewModel.navBarEntry == page,
+                                    onClick = {
+                                        viewModel.navigateMain(page)
+                                    },
+                                    icon = {
+                                        Icon(page.navigationIcon, contentDescription = null)
+                                    },
+                                    label = {
+                                        Text(stringResource(page.navigationLabel))
+                                    }
                                 )
                             }
-                        },
-                        bottomBar = {
-                            NavigationBar {
-                                Main.pages.forEach { page ->
-                                    NavigationBarItem(
-                                        selected = viewModel.navBarEntry == page,
-                                        onClick = {
-                                            viewModel.navigateMain(page)
-                                        },
-                                        icon = {
-                                            Icon(page.navigationIcon, contentDescription = null)
-                                        },
-                                        label = {
-                                            Text(stringResource(page.navigationLabel))
-                                        }
-                                    )
-                                }
-                            }
-                        },
-                    ) { contentPadding ->
+                        }
+                    }
+
+                    val navBarPlaceable = if (navBarHeightFactor != 0f) {
+                        navBar.first().measure(constraints)
+                    } else {
+                        null
+                    }
+
+                    val navBarHeight =
+                        navBarPlaceable?.height?.times(navBarHeightFactor)?.roundToInt()
+                    val navBarY = navBarHeight?.let { constraints.maxHeight - it }
+
+                    val paddingBottom = navBarHeight?.let { max(insetsBottom, it) } ?: insetsBottom
+                    val contentPadding = PaddingValues(bottom = paddingBottom.toDp())
+
+                    val contentPlaceable = subcompose("content") {
                         NavDisplay(
                             backStack = viewModel.backStack,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.consumeWindowInsets(insets.only { bottom }),
                             entryProvider = { it.navEntry(viewModel, contentPadding) },
                         )
+                    }.first().measure(constraints)
+
+                    layout(constraints.maxWidth, constraints.maxHeight) {
+                        contentPlaceable.place(0, 0)
+                        navBarPlaceable?.place(0, navBarY!!)
                     }
                 }
             }

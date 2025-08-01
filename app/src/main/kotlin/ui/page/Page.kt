@@ -10,8 +10,6 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Serializable
 sealed class Page {
-    open val appBarLabel: Int? = null
-
     @Composable
     context(contentPadding: PaddingValues)
     abstract fun AppViewModel.Content()
@@ -24,7 +22,6 @@ sealed class Page {
 }
 
 sealed class Main : Page() {
-    override val appBarLabel = R.string.app_name
     abstract val navigationLabel: Int
     abstract val navigationIcon: ImageVector
 
