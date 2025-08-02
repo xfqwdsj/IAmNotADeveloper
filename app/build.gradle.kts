@@ -2,13 +2,16 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    id("kotlin-parcelize")
 }
 
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
+        freeCompilerArgs.add("-Xcontext-parameters")
     }
 }
 
@@ -60,6 +63,7 @@ android {
     }
 
     buildFeatures {
+        aidl = true
         compose = true
     }
 
@@ -74,11 +78,10 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
-    implementation(libs.activity.compose)
-
-    val compose = platform(libs.compose)
-    implementation(compose)
-
+    implementation(libs.activity)
+    implementation(libs.navigation.runtime)
+    implementation(libs.navigation.ui)
+    implementation(platform(libs.compose))
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui)
@@ -86,5 +89,6 @@ dependencies {
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
     implementation(libs.preference)
+    implementation(libs.dslUtilities)
     compileOnly(libs.xposed.api)
 }

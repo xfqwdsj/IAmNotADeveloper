@@ -5,50 +5,34 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.viewModels
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.detection.DetectionCategory
-import top.ltfan.notdeveloper.detection.DetectionMethod
-import top.ltfan.notdeveloper.ui.composable.CategoryCard
-import top.ltfan.notdeveloper.ui.composable.StatusCard
+import androidx.navigation3.ui.NavDisplay
+import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
+import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.only
+import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
-import top.ltfan.notdeveloper.xposed.Log
+import top.ltfan.notdeveloper.xposed.notDevService
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
-    private var isPreferencesReady by mutableStateOf(false)
-    private val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
+    private val viewModel: AppViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,54 +51,56 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             IAmNotADeveloperTheme {
-                val scrollBehavior =
-                    TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+                val insets = AppWindowInsets
+                val navBarHeightFactor by animateFloatAsState(if (viewModel.showNavBar) 1f else 0f)
+                SubcomposeLayout { constraints ->
+                    val insetsBottom = insets.getBottom(this)
 
-                Scaffold(
-                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                    topBar = {
-                        LargeTopAppBar(
-                            title = {
-                                Text(stringResource(R.string.app_name))
-                            },
-                            windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
-                            scrollBehavior = scrollBehavior
+                    val navBar = subcompose("navBar") {
+                        NavigationBar(
+                            windowInsets = insets.only { horizontal + bottom }
+                        ) {
+                            Main.pages.forEach { page ->
+                                NavigationBarItem(
+                                    selected = viewModel.navBarEntry == page,
+                                    onClick = {
+                                        viewModel.navigateMain(page)
+                                    },
+                                    icon = {
+                                        Icon(page.navigationIcon, contentDescription = null)
+                                    },
+                                    label = {
+                                        Text(stringResource(page.navigationLabel))
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    val navBarPlaceable = if (navBarHeightFactor != 0f) {
+                        navBar.first().measure(constraints)
+                    } else {
+                        null
+                    }
+
+                    val navBarHeight =
+                        navBarPlaceable?.height?.times(navBarHeightFactor)?.roundToInt()
+                    val navBarY = navBarHeight?.let { constraints.maxHeight - it }
+
+                    val paddingBottom = navBarHeight?.let { max(insetsBottom, it) } ?: insetsBottom
+                    val contentPadding = PaddingValues(bottom = paddingBottom.toDp())
+
+                    val contentPlaceable = subcompose("content") {
+                        NavDisplay(
+                            backStack = viewModel.backStack,
+                            modifier = Modifier.consumeWindowInsets(insets.only { bottom }),
+                            entryProvider = { it.navEntry(viewModel, contentPadding) },
                         )
-                    },
-                ) { padding ->
-                    val layoutDirection = LocalLayoutDirection.current
-                    val insets = WindowInsets.displayCutout
-                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-                        .asPaddingValues()
-                    val contentPadding = PaddingValues(
-                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(layoutDirection),
-                        top = padding.calculateTopPadding() + insets.calculateTopPadding() + 16.dp,
-                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(layoutDirection),
-                        bottom = padding.calculateBottomPadding() + insets.calculateBottomPadding() + 16.dp,
-                    )
-                    LazyColumn(
-                        modifier = Modifier.consumeWindowInsets(contentPadding)
-                            .fillMaxSize(),
-                        contentPadding = contentPadding,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        item {
-                            StatusCard(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                isPreferencesReady = isPreferencesReady
-                            )
-                        }
+                    }.first().measure(constraints)
 
-                        items(DetectionCategory.values) { category ->
-                            CategoryCard(
-                                category = category,
-                                testResults = testResults,
-                                afterChange = ::check,
-                                isPreferencesReady = isPreferencesReady,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
-                        }
+                    layout(constraints.maxWidth, constraints.maxHeight) {
+                        contentPlaceable.place(0, 0)
+                        navBarPlaceable?.place(0, navBarY!!)
                     }
                 }
             }
@@ -123,15 +109,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        isPreferencesReady = statusIsPreferencesReady
-        check()
-    }
-
-    private fun check() {
-        DetectionCategory.allMethods.forEach { method ->
-            val result = method.test(this)
-            testResults[method] = result
-            Log.v("${method.preferenceKey} test result: $result")
+        viewModel.isPreferencesReady = statusIsPreferencesReady
+        if (viewModel.service == null) {
+            viewModel.service = notDevService
         }
+        viewModel.test()
     }
 }
