@@ -1,28 +1,27 @@
 package top.ltfan.notdeveloper.detection
 
 import android.content.Context
-import android.os.Parcelable
 import androidx.annotation.StringRes
 
 sealed class DetectionMethod(
-    val preferenceKey: String,
-    @param:StringRes val nameId: Int
+    val name: String,
+    @param:StringRes val labelResId: Int,
 ) {
     abstract fun test(context: Context): Boolean
 
     abstract class SettingsMethod(
-        preferenceKey: String,
-        nameId: Int,
+        name: String,
+        @StringRes labelResId: Int,
         val settingsClass: Class<*>,
         val settingKey: String,
-    ) : DetectionMethod(preferenceKey, nameId)
+    ) : DetectionMethod(name, labelResId)
 
     abstract class SystemPropertiesMethod(
         preferenceKey: String,
-        nameId: Int,
+        @StringRes labelResId: Int,
         val propertyKey: String,
         val overrideValue: String,
-    ) : DetectionMethod(preferenceKey, nameId) {
+    ) : DetectionMethod(preferenceKey, labelResId) {
         open fun getOverrideValue(methodName: String): Any? = when (methodName) {
             "get", "getprop" -> overrideValue
             "getBoolean" -> overrideValue.toBoolean()
