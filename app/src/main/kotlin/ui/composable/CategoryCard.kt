@@ -1,5 +1,6 @@
 package top.ltfan.notdeveloper.ui.composable
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import top.ltfan.notdeveloper.ModuleService
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 
@@ -33,7 +33,7 @@ fun CategoryCard(
     ) {
         Column {
             Text(
-                text = stringResource(category.nameId),
+                text = stringResource(category.labelResId),
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -43,9 +43,11 @@ fun CategoryCard(
             Spacer(Modifier.height(12.dp))
 
             category.methods.forEach { method ->
+                @Suppress("DEPRECATION")
+                @SuppressLint("WorldReadableFiles")
                 var pref by rememberBooleanSharedPreference(
-                    preferences = ModuleService.preferences,
-                    key = method.preferenceKey,
+                    mode = android.content.Context.MODE_WORLD_READABLE,
+                    key = method.name,
                     defaultValue = true,
                     afterSet = { afterChange(method) }
                 )
@@ -53,7 +55,7 @@ fun CategoryCard(
                 val testResult = testResults[method] ?: false
 
                 PreferenceItem(
-                    nameId = method.nameId,
+                    nameId = method.labelResId,
                     testResult = testResult,
                     checked = pref,
                     onClick = { pref = !pref },
