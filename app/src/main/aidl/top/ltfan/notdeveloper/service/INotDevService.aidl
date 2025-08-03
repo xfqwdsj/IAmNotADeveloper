@@ -1,6 +1,7 @@
 package top.ltfan.notdeveloper.service;
 
 import top.ltfan.notdeveloper.service.INotificationCallback;
+import top.ltfan.notdeveloper.service.data.IPackageSettingsDao;
 
 interface INotDevService {
     void notifySettingChange(
@@ -8,4 +9,6 @@ interface INotDevService {
         int type,
         INotificationCallback callback
     );
+
+    Map<String, IPackageSettingsDao> getConnections();
 }
