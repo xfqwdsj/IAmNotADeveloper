@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
     id("kotlin-parcelize")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -89,18 +91,14 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
     implementation(libs.preference)
     implementation(libs.dslUtilities)
     compileOnly(libs.xposed.api)
 }
 
-spotless {
-    kotlin {
-        target("src/*/kotlin/**/*.kt")
-        ktfmt().kotlinlangStyle()
-    }
-
-    kotlinGradle {
-        ktfmt().kotlinlangStyle()
-    }
+room {
+    schemaDirectory("$projectDir/schemas")
 }
