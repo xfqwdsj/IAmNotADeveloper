@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,7 +33,7 @@ fun CategoryCard(
     ) {
         Column {
             Text(
-                text = stringResource(category.nameId),
+                text = stringResource(category.labelResId),
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -48,7 +47,7 @@ fun CategoryCard(
                 @SuppressLint("WorldReadableFiles")
                 var pref by rememberBooleanSharedPreference(
                     mode = android.content.Context.MODE_WORLD_READABLE,
-                    key = method.preferenceKey,
+                    key = method.name,
                     defaultValue = true,
                     afterSet = { afterChange(method) }
                 )
@@ -56,7 +55,7 @@ fun CategoryCard(
                 val testResult = testResults[method] ?: false
 
                 PreferenceItem(
-                    nameId = method.nameId,
+                    nameId = method.labelResId,
                     testResult = testResult,
                     checked = pref,
                     onClick = { pref = !pref },
