@@ -1,11 +1,16 @@
 package top.ltfan.notdeveloper.xposed
 
+import android.app.AndroidAppHelper
 import android.content.Context
 import android.provider.Settings
+import androidx.room.Room
 import top.ltfan.dslutilities.LockableValueDsl
+import top.ltfan.notdeveloper.data.PackageSettingsDatabase
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.service.INotDevService
 import top.ltfan.notdeveloper.service.INotificationCallback
+import top.ltfan.notdeveloper.service.data.IPackageSettingsDao
+import java.util.concurrent.ConcurrentHashMap
 
 const val CallMethodGet = "GET"
 const val CallMethodNotify = "NOTIFY"
@@ -32,9 +37,30 @@ class NotDevServiceBuilder : LockableValueDsl() {
     fun build(): NotDevService {
         lock()
         return object : NotDevService() {
+            private val application by lazy { AndroidAppHelper.currentApplication() }
+
+            @get:JvmName("getConnectionsKotlin")
+            private val connections = ConcurrentHashMap<String, IPackageSettingsDao>()
+
+            @get:JvmName("getDaoKotlin")
+            private val dao by lazy {
+                Log.d("Application: $application, package: ${application.packageName}")
+                PackageSettingsDaoService(
+                    Room.databaseBuilder(
+                        application,
+                        PackageSettingsDatabase::class.java,
+                        PackageSettingsDatabase.DATABASE_NAME
+                    ).build().dao().also {
+                        Log.d("Database created: $it")
+                    }
+                )
+            }
+
             override fun notify(name: String, type: Int) {
                 notify.invoke(name, type)
             }
+
+            override fun getDao() = dao
         }
     }
 

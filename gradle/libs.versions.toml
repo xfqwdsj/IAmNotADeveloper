@@ -1,8 +1,9 @@
 [versions]
 app-versionName = "1.6.2"
 app-versionCode = "12"
-kotlin = "2.2.10"
-agp = "9.0.0-alpha01"
+kotlin = "2.2.0"
+ksp = "2.2.0-2.0.2"
+agp = "8.13.0-alpha04"
 compileSdk = "36"
 targetSdk = "36"
 minSdk = "27"
@@ -10,6 +11,7 @@ lifecycle = "2.9.2"
 activity = "1.10.1"
 navigation = "1.0.0-alpha06"
 compose = "2025.07.00"
+room = "2.7.2"
 preference = "1.2.1"
 dsl-utilities = "1.0.0"
 xposed-api = "82"
@@ -28,6 +30,9 @@ compose-ui = { module = "androidx.compose.ui:ui" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 preference = { module = "androidx.preference:preference-ktx", version.ref = "preference" }
 dslUtilities = { module = "top.ltfan.dslutilities:dsl-utilities", version.ref = "dsl-utilities" }
 xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed-api" }
@@ -35,6 +40,7 @@ xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed-api"
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-kotlinParcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+room = { id = "androidx.room", version.ref = "room" }

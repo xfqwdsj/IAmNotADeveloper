@@ -20,12 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.ui.NavDisplay
+import androidx.room.Room
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
+import top.ltfan.notdeveloper.xposed.Log
 import top.ltfan.notdeveloper.xposed.notDevService
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 import kotlin.math.max
@@ -114,5 +116,16 @@ class MainActivity : ComponentActivity() {
             viewModel.service = notDevService
         }
         viewModel.test()
+
+        val dao = viewModel.service?.dao
+        try {
+            Log.Android.d("Initializing database")
+            Log.Android.d("Database DAO: $dao")
+            dao?.insertPackageInfo("a", 1, 1)
+            val res = dao?.getPackageInfoByName("a")
+            Log.Android.d("Database initialized, test result: $res")
+        } catch (e: Throwable) {
+            Log.Android.e("Database initialization failed", e)
+        }
     }
 }
