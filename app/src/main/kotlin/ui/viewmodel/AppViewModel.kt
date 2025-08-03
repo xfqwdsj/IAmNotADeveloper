@@ -49,7 +49,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         DetectionCategory.allMethods.forEach { method ->
             val result = method.test(application)
             testResults[method] = result
-            Log.v("${method.preferenceKey} test result: $result")
+            Log.v("${method.name} test result: $result")
         }
     }
 
@@ -67,7 +67,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                         test()
                     }
                 } catch (e: Throwable) {
-                    Log.Android.e("Failed to notify setting change for ${method.preferenceKey}", e)
+                    Log.Android.e("Failed to notify setting change for ${method.name}", e)
                     test()
                 }
             }
