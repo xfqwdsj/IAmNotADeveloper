@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.os.Binder
 import android.os.Bundle
-import android.os.IBinder
 import android.os.Process
 import android.os.UserHandle
 import androidx.annotation.Keep
@@ -58,7 +57,7 @@ private fun DetectionMethod.SettingsMethod.doHook(
 ) {
     if (lpparam.packageName != "com.android.providers.settings") return
 
-    Log.d("Processing SettingsMethod: ${this.settingKey}")
+    Log.d("Processing SettingsMethod: $settingKey")
 
     val settingsProviderClass = XposedHelpers.findClass(
         "com.android.providers.settings.SettingsProvider", lpparam.classLoader
@@ -69,38 +68,38 @@ private fun DetectionMethod.SettingsMethod.doHook(
         object : XC_MethodHook() {
             override fun afterHookedMethod(param: MethodHookParam) {
                 val name = param.args[1] as String
-                if (name == settingKey) {
-                    val uid = Binder.getCallingUid()
-                    val packageName =
-                        AndroidAppHelper.currentApplication().packageManager.getPackagesForUid(uid)
-                            ?.firstOrNull() ?: return
+                if (name != settingKey) return
 
-                    // TODO: Package checks
-                    if (packageName.startsWith("android") || packageName.startsWith("com.android")) {
-                        Log.d("Calling package is a system package, skipping hook $name")
-                        return
-                    }
+                val uid = Binder.getCallingUid()
+                val packageName =
+                    AndroidAppHelper.currentApplication().packageManager.getPackagesForUid(uid)
+                        ?.firstOrNull() ?: return
 
-                    prefs.reload()
-
-                    Log.d("Processing ${param.method.name}($name) from $packageName")
-
-                    // TODO: Package-specific checks
-                    if (!prefs.getBoolean(preferenceKey, true)) {
-                        Log.d("Skipping ${param.method.name}($name) as preference is disabled")
-                        return
-                    }
-
-                    val result = param.result as Bundle
-                    result.putString("value", "0")
-
-                    Log.d("Processed ${param.method.name}($name) from $packageName")
+                // TODO: Package checks
+                if (packageName.startsWith("android") || packageName.startsWith("com.android")) {
+                    Log.d("Calling package is a system package, skipping hook $name")
+                    return
                 }
+
+                prefs.reload()
+
+                Log.d("Processing ${param.method.name}($name) from $packageName")
+
+                // TODO: Package-specific checks
+                if (!prefs.getBoolean(this@doHook.name, true)) {
+                    Log.d("Skipping ${param.method.name}($name) as preference is disabled")
+                    return
+                }
+
+                val result = param.result as Bundle
+                result.putString("value", "0")
+
+                Log.d("Processed ${param.method.name}($name) from $packageName")
             }
         },
     )
 
-    Log.d("Processed SettingsMethod: ${this.settingKey}")
+    Log.d("Processed SettingsMethod: $settingKey")
 }
 
 private fun DetectionMethod.SystemPropertiesMethod.doHook(
@@ -110,7 +109,7 @@ private fun DetectionMethod.SystemPropertiesMethod.doHook(
     val packageName = lpparam.packageName
     if (packageName.startsWith("android") || packageName.startsWith("com.android")) return
 
-    Log.d("Processing SystemPropertiesMethod: ${this.propertyKey}")
+    Log.d("Processing SystemPropertiesMethod: $propertyKey")
 
     val systemPropertiesClass = XposedHelpers.findClass(
         "android.os.SystemProperties", lpparam.classLoader
@@ -125,26 +124,25 @@ private fun DetectionMethod.SystemPropertiesMethod.doHook(
             object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     val name = param.args[0] as String
+                    if (name != propertyKey) return
 
                     prefs.reload()
 
                     Log.d("Processing ${param.method.name}($name) from $packageName")
 
-                    if (!prefs.getBoolean(preferenceKey, true)) {
+                    if (!prefs.getBoolean(this@doHook.name, true)) {
                         Log.d("Skipping ${param.method.name}($name) as preference is disabled")
                         return
                     }
 
-                    if (name == propertyKey) {
-                        param.result = getOverrideValue(methodName)
-                        Log.d("Processed ${param.method.name}($name) from $packageName, returning override value: ${param.result}")
-                    }
+                    param.result = getOverrideValue(methodName)
+                    Log.d("Processed ${param.method.name}($name) from $packageName, returning override value: ${param.result}")
                 }
             },
         )
     }
 
-    Log.d("Processed SystemPropertiesMethod: ${this.propertyKey}")
+    Log.d("Processed SystemPropertiesMethod: $propertyKey")
 }
 
 @OptIn(ExperimentalTime::class)
@@ -271,11 +269,11 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                     }
 
                     val caller = param.args[0] // IApplicationThread
-                    val token = param.args[2] as IBinder
-                    val callingUid = param.args[3] as Int
-                    val callingTag = param.args[4] as String
-                    val stable = param.args[5] as Boolean
-                    val userId = param.args[6] as Int
+                    val token = param.args[2] // IBinder
+                    val callingUid = param.args[3] // Int
+                    val callingTag = param.args[5] // String
+                    val stable = param.args[6] // Boolean
+                    val userId = param.args[7] // Int
 
                     Log.d("Intercepted request for NotDevServiceProvider")
 
@@ -310,15 +308,17 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                         Log.d("Failed to call incProviderCountLocked (1): ${e.message}", e)
                     }
 
-                    try {
-                        // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ContentProviderHelper.java;drc=1109a0c5446c311c2fb2c97b5ee6253cd624e0e3;bpv=1;bpt=0;l=163
-                        connection = XposedHelpers.callMethod(
-                            helper, "incProviderCountLocked",
-                            processRecord, record, token, callingUid, callingPackage,
-                            callingTag, stable, true, startTimeMs, processList,
-                        )
-                    } catch (e: Throwable) {
-                        Log.d("Failed to call incProviderCountLocked (2): ${e.message}", e)
+                    if (connection == null) {
+                        try {
+                            // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ContentProviderHelper.java;drc=1109a0c5446c311c2fb2c97b5ee6253cd624e0e3;bpv=1;bpt=0;l=163
+                            connection = XposedHelpers.callMethod(
+                                helper, "incProviderCountLocked",
+                                processRecord, record, token, callingUid, callingPackage,
+                                callingTag, stable, true, startTimeMs, processList,
+                            )
+                        } catch (e: Throwable) {
+                            Log.d("Failed to call incProviderCountLocked (2): ${e.message}", e)
+                        }
                     }
 
                     if (connection == null) {
@@ -357,29 +357,29 @@ private fun patchSystem(lpparam: LoadPackageParam) {
 
                     val argsSize = param.args.size
                     val caller = param.args[0] // IApplicationThread
-                    val token = param.args[2] as IBinder
+                    val token = param.args[2] // IBinder
                     var callingUid: Int
-                    var callingPackage: String? = null
-                    var callingTag: String? = null
-                    var stable: Boolean
+                    var callingPackage: Any? = null // String
+                    var callingTag: Any? = null // String
+                    var stable: Any? // Boolean
 
                     when (argsSize) {
                         8 -> {
                             callingUid = param.args[3] as Int
-                            callingPackage = param.args[4] as String
-                            callingTag = param.args[5] as String
-                            stable = param.args[6] as Boolean
+                            callingPackage = param.args[4]
+                            callingTag = param.args[5]
+                            stable = param.args[6]
                         }
 
                         7 -> {
                             callingUid = param.args[3] as Int
-                            callingTag = param.args[4] as String
-                            stable = param.args[5] as Boolean
+                            callingTag = param.args[4]
+                            stable = param.args[5]
                         }
 
                         6 -> {
                             callingUid = param.args[3] as Int
-                            stable = param.args[4] as Boolean
+                            stable = param.args[4]
                         }
 
                         else -> return
@@ -419,10 +419,10 @@ private fun patchSystem(lpparam: LoadPackageParam) {
 
                     val connection = if (callingTag != null) {
                         XposedHelpers.callMethod(
-                        ams, "incProviderCountLocked",
-                        processRecord, record, token, callingUid, callingPackage,
-                        callingTag, stable, true, startTimeMs, processList,
-                    )
+                            ams, "incProviderCountLocked",
+                            processRecord, record, token, callingUid, callingPackage,
+                            callingTag, stable, true, startTimeMs, processList,
+                        )
                     } else {
                         XposedHelpers.callMethod(
                             ams, "incProviderCountLocked",
