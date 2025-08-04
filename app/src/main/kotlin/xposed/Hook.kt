@@ -76,7 +76,10 @@ private fun DetectionMethod.SettingsMethod.doHook(
                 val uid = Binder.getCallingUid()
                 val packageName =
                     AndroidAppHelper.currentApplication().packageManager.getPackagesForUid(uid)
-                        ?.firstOrNull() ?: return
+                        ?.firstOrNull() ?: run {
+                        Log.debug.e("Calling package not found")
+                        return
+                    }
 
                 // TODO: Package checks
                 if (packageName.startsWith("android") || packageName.startsWith("com.android")) {
@@ -156,20 +159,20 @@ private fun patchSystem(lpparam: LoadPackageParam) {
 
     val service = NotDevService {
         notify { name, type ->
-            Log.d("Received notification request for $name")
-
             val application = AndroidAppHelper.currentApplication()
             val uid = Binder.getCallingUid()
             val packageName =
                 application.packageManager.getPackagesForUid(uid)?.firstOrNull() ?: run {
-                    Log.d("Calling package not found, skipping notification for $name")
+                    Log.debug.e("Calling package not found")
                     return@notify
                 }
 
             if (packageName != BuildConfig.APPLICATION_ID) {
-                Log.d("Invalid package $packageName, skipping notification for $name")
+                Log.debug.e("Invalid package $packageName, skipping notification for $name")
                 return@notify
             }
+
+            Log.d("Received notification request for $name")
 
             val userId = XposedHelpers.callStaticMethod(
                 UserHandle::class.java, "getUserId", uid
@@ -225,15 +228,6 @@ private fun patchSystem(lpparam: LoadPackageParam) {
     )
 
     XposedBridge.hookAllMethods(
-        activityManagerServiceClass, "getContentProviderExternal",
-        object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                Log.d("getContentProviderExternal(${param.args.joinToString()}) -> ${param.result}")
-            }
-        },
-    )
-
-    XposedBridge.hookAllMethods(
         activityManagerServiceClass, "getContentProvider",
         object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
@@ -242,7 +236,7 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                     4 -> 0
                     5 -> 1
                     else -> {
-                        Log.e("Unsupported Android version, args size: ${args.size}")
+                        Log.debug.e("Unsupported Android version, args size: ${args.size}")
                         return
                     }
                 }
@@ -253,7 +247,7 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                     4 -> {
                         AndroidAppHelper.currentApplication().packageManager
                             .getPackagesForUid(callingUid)?.firstOrNull() ?: run {
-                            Log.e("Calling package not found")
+                            Log.debug.e("Calling package not found")
                             return
                         }
                     }
@@ -262,9 +256,7 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                     else -> return
                 }
                 if (callingPackage != BuildConfig.APPLICATION_ID) {
-                    if (BuildConfig.DEBUG) {
-                        Log.d("Invalid package $callingPackage requesting NotDevServiceProvider")
-                    }
+                    Log.debug.e("Invalid package $callingPackage requesting NotDevServiceProvider")
                     return
                 }
 
@@ -278,7 +270,7 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                 val helper = try {
                     XposedHelpers.getObjectField(ams, "mCpHelper")
                 } catch (e: NoSuchFieldError) {
-                    Log.w("mCpHelper field not found, using ActivityManagerService directly", e)
+                    Log.d("mCpHelper field not found, using ActivityManagerService directly", e)
                     ams
                 }
 
@@ -355,7 +347,7 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                         null, stable, true, startTimeMs, processList, userId,
                     )
                 } catch (e: NoSuchMethodError) {
-                    Log.d("Failed to get provider connection (1)", e)
+                    Log.w("Failed to get provider connection (1)", e)
                 }
 
                 if (connection == null) {
@@ -367,7 +359,7 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                             null, stable, true, startTimeMs, processList,
                         )
                     } catch (e: NoSuchMethodError) {
-                        Log.d("Failed to get provider connection (2)", e)
+                        Log.w("Failed to get provider connection (2)", e)
                     }
                 }
 
@@ -379,17 +371,16 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                             processRecord, record, null, stable,
                         )
                     } catch (e: NoSuchMethodError) {
-                        Log.d("Failed to get provider connection (3)", e)
+                        Log.w("Failed to get provider connection (3)", e)
                     }
                 }
 
                 if (connection == null) {
-                    Log.e("Failed to get connection for NotDevServiceProvider, returning null")
-                    param.result = null
+                    Log.e("Failed to get connection for NotDevServiceProvider")
                     return
-                } else {
-                    Log.d("Got connection for NotDevServiceProvider")
                 }
+
+                Log.d("Got connection for NotDevServiceProvider")
 
                 param.result = XposedHelpers.callMethod(
                     record, "newHolder",
@@ -423,13 +414,16 @@ private fun patchSettingsProvider(lpparam: LoadPackageParam) {
                 val uid = Binder.getCallingUid()
                 val packageNames =
                     AndroidAppHelper.currentApplication().packageManager
-                        .getPackagesForUid(uid) ?: return
+                        .getPackagesForUid(uid) ?: run {
+                        Log.debug.e("Calling package not found")
+                        return
+                    }
                 val valid = packageNames.any {
                     it == BuildConfig.APPLICATION_ID || it == "android"
                 }
                 if (!valid) {
                     val string = packageNames.toString()
-                    Log.d("Invalid calling package: $string, skipping hook")
+                    Log.debug.d("Invalid calling package: $string")
                     return
                 }
 
