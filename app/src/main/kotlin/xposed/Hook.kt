@@ -2,6 +2,7 @@ package top.ltfan.notdeveloper.xposed
 
 import android.app.AndroidAppHelper
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.os.Binder
 import android.os.Bundle
 import android.os.UserHandle
@@ -9,7 +10,6 @@ import androidx.annotation.Keep
 import androidx.core.net.toUri
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -83,10 +83,10 @@ private fun DetectionMethod.SettingsMethod.doHook() {
                 val name = param.args[1] as String
                 if (name != settingKey) return
 
+                val packageManager = AndroidAppHelper.currentApplication().packageManager
                 val uid = Binder.getCallingUid()
                 val packageName =
-                    AndroidAppHelper.currentApplication().packageManager.getPackagesForUid(uid)
-                        ?.firstOrNull() ?: run {
+                    packageManager.getPackagesForUid(uid)?.firstOrNull() ?: run {
                         Log.debug.e("Calling package not found")
                         return
                     }
@@ -94,20 +94,30 @@ private fun DetectionMethod.SettingsMethod.doHook() {
                     UserHandle::class.java, "getUserId", uid
                 ) as Int
 
-                // TODO: Package checks
-                if (packageName.startsWith("android") || packageName.startsWith("com.android")) {
-                    Log.d("Calling package is a system package, skipping hook $name")
+                val appInfo = XposedHelpers.callMethod(
+                    packageManager, "getApplicationInfoAsUser",
+                    packageName, 0, userId
+                ) as ApplicationInfo
+
+                val methods = DetectionMethod.SettingsMethod.fromSettingKey(name)
+
+                val isSet = dao.isDetectionSet(packageName, userId, methods).all { it }
+                if (!isSet) {
+                    Log.d("Skipping ${param.method.name}($name) as injection preferences is not set")
                     return
+                }
+
+                val isSystem =
+                    appInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+                if (isSystem) {
+                    Log.i("Calling package $packageName of ${param.method.name}($name) is a system package")
                 }
 
                 Log.d("Processing ${param.method.name}($name) from $packageName")
 
-                val enabled = DetectionMethod.SettingsMethod.fromSettingKey(name)
-                    .any { dao.isDetectionEnabled(packageName, userId, it) }
-
-                // TODO: Package-specific checks
+                val enabled = dao.isDetectionEnabled(packageName, userId, methods).all { it }
                 if (!enabled) {
-                    Log.d("Skipping ${param.method.name}($name) as preference is disabled")
+                    Log.d("Skipping ${param.method.name}($name) as injection is disabled")
                     return
                 }
 
@@ -122,7 +132,8 @@ private fun DetectionMethod.SettingsMethod.doHook() {
     Log.d("Processed SettingsMethod: $settingKey")
 }
 
-context(lpparam: XC_LoadPackage.LoadPackageParam, prefs: XSharedPreferences) private fun DetectionMethod.SystemPropertiesMethod.doHook() {
+context(lpparam: XC_LoadPackage.LoadPackageParam, dao: PackageSettingsDaoClientInterface)
+private fun DetectionMethod.SystemPropertiesMethod.doHook() {
     val packageName = lpparam.packageName
     if (packageName.startsWith("android") || packageName.startsWith("com.android")) return
 
@@ -143,12 +154,17 @@ context(lpparam: XC_LoadPackage.LoadPackageParam, prefs: XSharedPreferences) pri
                     val name = param.args[0] as String
                     if (name != propertyKey) return
 
-                    prefs.reload()
+                    val userId = XposedHelpers.callStaticMethod(
+                        UserHandle::class.java, "myUserId"
+                    ) as Int
+
+                    val methods = DetectionMethod.SystemPropertiesMethod.fromPropertyKey(name)
 
                     Log.d("Processing ${param.method.name}($name) from $packageName")
 
-                    if (!prefs.getBoolean(this@doHook.name, true)) {
-                        Log.d("Skipping ${param.method.name}($name) as preference is disabled")
+                    val enabled = dao.isDetectionEnabled(packageName, userId, methods).all { it }
+                    if (!enabled) {
+                        Log.d("Skipping ${param.method.name}($name) as injection is disabled")
                         return
                     }
 
