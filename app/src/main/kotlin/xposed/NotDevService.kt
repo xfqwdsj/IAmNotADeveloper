@@ -1,19 +1,15 @@
 package top.ltfan.notdeveloper.xposed
 
 import android.content.Context
-import android.os.UserHandle
 import android.provider.Settings
-import androidx.room.Room
 import top.ltfan.dslutilities.LockableValueDsl
-import top.ltfan.notdeveloper.data.PackageSettingsDao
-import top.ltfan.notdeveloper.data.PackageSettingsDatabase
 import top.ltfan.notdeveloper.detection.DetectionMethod
+import top.ltfan.notdeveloper.provider.getInterfaceOrNull
 import top.ltfan.notdeveloper.service.INotDevService
 import top.ltfan.notdeveloper.service.INotificationCallback
 import top.ltfan.notdeveloper.service.data.IPackageSettingsDao
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.reflect.full.staticFunctions
 
 const val CallMethodGet = "GET"
 const val CallMethodNotify = "NOTIFY"
@@ -76,37 +72,15 @@ inline fun NotDevService(block: NotDevServiceBuilder.() -> Unit) =
 
 val Context.notDevService
     get() = runCatching {
-        val binder = contentResolver.call(
-            NotDevServiceProvider.uri, CallMethodGet, null, null
-        )?.getBinder(BundleExtraService) ?: error("Failed to get NotDevService binder")
-        NotDevServiceClient(this, INotDevService.Stub.asInterface(binder))
+        contentResolver.getInterfaceOrNull(NotDevServiceProvider) {
+            NotDevClient(INotDevService.Stub.asInterface(it))
+        } ?: error("Failed to get NotDevService binder")
     }.getOrElse {
         Log.Android.e("Failed to get NotDevService: ${it.message}", it)
         null
     }
 
-class NotDevServiceClient(
-    context: Context,
-    service: INotDevService,
-) : INotDevService by service {
-    val dao: PackageSettingsDao
-
-    init {
-        val application = context.applicationContext
-        val myUserId = UserHandle::class.staticFunctions
-            .firstOrNull { it.name == "myUserId" } ?: error("Failed to get myUserId method")
-        val userId = (myUserId.call() as Int).toString()
-        val database = Room.databaseBuilder(
-            application,
-            PackageSettingsDatabase::class.java,
-            PackageSettingsDatabase.DATABASE_NAME,
-        ).build()
-        val dao = database.dao()
-        val daoService = PackageSettingsDaoService(dao)
-        service.connections[userId] = daoService
-        this.dao = dao
-    }
-}
+class NotDevClient(service: INotDevService) : INotDevService by service
 
 inline fun INotDevService.notifySettingChange(
     method: DetectionMethod.SettingsMethod, crossinline callback: () -> Unit
