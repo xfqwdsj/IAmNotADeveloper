@@ -13,7 +13,7 @@ import top.ltfan.notdeveloper.service.INotificationCallback
 import top.ltfan.notdeveloper.service.data.IPackageSettingsDao
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.staticFunctions
 
 const val CallMethodGet = "GET"
 const val CallMethodNotify = "NOTIFY"
@@ -93,9 +93,9 @@ class NotDevServiceClient(
 
     init {
         val application = context.applicationContext
-        val myUserId = UserHandle::class.memberFunctions
+        val myUserId = UserHandle::class.staticFunctions
             .firstOrNull { it.name == "myUserId" } ?: error("Failed to get myUserId method")
-        val userId = (myUserId.call(application) as Int).toString()
+        val userId = (myUserId.call() as Int).toString()
         val database = Room.databaseBuilder(
             application,
             PackageSettingsDatabase::class.java,
