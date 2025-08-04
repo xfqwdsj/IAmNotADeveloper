@@ -12,14 +12,73 @@ import kotlinx.coroutines.runBlocking
 import top.ltfan.notdeveloper.data.PackageInfo
 import top.ltfan.notdeveloper.data.PackageSettingsDao
 import top.ltfan.notdeveloper.data.ParcelablePackageInfo
+import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.service.data.IBooleanListener
 import top.ltfan.notdeveloper.service.data.IPackageInfoListListener
 import top.ltfan.notdeveloper.service.data.IPackageSettingsDao
 import top.ltfan.notdeveloper.service.data.IUnlistener
 import top.ltfan.notdeveloper.util.doBroadcast
 
-class PackageSettingsDaoService(private val delegate: PackageSettingsDao) :
-    IPackageSettingsDao.Stub() {
+interface PackageSettingsDaoClientInterface : IPackageSettingsDao {
+    fun isDetectionEnabled(packageName: String, userId: Int, method: DetectionMethod) =
+        isDetectionEnabled(packageName, userId, method.name)
+
+    fun isDetectionEnabled(packageName: String, userId: Int, methods: List<DetectionMethod>) =
+        methods.any { isDetectionEnabled(packageName, userId, it) }
+
+    fun listenDetectionEnabled(
+        packageName: String, userId: Int, method: DetectionMethod, listener: IBooleanListener
+    ): IUnlistener = listenDetectionEnabled(packageName, userId, method.name, listener)
+
+    fun listenDetectionEnabled(
+        packageName: String, userId: Int, methods: List<DetectionMethod>, listener: IBooleanListener
+    ): List<IUnlistener> = methods.map { listenDetectionEnabled(packageName, userId, it, listener) }
+
+    fun toggleDetectionEnabled(
+        packageName: String, userId: Int, method: DetectionMethod
+    ) = toggleDetectionEnabled(packageName, userId, method.name)
+}
+
+open class PackageSettingsDaoClient(service: IPackageSettingsDao) :
+    PackageSettingsDaoClientInterface, IPackageSettingsDao by service {
+    companion object : PackageSettingsDaoClientInterface, IPackageSettingsDao.Stub() {
+        override fun insertPackageInfo(packageName: String, userId: Int, appId: Int) {}
+        override fun deletePackageInfo(packageName: String, userId: Int) {}
+        override fun getPackageInfoByName(packageName: String): List<ParcelablePackageInfo> =
+            emptyList()
+
+        override fun listenPackageInfoByName(
+            packageName: String, listener: IPackageInfoListListener
+        ) = stubUnlistener
+
+        override fun getPackageInfoByUser(userId: Int): List<ParcelablePackageInfo> = emptyList()
+        override fun listenPackageInfoByUser(
+            userId: Int, listener: IPackageInfoListListener
+        ) = stubUnlistener
+
+        override fun isPackageInfoExists(packageName: String, userId: Int) = false
+        override fun isDetectionEnabled(
+            packageName: String, userId: Int, methodName: String
+        ) = true
+
+        override fun listenDetectionEnabled(
+            packageName: String, userId: Int, methodName: String, listener: IBooleanListener
+        ) = stubUnlistener
+
+        override fun clearAllData() {}
+        override fun toggleDetectionEnabled(packageName: String, userId: Int, methodName: String) {}
+        override fun enableAllDetectionsForPackage(packageName: String, userId: Int) {}
+        override fun disableAllDetectionsForPackage(packageName: String, userId: Int) {}
+
+        private val stubUnlistener = object : IUnlistener.Stub() {
+            override fun invoke() {}
+        }
+    }
+}
+
+class PackageSettingsDaoService(
+    private val delegate: PackageSettingsDao,
+) : IPackageSettingsDao.Stub() {
     private val packageInfoByNameListeners =
         mutableMapOf<String, Pair<Job, RemoteCallbackList<IPackageInfoListListener>>>()
     private val packageInfoByUserListeners =
