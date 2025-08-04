@@ -20,11 +20,17 @@ import top.ltfan.notdeveloper.service.data.IUnlistener
 import top.ltfan.notdeveloper.util.doBroadcast
 
 interface PackageSettingsDaoClientInterface : IPackageSettingsDao {
+    fun isDetectionSet(packageName: String, userId: Int, method: DetectionMethod) =
+        isDetectionSet(packageName, userId, method.name)
+
+    fun isDetectionSet(packageName: String, userId: Int, methods: List<DetectionMethod>) =
+        methods.map { isDetectionSet(packageName, userId, it) }
+
     fun isDetectionEnabled(packageName: String, userId: Int, method: DetectionMethod) =
         isDetectionEnabled(packageName, userId, method.name)
 
     fun isDetectionEnabled(packageName: String, userId: Int, methods: List<DetectionMethod>) =
-        methods.any { isDetectionEnabled(packageName, userId, it) }
+        methods.map { isDetectionEnabled(packageName, userId, it) }
 
     fun listenDetectionEnabled(
         packageName: String, userId: Int, method: DetectionMethod, listener: IBooleanListener
@@ -32,7 +38,12 @@ interface PackageSettingsDaoClientInterface : IPackageSettingsDao {
 
     fun listenDetectionEnabled(
         packageName: String, userId: Int, methods: List<DetectionMethod>, listener: IBooleanListener
-    ): List<IUnlistener> = methods.map { listenDetectionEnabled(packageName, userId, it, listener) }
+    ): IUnlistener {
+        val unlisteners = methods.map { listenDetectionEnabled(packageName, userId, it, listener) }
+        return Unlistener {
+            unlisteners.forEach { it() }
+        }
+    }
 
     fun toggleDetectionEnabled(
         packageName: String, userId: Int, method: DetectionMethod
@@ -49,30 +60,30 @@ open class PackageSettingsDaoClient(service: IPackageSettingsDao) :
 
         override fun listenPackageInfoByName(
             packageName: String, listener: IPackageInfoListListener
-        ) = stubUnlistener
+        ) = Unlistener.Stub
 
         override fun getPackageInfoByUser(userId: Int): List<ParcelablePackageInfo> = emptyList()
         override fun listenPackageInfoByUser(
             userId: Int, listener: IPackageInfoListListener
-        ) = stubUnlistener
+        ) = Unlistener.Stub
 
-        override fun isPackageInfoExists(packageName: String, userId: Int) = false
+        override fun isPackageExists(packageName: String, userId: Int) = false
+        override fun isDetectionSet(
+            packageName: String, userId: Int, methodName: String
+        ) = false
+
         override fun isDetectionEnabled(
             packageName: String, userId: Int, methodName: String
         ) = true
 
         override fun listenDetectionEnabled(
             packageName: String, userId: Int, methodName: String, listener: IBooleanListener
-        ) = stubUnlistener
+        ) = Unlistener.Stub
 
         override fun clearAllData() {}
         override fun toggleDetectionEnabled(packageName: String, userId: Int, methodName: String) {}
         override fun enableAllDetectionsForPackage(packageName: String, userId: Int) {}
         override fun disableAllDetectionsForPackage(packageName: String, userId: Int) {}
-
-        private val stubUnlistener = object : IUnlistener.Stub() {
-            override fun invoke() {}
-        }
     }
 }
 
@@ -128,9 +139,15 @@ class PackageSettingsDaoService(
         broadcast = { this(it.repack()) },
     )
 
-    override fun isPackageInfoExists(packageName: String, userId: Int): Boolean {
+    override fun isPackageExists(packageName: String, userId: Int): Boolean {
         return runBlocking(Dispatchers.IO) {
             delegate.isPackageExists(packageName, userId)
+        }
+    }
+
+    override fun isDetectionSet(packageName: String, userId: Int, methodName: String): Boolean {
+        return runBlocking(Dispatchers.IO) {
+            delegate.isDetectionSet(packageName, userId, methodName)
         }
     }
 
@@ -179,18 +196,16 @@ class PackageSettingsDaoService(
         crossinline flow: (K) -> Flow<V>,
         crossinline broadcast: Listener.(V) -> Unit,
     ): IUnlistener {
-        val unlistener = object : IUnlistener.Stub() {
-            override fun invoke() {
-                val map = this@registerListener
-                synchronized(map) {
-                    val list = map[key]?.second
-                    list?.unregister(listener)
-                    if (list?.registeredCallbackCount != 0) return
-                    map.remove(key)
-                }?.let { (job, list) ->
-                    job.cancel()
-                    list.kill()
-                }
+        val unlistener = Unlistener {
+            val map = this
+            synchronized(map) {
+                val list = map[key]?.second
+                list?.unregister(listener)
+                if (list?.registeredCallbackCount != 0) return@Unlistener
+                map.remove(key)
+            }?.let { (job, list) ->
+                job.cancel()
+                list.kill()
             }
         }
 
@@ -228,4 +243,14 @@ class PackageSettingsDaoService(
     }
 
     private fun List<PackageInfo>.repack() = map { ParcelablePackageInfo(it) }
+}
+
+class Unlistener(private val unlisten: () -> Unit) : IUnlistener.Stub() {
+    override fun invoke() {
+        unlisten()
+    }
+
+    object Stub : IUnlistener.Stub() {
+        override fun invoke() {}
+    }
 }
