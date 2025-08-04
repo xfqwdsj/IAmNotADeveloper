@@ -1,16 +1,19 @@
 package top.ltfan.notdeveloper.xposed
 
-import android.app.AndroidAppHelper
 import android.content.Context
+import android.os.UserHandle
 import android.provider.Settings
 import androidx.room.Room
 import top.ltfan.dslutilities.LockableValueDsl
+import top.ltfan.notdeveloper.data.PackageSettingsDao
 import top.ltfan.notdeveloper.data.PackageSettingsDatabase
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.service.INotDevService
 import top.ltfan.notdeveloper.service.INotificationCallback
 import top.ltfan.notdeveloper.service.data.IPackageSettingsDao
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
+import kotlin.reflect.full.memberFunctions
 
 const val CallMethodGet = "GET"
 const val CallMethodNotify = "NOTIFY"
@@ -24,6 +27,22 @@ abstract class NotDevService : INotDevService.Stub() {
     }
 
     protected abstract fun notify(name: String, type: Int)
+
+    @get:JvmName("getConnectionsKotlin")
+    private val connections = DaoConnectionsMap()
+
+    override fun getConnections() = connections
+}
+
+class DaoConnectionsMap(
+    private val delegate: ConcurrentHashMap<String, IPackageSettingsDao> = ConcurrentHashMap(),
+) : ConcurrentMap<String, IPackageSettingsDao> by delegate {
+//    override fun get(key: String?): IPackageSettingsDao? {
+//        val result = delegate[key]
+//        if (result == null) return result
+//
+//
+//    }
 }
 
 @NotDevServiceBuilder.Dsl
@@ -37,30 +56,9 @@ class NotDevServiceBuilder : LockableValueDsl() {
     fun build(): NotDevService {
         lock()
         return object : NotDevService() {
-            private val application by lazy { AndroidAppHelper.currentApplication() }
-
-            @get:JvmName("getConnectionsKotlin")
-            private val connections = ConcurrentHashMap<String, IPackageSettingsDao>()
-
-            @get:JvmName("getDaoKotlin")
-            private val dao by lazy {
-                Log.d("Application: $application, package: ${application.packageName}")
-                PackageSettingsDaoService(
-                    Room.databaseBuilder(
-                        application,
-                        PackageSettingsDatabase::class.java,
-                        PackageSettingsDatabase.DATABASE_NAME
-                    ).build().dao().also {
-                        Log.d("Database created: $it")
-                    }
-                )
-            }
-
             override fun notify(name: String, type: Int) {
                 notify.invoke(name, type)
             }
-
-            override fun getDao() = dao
         }
     }
 
@@ -81,11 +79,34 @@ val Context.notDevService
         val binder = contentResolver.call(
             NotDevServiceProvider.uri, CallMethodGet, null, null
         )?.getBinder(BundleExtraService) ?: error("Failed to get NotDevService binder")
-        INotDevService.Stub.asInterface(binder)
+        NotDevServiceClient(this, INotDevService.Stub.asInterface(binder))
     }.getOrElse {
         Log.Android.e("Failed to get NotDevService: ${it.message}", it)
         null
     }
+
+class NotDevServiceClient(
+    context: Context,
+    service: INotDevService,
+) : INotDevService by service {
+    val dao: PackageSettingsDao
+
+    init {
+        val application = context.applicationContext
+        val myUserId = UserHandle::class.memberFunctions
+            .firstOrNull { it.name == "myUserId" } ?: error("Failed to get myUserId method")
+        val userId = (myUserId.call(application) as Int).toString()
+        val database = Room.databaseBuilder(
+            application,
+            PackageSettingsDatabase::class.java,
+            PackageSettingsDatabase.DATABASE_NAME,
+        ).build()
+        val dao = database.dao()
+        val daoService = PackageSettingsDaoService(dao)
+        service.connections[userId] = daoService
+        this.dao = dao
+    }
+}
 
 inline fun INotDevService.notifySettingChange(
     method: DetectionMethod.SettingsMethod, crossinline callback: () -> Unit
