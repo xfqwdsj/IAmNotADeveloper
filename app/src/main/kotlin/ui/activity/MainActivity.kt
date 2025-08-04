@@ -116,16 +116,5 @@ class MainActivity : ComponentActivity() {
             viewModel.service = notDevService
         }
         viewModel.test()
-
-        val dao = viewModel.service?.dao
-        try {
-            Log.Android.d("Initializing database")
-            Log.Android.d("Database DAO: $dao")
-            dao?.insertPackageInfo("a", 1, 1)
-            val res = dao?.getPackageInfoByName("a")
-            Log.Android.d("Database initialized, test result: $res")
-        } catch (e: Throwable) {
-            Log.Android.e("Database initialization failed", e)
-        }
     }
 }
