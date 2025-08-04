@@ -12,7 +12,8 @@ interface IPackageSettingsDao {
     IUnlistener listenPackageInfoByName(String packageName, IPackageInfoListListener listener);
     List<ParcelablePackageInfo> getPackageInfoByUser(int userId);
     IUnlistener listenPackageInfoByUser(int userId, IPackageInfoListListener listener);
-    boolean isPackageInfoExists(String packageName, int userId);
+    boolean isPackageExists(String packageName, int userId);
+    boolean isDetectionSet(String packageName, int userId, String methodName);
     boolean isDetectionEnabled(String packageName, int userId, String methodName);
     IUnlistener listenDetectionEnabled(String packageName, int userId, String methodName, IBooleanListener listener);
     void clearAllData();
