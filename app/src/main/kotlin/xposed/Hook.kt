@@ -225,14 +225,49 @@ private fun patchSystem(lpparam: LoadPackageParam) {
     )
 
     XposedBridge.hookAllMethods(
-        activityManagerServiceClass, "systemReady",
+        activityManagerServiceClass, "getContentProvider",
         object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                val ams = param.thisObject
-                Log.d("Got ActivityManagerService, registering provider")
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val args = param.args
+                val argsOffset = when (args.size) {
+                    4 -> 1
+                    5 -> 0
+                    else -> {
+                        Log.e("Unsupported Android version, args size: ${args.size}")
+                        return
+                    }
+                }
+                val name = args[1 + argsOffset] as String
+                if (name != NotDevServiceProvider.uri.authority) return
+                val callingUid = Binder.getCallingUid()
+                val callingPackage = when (args.size) {
+                    4 -> {
+                        AndroidAppHelper.currentApplication().packageManager
+                            .getPackagesForUid(callingUid)?.firstOrNull() ?: run {
+                            Log.e("Calling package not found")
+                            return
+                        }
+                    }
 
-                val helper = XposedHelpers.getObjectField(ams, "mCpHelper")
-                val providerMap = XposedHelpers.getObjectField(helper, "mProviderMap")
+                    5 -> args[1] as String
+                    else -> return
+                }
+                if (callingPackage != BuildConfig.APPLICATION_ID) {
+                    Log.d("Invalid package $callingPackage requesting NotDevServiceProvider")
+                    return
+                }
+
+                val caller = args[0] // IApplicationThread
+                val userId = args[2 + argsOffset] as Int
+                val stable = args[3 + argsOffset] as Boolean
+
+                val ams = param.thisObject
+                val helper = try {
+                    XposedHelpers.getObjectField(ams, "mCpHelper")
+                } catch (e: NoSuchFieldError) {
+                    Log.w("mCpHelper field not found, using ActivityManagerService directly", e)
+                    ams
+                }
 
                 val contentProviderRecordClass = XposedHelpers.findClass(
                     "com.android.server.am.ContentProviderRecord",
@@ -268,209 +303,90 @@ private fun patchSystem(lpparam: LoadPackageParam) {
 
                 XposedHelpers.setObjectField(record, "provider", iContentProvider)
 
-                XposedHelpers.callMethod(
-                    providerMap, "putProviderByName",
-                    NotDevServiceProvider.uri.authority,
-                    record,
+                var processRecord: Any? = null
+
+                try {
+                    processRecord = XposedHelpers.callMethod(
+                        ams, "getRecordForAppLOSP", caller
+                    )
+                } catch (e: NoSuchMethodError) {
+                    Log.w("getRecordForAppLOSP method not found", e)
+                }
+
+                if (processRecord == null) {
+                    try {
+                        processRecord = XposedHelpers.callMethod(
+                            ams, "getRecordForAppLocked", caller
+                        )
+                    } catch (e: Throwable) {
+                        Log.w("getRecordForAppLocked method not found", e)
+                    }
+                }
+
+                if (processRecord == null) {
+                    Log.e("Failed to get process record for NotDevServiceProvider")
+                    return
+                }
+
+                val startTime = Clock.System.now()
+                val startTimeMs = startTime.toEpochMilliseconds()
+                val processList = XposedHelpers.getObjectField(ams, "mProcessList")
+
+                var connection: Any? = null
+
+                try {
+                    // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ContentProviderHelper.java;drc=eaa7835d03348af38535ce6a835408a63cee7b87;bpv=1;bpt=0;l=1287
+                    connection = XposedHelpers.callMethod(
+                        helper, "incProviderCountLocked",
+                        processRecord, record, null, callingUid, callingPackage,
+                        null, stable, true, startTimeMs, processList, userId,
+                    )
+                } catch (e: NoSuchMethodError) {
+                    Log.d("Failed to get provider connection (1)", e)
+                }
+
+                if (connection == null) {
+                    try {
+                        // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ContentProviderHelper.java;drc=1109a0c5446c311c2fb2c97b5ee6253cd624e0e3;bpv=1;bpt=0;l=163
+                        connection = XposedHelpers.callMethod(
+                            helper, "incProviderCountLocked",
+                            processRecord, record, null, callingUid, callingPackage,
+                            null, stable, true, startTimeMs, processList,
+                        )
+                    } catch (e: NoSuchMethodError) {
+                        Log.d("Failed to get provider connection (2)", e)
+                    }
+                }
+
+                if (connection == null) {
+                    try {
+                        // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ActivityManagerService.java;drf=services%2Fjava%2Fcom%2Fandroid%2Fserver%2Fam%2FActivityManagerService.java;drc=20e809870d8ac1e5b848f2daf51b2272ef89bdfc;bpv=1;bpt=0;l=6161
+                        XposedHelpers.callMethod(
+                            ams, "incProviderCountLocked",
+                            processRecord, record, null, stable,
+                        )
+                    } catch (e: NoSuchMethodError) {
+                        Log.d("Failed to get provider connection (3)", e)
+                    }
+                }
+
+                if (connection == null) {
+                    Log.e("Failed to get connection for NotDevServiceProvider, returning null")
+                    param.result = null
+                    return
+                } else {
+                    Log.d("Got connection for NotDevServiceProvider")
+                }
+
+                param.result = XposedHelpers.callMethod(
+                    record, "newHolder",
+                    connection, false,
                 )
 
-                Log.d("Registered NotDevServiceProvider")
+                Log.d("Returning NotDevServiceProvider holder for $callingPackage")
             }
         },
     )
-
-    var error: Throwable? = null
-
-    runCatching {
-        XposedHelpers.findClassIfExists(
-            "com.android.server.am.ContentProviderHelper",
-            lpparam.classLoader,
-        )
-    }.onSuccess { contentProviderHelperClass ->
-        XposedBridge.hookAllMethods(
-            contentProviderHelperClass, "getContentProviderImpl",
-            object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    val name = param.args[1] as String
-                    if (name != NotDevServiceProvider.uri.authority) return
-                    val callingPackage = param.args[4] as String
-                    if (callingPackage != BuildConfig.APPLICATION_ID) {
-                        Log.d("Invalid package $callingPackage requesting NotDevServiceProvider, returning null")
-                        param.result = null
-                    }
-
-                    val caller = param.args[0] // IApplicationThread
-                    val token = param.args[2] // IBinder
-                    val callingUid = param.args[3] // Int
-                    val callingTag = param.args[5] // String
-                    val stable = param.args[6] // Boolean
-                    val userId = param.args[7] // Int
-
-                    Log.d("Intercepted request for NotDevServiceProvider")
-
-                    val helper = param.thisObject
-                    val ams = XposedHelpers.getObjectField(helper, "mService")
-
-                    val providerMap = XposedHelpers.getObjectField(helper, "mProviderMap")
-                    val processList = XposedHelpers.getObjectField(ams, "mProcessList")
-
-                    val processRecord = XposedHelpers.callMethod(
-                        ams, "getRecordForAppLOSP", caller
-                    )
-
-                    val record = XposedHelpers.callMethod(
-                        providerMap, "getProviderByName", NotDevServiceProvider.uri.authority, 0
-                    )
-
-                    val startTime = Clock.System.now()
-                    val startTimeMs = startTime.toEpochMilliseconds()
-
-
-                    var connection: Any? = null
-
-                    try {
-                        // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ContentProviderHelper.java;drc=eaa7835d03348af38535ce6a835408a63cee7b87;bpv=1;bpt=0;l=1287
-                        connection = XposedHelpers.callMethod(
-                            helper, "incProviderCountLocked",
-                            processRecord, record, token, callingUid, callingPackage,
-                            callingTag, stable, true, startTimeMs, processList, userId,
-                        )
-                    } catch (e: Throwable) {
-                        Log.d("Failed to call incProviderCountLocked (1): ${e.message}", e)
-                    }
-
-                    if (connection == null) {
-                        try {
-                            // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ContentProviderHelper.java;drc=1109a0c5446c311c2fb2c97b5ee6253cd624e0e3;bpv=1;bpt=0;l=163
-                            connection = XposedHelpers.callMethod(
-                                helper, "incProviderCountLocked",
-                                processRecord, record, token, callingUid, callingPackage,
-                                callingTag, stable, true, startTimeMs, processList,
-                            )
-                        } catch (e: Throwable) {
-                            Log.d("Failed to call incProviderCountLocked (2): ${e.message}", e)
-                        }
-                    }
-
-                    if (connection == null) {
-                        Log.e("Failed to get connection for NotDevServiceProvider, returning null")
-                        param.result = null
-                        return
-                    } else {
-                        Log.d("Got connection for NotDevServiceProvider")
-                    }
-
-                    param.result = XposedHelpers.callMethod(
-                        record, "newHolder",
-                        connection, false,
-                    )
-
-                    Log.d("Returning NotDevServiceProvider holder for $name")
-                }
-            },
-        )
-    }.onFailure {
-        error = it
-        Log.e("Failed to find ContentProviderHelper class: ${it.message}", it)
-    }
-
-    if (error != null) {
-        XposedBridge.hookAllMethods(
-            activityManagerServiceClass, "getContentProviderExternal",
-            object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    val name = param.args[1] as String
-                    if (name != NotDevServiceProvider.uri.authority) return
-
-                    // 8: Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ActivityManagerService.java;drc=24bbe58df6ee9211502178213b626c659a132efb;bpv=1;bpt=0;l=6316
-                    // 7: Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ActivityManagerService.java;drc=e19c494612787e1b8cc9a07144afb2975e5fa183;bpv=1;bpt=0;l=6228
-                    // 5: Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ActivityManagerService.java;drf=services%2Fjava%2Fcom%2Fandroid%2Fserver%2Fam%2FActivityManagerService.java;drc=20e809870d8ac1e5b848f2daf51b2272ef89bdfc;bpv=1;bpt=0;l=6223
-
-                    val argsSize = param.args.size
-                    val caller = param.args[0] // IApplicationThread
-                    val token = param.args[2] // IBinder
-                    var callingUid: Int
-                    var callingPackage: Any? = null // String
-                    var callingTag: Any? = null // String
-                    var stable: Any? // Boolean
-
-                    when (argsSize) {
-                        8 -> {
-                            callingUid = param.args[3] as Int
-                            callingPackage = param.args[4]
-                            callingTag = param.args[5]
-                            stable = param.args[6]
-                        }
-
-                        7 -> {
-                            callingUid = param.args[3] as Int
-                            callingTag = param.args[4]
-                            stable = param.args[5]
-                        }
-
-                        6 -> {
-                            callingUid = param.args[3] as Int
-                            stable = param.args[4]
-                        }
-
-                        else -> return
-                    }
-
-                    if (callingPackage == null) {
-                        callingPackage = AndroidAppHelper.currentApplication()
-                            .packageManager.getPackagesForUid(callingUid)?.firstOrNull() ?: run {
-                            Log.w("Calling package not found, returning null for NotDevServiceProvider")
-                            param.result = null
-                            return
-                        }
-                    }
-
-                    if (callingPackage != BuildConfig.APPLICATION_ID) {
-                        Log.d("Invalid package $callingPackage requesting NotDevServiceProvider, returning null")
-                        param.result = null
-                    }
-
-                    Log.d("Intercepted request for NotDevServiceProvider")
-
-                    val ams = param.thisObject
-
-                    val providerMap = XposedHelpers.getObjectField(ams, "mProviderMap")
-                    val processList = XposedHelpers.getObjectField(ams, "mProcessList")
-
-                    val processRecord = XposedHelpers.callMethod(
-                        ams, "getRecordForAppLocked", caller
-                    )
-
-                    val record = XposedHelpers.callMethod(
-                        providerMap, "getProviderByName", NotDevServiceProvider.uri.authority, 0
-                    )
-
-                    val startTime = Clock.System.now()
-                    val startTimeMs = startTime.toEpochMilliseconds()
-
-                    val connection = if (callingTag != null) {
-                        XposedHelpers.callMethod(
-                            ams, "incProviderCountLocked",
-                            processRecord, record, token, callingUid, callingPackage,
-                            callingTag, stable, true, startTimeMs, processList,
-                        )
-                    } else {
-                        XposedHelpers.callMethod(
-                            ams, "incProviderCountLocked",
-                            processRecord, record, token, stable,
-                        )
-                    }
-
-                    param.result = XposedHelpers.callMethod(
-                        record, "newHolder",
-                        connection, false,
-                    )
-
-                    Log.d("Returning NotDevServiceProvider holder for $name")
-                }
-            },
-        )
-    }
 
     Log.d("Patched system for NotDevService")
 }
