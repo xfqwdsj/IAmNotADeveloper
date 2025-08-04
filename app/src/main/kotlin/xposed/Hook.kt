@@ -225,13 +225,22 @@ private fun patchSystem(lpparam: LoadPackageParam) {
     )
 
     XposedBridge.hookAllMethods(
+        activityManagerServiceClass, "getContentProviderExternal",
+        object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                Log.d("getContentProviderExternal(${param.args.joinToString()}) -> ${param.result}")
+            }
+        },
+    )
+
+    XposedBridge.hookAllMethods(
         activityManagerServiceClass, "getContentProvider",
         object : XC_MethodHook() {
             override fun beforeHookedMethod(param: MethodHookParam) {
                 val args = param.args
                 val argsOffset = when (args.size) {
-                    4 -> 1
-                    5 -> 0
+                    4 -> 0
+                    5 -> 1
                     else -> {
                         Log.e("Unsupported Android version, args size: ${args.size}")
                         return
@@ -253,9 +262,13 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                     else -> return
                 }
                 if (callingPackage != BuildConfig.APPLICATION_ID) {
-                    Log.d("Invalid package $callingPackage requesting NotDevServiceProvider")
+                    if (BuildConfig.DEBUG) {
+                        Log.d("Invalid package $callingPackage requesting NotDevServiceProvider")
+                    }
                     return
                 }
+
+                Log.d("Building NotDevServiceProvider for $callingPackage")
 
                 val caller = args[0] // IApplicationThread
                 val userId = args[2 + argsOffset] as Int
