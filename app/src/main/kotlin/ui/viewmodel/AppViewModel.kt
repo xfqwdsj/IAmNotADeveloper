@@ -14,7 +14,7 @@ import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.page.Overview
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.xposed.Log
-import top.ltfan.notdeveloper.xposed.NotDevServiceClient
+import top.ltfan.notdeveloper.xposed.NotDevClient
 import top.ltfan.notdeveloper.xposed.notifySettingChange
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
@@ -25,7 +25,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     var isPreferencesReady by mutableStateOf(false)
     val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
-    var service: NotDevServiceClient? by mutableStateOf(null)
+    var service: NotDevClient? by mutableStateOf(null)
 
     fun navigateMain(page: Main) {
         if (currentPage == page) return

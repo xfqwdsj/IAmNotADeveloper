@@ -1,12 +1,9 @@
 package top.ltfan.notdeveloper.xposed
 
 import android.app.AndroidAppHelper
-import android.content.ComponentName
 import android.content.Context
-import android.content.pm.ApplicationInfo
 import android.os.Binder
 import android.os.Bundle
-import android.os.Process
 import android.os.UserHandle
 import androidx.annotation.Keep
 import androidx.core.net.toUri
@@ -15,19 +12,23 @@ import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XSharedPreferences
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import de.robv.android.xposed.callbacks.XC_LoadPackage
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.data.SystemDataDir
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
+import top.ltfan.notdeveloper.provider.PackageSettingsDaoProvider
+import top.ltfan.notdeveloper.provider.getInterfaceOrNull
+import top.ltfan.notdeveloper.service.data.IPackageSettingsDao
+import top.ltfan.notdeveloper.xposed.hook.RegisteredProvider
+import top.ltfan.notdeveloper.xposed.hook.withContentProviderContext
 import java.io.File
 import kotlin.reflect.jvm.javaMethod
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 @Keep
 class Hook : IXposedHookLoadPackage {
-    override fun handleLoadPackage(lpparam: LoadPackageParam) {
+    override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
         if (lpparam.packageName == BuildConfig.APPLICATION_ID) {
             XposedHelpers.findAndHookMethod(
                 StatusProxy::class.java.name,
@@ -41,23 +42,32 @@ class Hook : IXposedHookLoadPackage {
             )
         }
 
-        patchSystem(lpparam)
-        patchSettingsProvider(lpparam)
+        withLpparamContext(lpparam) {
+            patchSystem()
+            patchSettingsProvider()
 
-        val prefs = XSharedPreferences(BuildConfig.APPLICATION_ID)
-        DetectionCategory.allMethods.forEach { method ->
-            try {
-                method.hook(prefs, lpparam)
-            } catch (e: Throwable) {
-                Log.e("Failed to apply hook for ${method::class.simpleName}: ${e.message}", e)
+            val remoteDao = AndroidAppHelper.currentApplication().contentResolver
+                .getInterfaceOrNull(PackageSettingsDaoProvider) {
+                    PackageSettingsDaoClient(IPackageSettingsDao.Stub.asInterface(it))
+                }
+            val dao = remoteDao ?: run {
+                Log.w("PackageSettingsDao not found, using stub implementation")
+                PackageSettingsDaoClient
+            }
+
+            DetectionCategory.allMethods.forEach { method ->
+                try {
+                    method.hook(dao)
+                } catch (e: Throwable) {
+                    Log.e("Failed to apply hook for ${method::class.simpleName}: ${e.message}", e)
+                }
             }
         }
     }
 }
 
-private fun DetectionMethod.SettingsMethod.doHook(
-    prefs: XSharedPreferences, lpparam: LoadPackageParam
-) {
+context(lpparam: XC_LoadPackage.LoadPackageParam, dao: PackageSettingsDaoClientInterface)
+private fun DetectionMethod.SettingsMethod.doHook() {
     if (lpparam.packageName != "com.android.providers.settings") return
 
     Log.d("Processing SettingsMethod: $settingKey")
@@ -80,6 +90,9 @@ private fun DetectionMethod.SettingsMethod.doHook(
                         Log.debug.e("Calling package not found")
                         return
                     }
+                val userId = XposedHelpers.callStaticMethod(
+                    UserHandle::class.java, "getUserId", uid
+                ) as Int
 
                 // TODO: Package checks
                 if (packageName.startsWith("android") || packageName.startsWith("com.android")) {
@@ -87,12 +100,13 @@ private fun DetectionMethod.SettingsMethod.doHook(
                     return
                 }
 
-                prefs.reload()
-
                 Log.d("Processing ${param.method.name}($name) from $packageName")
 
+                val enabled = DetectionMethod.SettingsMethod.fromSettingKey(name)
+                    .any { dao.isDetectionEnabled(packageName, userId, it) }
+
                 // TODO: Package-specific checks
-                if (!prefs.getBoolean(this@doHook.name, true)) {
+                if (!enabled) {
                     Log.d("Skipping ${param.method.name}($name) as preference is disabled")
                     return
                 }
@@ -108,10 +122,7 @@ private fun DetectionMethod.SettingsMethod.doHook(
     Log.d("Processed SettingsMethod: $settingKey")
 }
 
-private fun DetectionMethod.SystemPropertiesMethod.doHook(
-    prefs: XSharedPreferences,
-    lpparam: LoadPackageParam,
-) {
+context(lpparam: XC_LoadPackage.LoadPackageParam, prefs: XSharedPreferences) private fun DetectionMethod.SystemPropertiesMethod.doHook() {
     val packageName = lpparam.packageName
     if (packageName.startsWith("android") || packageName.startsWith("com.android")) return
 
@@ -152,7 +163,7 @@ private fun DetectionMethod.SystemPropertiesMethod.doHook(
 }
 
 @OptIn(ExperimentalTime::class)
-private fun patchSystem(lpparam: LoadPackageParam) {
+context(lpparam: XC_LoadPackage.LoadPackageParam) private fun patchSystem() {
     if (lpparam.packageName != "android") return
 
     Log.d("Patching system for NotDevService")
@@ -241,12 +252,13 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                     }
                 }
                 val name = args[1 + argsOffset] as String
-                if (name != NotDevServiceProvider.uri.authority) return
+                if (!RegisteredProvider.entries.any { it.authority == name }) return
                 val callingUid = Binder.getCallingUid()
                 val callingPackage = when (args.size) {
                     4 -> {
-                        AndroidAppHelper.currentApplication().packageManager
-                            .getPackagesForUid(callingUid)?.firstOrNull() ?: run {
+                        AndroidAppHelper.currentApplication().packageManager.getPackagesForUid(
+                            callingUid
+                        )?.firstOrNull() ?: run {
                             Log.debug.e("Calling package not found")
                             return
                         }
@@ -274,120 +286,20 @@ private fun patchSystem(lpparam: LoadPackageParam) {
                     ams
                 }
 
-                val contentProviderRecordClass = XposedHelpers.findClass(
-                    "com.android.server.am.ContentProviderRecord",
-                    lpparam.classLoader,
-                )
-
-                val applicationInfo = ApplicationInfo().apply {
-                    packageName = "android"
-                    uid = Process.SYSTEM_UID
-                    flags = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
-                }
-                val providerInfo = NotDevServiceProvider.info.apply {
-                    processName = "system_server"
-                    this.applicationInfo = applicationInfo
-                }
-
-                val application = AndroidAppHelper.currentApplication()
-                val record = XposedHelpers.newInstance(
-                    contentProviderRecordClass,
+                withContentProviderContext(
                     ams,
-                    providerInfo,
-                    applicationInfo,
-                    ComponentName(application, NotDevServiceProvider::class.java),
-                    true
-                )
-
-                val provider = NotDevServiceProvider(service)
-                provider.attachInfo(application, providerInfo)
-
-                val iContentProvider = XposedHelpers.callMethod(
-                    provider, "getIContentProvider",
-                )
-
-                XposedHelpers.setObjectField(record, "provider", iContentProvider)
-
-                var processRecord: Any? = null
-
-                try {
-                    processRecord = XposedHelpers.callMethod(
-                        ams, "getRecordForAppLOSP", caller
-                    )
-                } catch (e: NoSuchMethodError) {
-                    Log.w("getRecordForAppLOSP method not found", e)
+                    helper,
+                    caller,
+                    callingPackage,
+                    callingUid,
+                    userId,
+                    stable,
+                    lpparam,
+                    param,
+                ) {
+                    RegisteredProvider.NotDevService(NotDevServiceProvider(service))
+                    RegisteredProvider.PackageSettingsDao()
                 }
-
-                if (processRecord == null) {
-                    try {
-                        processRecord = XposedHelpers.callMethod(
-                            ams, "getRecordForAppLocked", caller
-                        )
-                    } catch (e: Throwable) {
-                        Log.w("getRecordForAppLocked method not found", e)
-                    }
-                }
-
-                if (processRecord == null) {
-                    Log.e("Failed to get process record for NotDevServiceProvider")
-                    return
-                }
-
-                val startTime = Clock.System.now()
-                val startTimeMs = startTime.toEpochMilliseconds()
-                val processList = XposedHelpers.getObjectField(ams, "mProcessList")
-
-                var connection: Any? = null
-
-                try {
-                    // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ContentProviderHelper.java;drc=eaa7835d03348af38535ce6a835408a63cee7b87;bpv=1;bpt=0;l=1287
-                    connection = XposedHelpers.callMethod(
-                        helper, "incProviderCountLocked",
-                        processRecord, record, null, callingUid, callingPackage,
-                        null, stable, true, startTimeMs, processList, userId,
-                    )
-                } catch (e: NoSuchMethodError) {
-                    Log.w("Failed to get provider connection (1)", e)
-                }
-
-                if (connection == null) {
-                    try {
-                        // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ContentProviderHelper.java;drc=1109a0c5446c311c2fb2c97b5ee6253cd624e0e3;bpv=1;bpt=0;l=163
-                        connection = XposedHelpers.callMethod(
-                            helper, "incProviderCountLocked",
-                            processRecord, record, null, callingUid, callingPackage,
-                            null, stable, true, startTimeMs, processList,
-                        )
-                    } catch (e: NoSuchMethodError) {
-                        Log.w("Failed to get provider connection (2)", e)
-                    }
-                }
-
-                if (connection == null) {
-                    try {
-                        // Since https://cs.android.com/android/_/android/platform/frameworks/base/+/main:services/core/java/com/android/server/am/ActivityManagerService.java;drf=services%2Fjava%2Fcom%2Fandroid%2Fserver%2Fam%2FActivityManagerService.java;drc=20e809870d8ac1e5b848f2daf51b2272ef89bdfc;bpv=1;bpt=0;l=6161
-                        XposedHelpers.callMethod(
-                            ams, "incProviderCountLocked",
-                            processRecord, record, null, stable,
-                        )
-                    } catch (e: NoSuchMethodError) {
-                        Log.w("Failed to get provider connection (3)", e)
-                    }
-                }
-
-                if (connection == null) {
-                    Log.e("Failed to get connection for NotDevServiceProvider")
-                    return
-                }
-
-                Log.d("Got connection for NotDevServiceProvider")
-
-                param.result = XposedHelpers.callMethod(
-                    record, "newHolder",
-                    connection, false,
-                )
-
-                Log.d("Returning NotDevServiceProvider holder for $callingPackage")
             }
         },
     )
@@ -395,7 +307,7 @@ private fun patchSystem(lpparam: LoadPackageParam) {
     Log.d("Patched system for NotDevService")
 }
 
-private fun patchSettingsProvider(lpparam: LoadPackageParam) {
+context(lpparam: XC_LoadPackage.LoadPackageParam) private fun patchSettingsProvider() {
     if (lpparam.packageName != "com.android.providers.settings") return
 
     Log.d("Patching SettingsProvider")
@@ -413,11 +325,11 @@ private fun patchSettingsProvider(lpparam: LoadPackageParam) {
                 if (method != CallMethodNotify) return
                 val uid = Binder.getCallingUid()
                 val packageNames =
-                    AndroidAppHelper.currentApplication().packageManager
-                        .getPackagesForUid(uid) ?: run {
-                        Log.debug.e("Calling package not found")
-                        return
-                    }
+                    AndroidAppHelper.currentApplication().packageManager.getPackagesForUid(uid)
+                        ?: run {
+                            Log.debug.e("Calling package not found")
+                            return
+                        }
                 val valid = packageNames.any {
                     it == BuildConfig.APPLICATION_ID || it == "android"
                 }
@@ -465,9 +377,21 @@ private fun patchSettingsProvider(lpparam: LoadPackageParam) {
     Log.d("Patched SettingsProvider")
 }
 
-private fun DetectionMethod.hook(prefs: XSharedPreferences, lpparam: LoadPackageParam) {
-    when (this) {
-        is DetectionMethod.SettingsMethod -> doHook(prefs, lpparam)
-        is DetectionMethod.SystemPropertiesMethod -> doHook(prefs, lpparam)
+context(lpparam: XC_LoadPackage.LoadPackageParam) private fun DetectionMethod.hook(dao: PackageSettingsDaoClientInterface) {
+    withDaoContext(dao) {
+        when (this) {
+            is DetectionMethod.SettingsMethod -> doHook()
+            is DetectionMethod.SystemPropertiesMethod -> doHook()
+        }
     }
 }
+
+private inline fun <R> withLpparamContext(
+    lpparam: XC_LoadPackage.LoadPackageParam,
+    block: context(XC_LoadPackage.LoadPackageParam) () -> R,
+) = with(lpparam, block)
+
+private inline fun <R> withDaoContext(
+    dao: PackageSettingsDaoClientInterface,
+    block: context(PackageSettingsDaoClientInterface) () -> R,
+) = with(dao, block)
