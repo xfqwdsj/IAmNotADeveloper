@@ -14,20 +14,30 @@ sealed class DetectionMethod(
         @StringRes labelResId: Int,
         val settingsClass: Class<*>,
         val settingKey: String,
-    ) : DetectionMethod(name, labelResId)
+    ) : DetectionMethod(name, labelResId) {
+        companion object {
+            val all by lazy { DetectionCategory.allMethods.filterIsInstance<SettingsMethod>() }
+            fun fromSettingKey(key: String) = all.filter { it.settingKey == key }
+        }
+    }
 
     abstract class SystemPropertiesMethod(
-        preferenceKey: String,
+        name: String,
         @StringRes labelResId: Int,
         val propertyKey: String,
         val overrideValue: String,
-    ) : DetectionMethod(preferenceKey, labelResId) {
+    ) : DetectionMethod(name, labelResId) {
         open fun getOverrideValue(methodName: String): Any? = when (methodName) {
             "get", "getprop" -> overrideValue
             "getBoolean" -> overrideValue.toBoolean()
             "getInt" -> overrideValue.toIntOrNull() ?: 0
             "getLong" -> overrideValue.toLongOrNull() ?: 0L
             else -> overrideValue
+        }
+
+        companion object {
+            val all by lazy { DetectionCategory.allMethods.filterIsInstance<SystemPropertiesMethod>() }
+            fun fromPropertyKey(key: String) = all.filter { it.propertyKey == key }
         }
     }
 }
