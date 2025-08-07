@@ -16,9 +16,9 @@ data class PackageInfo(
 
 @Parcelize
 data class ParcelablePackageInfo(
-    var packageName: String? = null,
-    var userId: Int? = null,
-    var appId: Int? = null,
+    var packageName: String,
+    var userId: Int,
+    var appId: Int,
 ) : Parcelable {
     companion object {
         @JvmStatic
