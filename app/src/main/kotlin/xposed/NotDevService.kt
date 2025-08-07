@@ -7,9 +7,6 @@ import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.provider.getInterfaceOrNull
 import top.ltfan.notdeveloper.service.INotDevService
 import top.ltfan.notdeveloper.service.INotificationCallback
-import top.ltfan.notdeveloper.service.data.IPackageSettingsDao
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
 
 const val CallMethodGet = "GET"
 const val CallMethodNotify = "NOTIFY"
@@ -23,22 +20,6 @@ abstract class NotDevService : INotDevService.Stub() {
     }
 
     protected abstract fun notify(name: String, type: Int)
-
-    @get:JvmName("getConnectionsKotlin")
-    private val connections = DaoConnectionsMap()
-
-    override fun getConnections() = connections
-}
-
-class DaoConnectionsMap(
-    private val delegate: ConcurrentHashMap<String, IPackageSettingsDao> = ConcurrentHashMap(),
-) : ConcurrentMap<String, IPackageSettingsDao> by delegate {
-//    override fun get(key: String?): IPackageSettingsDao? {
-//        val result = delegate[key]
-//        if (result == null) return result
-//
-//
-//    }
 }
 
 @NotDevServiceBuilder.Dsl
