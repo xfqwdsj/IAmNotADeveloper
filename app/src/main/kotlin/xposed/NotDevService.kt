@@ -15,6 +15,7 @@ const val BundleExtraType = "type"
 
 abstract class NotDevService : INotDevService.Stub() {
     override fun notifySettingChange(name: String, type: Int, callback: INotificationCallback) {
+        clearCallingIdentity()
         notify(name, type)
         callback()
     }
