@@ -9,6 +9,4 @@ interface INotDevService {
         int type,
         INotificationCallback callback
     );
-
-    Map<String, IPackageSettingsDao> getConnections();
 }
