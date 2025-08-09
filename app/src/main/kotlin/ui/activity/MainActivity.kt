@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,15 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.stringResource
 import androidx.navigation3.ui.NavDisplay
-import androidx.room.Room
+import top.ltfan.notdeveloper.service.systemService
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
-import top.ltfan.notdeveloper.xposed.Log
-import top.ltfan.notdeveloper.xposed.notDevService
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -113,7 +110,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         viewModel.isPreferencesReady = statusIsPreferencesReady
         if (viewModel.service == null) {
-            viewModel.service = notDevService
+            viewModel.service = systemService
         }
         viewModel.test()
     }

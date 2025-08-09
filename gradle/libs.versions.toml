@@ -14,6 +14,7 @@ compose = "2025.07.00"
 room = "2.7.2"
 preference = "1.2.1"
 dsl-utilities = "1.0.0"
+kaidl = "1.15"
 xposed-api = "82"
 
 [libraries]
@@ -35,6 +36,8 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 preference = { module = "androidx.preference:preference-ktx", version.ref = "preference" }
 dslUtilities = { module = "top.ltfan.dslutilities:dsl-utilities", version.ref = "dsl-utilities" }
+kaidl = { module = "com.github.kr328.kaidl:kaidl", version.ref = "kaidl" }
+kaidl-runtime = { module = "com.github.kr328.kaidl:kaidl-runtime", version.ref = "kaidl" }
 xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed-api" }
 
 [plugins]

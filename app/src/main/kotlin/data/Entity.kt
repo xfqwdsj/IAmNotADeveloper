@@ -1,6 +1,5 @@
 package top.ltfan.notdeveloper.data
 
-import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -21,9 +20,8 @@ data class ParcelablePackageInfo(
     var appId: Int,
 ) : Parcelable {
     companion object {
-        @JvmStatic
-        fun readFromParcel(source: Parcel): ParcelablePackageInfo =
-            parcelableCreator<ParcelablePackageInfo>().createFromParcel(source)
+        val CREATOR: Parcelable.Creator<ParcelablePackageInfo> =
+            parcelableCreator<ParcelablePackageInfo>()
     }
 
     constructor(packageInfo: PackageInfo) : this(
