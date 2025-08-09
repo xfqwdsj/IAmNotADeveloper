@@ -28,7 +28,7 @@
         </activity>
 
         <provider
-            android:name="top.ltfan.notdeveloper.provider.PackageSettingsDaoProvider"
+            android:name="top.ltfan.notdeveloper.provider.DatabaseServiceProvider"
             android:authorities="notdevsettings"
             android:exported="true"
             tools:ignore="ExportedContentProvider" />

@@ -8,14 +8,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
+import top.ltfan.notdeveloper.log.Log
+import top.ltfan.notdeveloper.service.SystemServiceClient
+import top.ltfan.notdeveloper.service.notifySettingChange
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.page.Overview
 import top.ltfan.notdeveloper.ui.page.Page
-import top.ltfan.notdeveloper.xposed.Log
-import top.ltfan.notdeveloper.xposed.NotDevClient
-import top.ltfan.notdeveloper.xposed.notifySettingChange
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
     var showNavBar by mutableStateOf(true)
@@ -25,7 +28,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     var isPreferencesReady by mutableStateOf(false)
     val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
-    var service: NotDevClient? by mutableStateOf(null)
+    var service: SystemServiceClient? by mutableStateOf(null)
 
     fun navigateMain(page: Main) {
         if (currentPage == page) return
@@ -58,17 +61,18 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             is DetectionMethod.SettingsMethod -> {
                 val service = service
                 if (service == null) {
-                    Log.Android.w("Service not connected, cannot notify settings changes")
+                    Log.Android.w("Service not connected, cannot notifySettingChange settings changes")
                     return
                 }
 
-                try {
-                    service.notifySettingChange(method) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        service.notifySettingChange(method)
+                    } catch (e: Throwable) {
+                        Log.Android.e("Failed to notifySettingChange setting change", e)
+                    } finally {
                         test()
                     }
-                } catch (e: Throwable) {
-                    Log.Android.e("Failed to notify setting change for ${method.name}", e)
-                    test()
                 }
             }
 
