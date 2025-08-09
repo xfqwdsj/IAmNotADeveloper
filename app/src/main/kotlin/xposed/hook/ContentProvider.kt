@@ -4,8 +4,8 @@ import android.content.ContentProvider
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import top.ltfan.notdeveloper.provider.BinderProvider
-import top.ltfan.notdeveloper.provider.PackageSettingsDaoProvider
-import top.ltfan.notdeveloper.xposed.NotDevServiceProvider
+import top.ltfan.notdeveloper.provider.DatabaseServiceProvider
+import top.ltfan.notdeveloper.provider.SystemServiceProvider
 
 data class ContentProviderContext(
     val ams: Any,
@@ -17,6 +17,7 @@ data class ContentProviderContext(
     val stable: Boolean,
     val lpparam: XC_LoadPackage.LoadPackageParam,
     val param: XC_MethodHook.MethodHookParam,
+    val name: String,
 )
 
 inline fun <R> withContentProviderContext(
@@ -29,10 +30,11 @@ inline fun <R> withContentProviderContext(
     stable: Boolean,
     lpparam: XC_LoadPackage.LoadPackageParam,
     param: XC_MethodHook.MethodHookParam,
+    name: String,
     block: context(ContentProviderContext) () -> R,
 ) = with(
     ContentProviderContext(
-        ams, helper, caller, callingPackage, callingUid, userId, stable, lpparam, param
+        ams, helper, caller, callingPackage, callingUid, userId, stable, lpparam, param, name
     ),
     block,
 )
@@ -43,13 +45,13 @@ sealed class ContextProviderParameter {
 }
 
 enum class RegisteredProvider(val authority: String) {
-    NotDevService(NotDevServiceProvider) {
+    SystemService(SystemServiceProvider) {
         context(context: ContentProviderContext)
-        override operator fun invoke(parameter: ContextProviderParameter) {
-            if (parameter !is ContextProviderParameter.Provider) error("NotDevServiceProvider requires a ContentProvider parameter")
+        override fun patch(parameter: ContextProviderParameter) {
+            if (parameter !is ContextProviderParameter.Provider) error("SystemServiceProvider requires a ContentProvider parameter")
             val provider = parameter.provider
             val (ams, helper, caller, callingPackage, callingUid, userId, stable, lpparam, param) = context
-            NotDevServiceProvider.patch(
+            SystemServiceProvider.patch(
                 provider,
                 ams,
                 helper,
@@ -64,18 +66,25 @@ enum class RegisteredProvider(val authority: String) {
         }
     },
 
-    PackageSettingsDao(PackageSettingsDaoProvider) {
+    DatabaseService(DatabaseServiceProvider) {
         context(context: ContentProviderContext)
-        override operator fun invoke(parameter: ContextProviderParameter) {
+        override fun patch(parameter: ContextProviderParameter) {
             val (_, _, _, callingPackage, _, _, _, _, param) = context
-            PackageSettingsDaoProvider.patch(callingPackage, param)
+            DatabaseServiceProvider.patch(callingPackage, param)
         }
     };
 
     constructor(provider: BinderProvider.Companion) : this(provider.authority)
 
     context(context: ContentProviderContext)
-    abstract operator fun invoke(parameter: ContextProviderParameter = ContextProviderParameter.Inject)
+    abstract fun patch(parameter: ContextProviderParameter)
+
+    context(context: ContentProviderContext)
+    operator fun invoke(parameter: ContextProviderParameter = ContextProviderParameter.Inject) {
+        val name = context.name
+        if (name != authority) return
+        patch(parameter)
+    }
 
     context(context: ContentProviderContext)
     operator fun invoke(provider: ContentProvider) {

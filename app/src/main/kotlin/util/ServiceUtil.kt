@@ -1,9 +1,10 @@
 package top.ltfan.notdeveloper.util
 
+import android.os.Binder
 import android.os.IInterface
 import android.os.RemoteCallbackList
 
-fun <T : IInterface> RemoteCallbackList<T>.doBroadcast(action: (T) -> Unit) {
+inline fun <T : IInterface> RemoteCallbackList<T>.doBroadcast(action: (T) -> Unit) {
     val count = beginBroadcast()
     try {
         for (i in 0 until count) {
@@ -11,5 +12,11 @@ fun <T : IInterface> RemoteCallbackList<T>.doBroadcast(action: (T) -> Unit) {
         }
     } finally {
         finishBroadcast()
+    }
+}
+
+inline fun <R> clearBinderCallingIdentity(block: () -> R) = Binder.clearCallingIdentity().let {
+    block().also { _ ->
+        Binder.restoreCallingIdentity(it)
     }
 }

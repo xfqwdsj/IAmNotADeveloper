@@ -13,6 +13,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven("https://api.xposed.info/")
+        maven("https://maven.kr328.app/releases")
     }
 }
 
