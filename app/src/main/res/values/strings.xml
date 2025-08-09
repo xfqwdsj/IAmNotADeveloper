@@ -3,9 +3,9 @@
     <string name="app_name">IAmNotADeveloper</string>
 
     <!-- Categories -->
-    <string name="category_development_mode">Development Mode</string>
-    <string name="category_usb_debugging">USB Debugging</string>
-    <string name="category_wireless_debugging">Wireless Debugging</string>
+    <string name="category_development_mode">Development mode</string>
+    <string name="category_usb_debugging">USB debugging</string>
+    <string name="category_wireless_debugging">Wireless debugging</string>
 
     <!-- Detection methods -->
     <string name="toggle_hide_development_mode">Hide development mode</string>
@@ -42,4 +42,3 @@
     <string name="test_result_on">Test result of this item: On</string>
     <string name="test_result_off">Test result of this item: Off</string>
 </resources>
-

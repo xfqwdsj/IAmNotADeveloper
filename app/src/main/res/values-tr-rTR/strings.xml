@@ -3,9 +3,9 @@
     <string name="app_name">IAmNotADeveloper</string>
 
     <!-- Categories -->
-    <string name="category_development_mode">Geliştirici Modu</string>
-    <string name="category_usb_debugging">USB Hata Ayıklama</string>
-    <string name="category_wireless_debugging">Kablosuz Hata Ayıklama</string>
+    <string name="category_development_mode">Geliştirici modu</string>
+    <string name="category_usb_debugging">USB hata ayıklama</string>
+    <string name="category_wireless_debugging">Kablosuz hata ayıklama</string>
 
     <!-- Detection methods -->
     <string name="toggle_hide_development_mode">Geliştirici modunu gizle</string>
@@ -42,4 +42,3 @@
     <string name="test_result_on">Bu öğenin test sonucu: Açık</string>
     <string name="test_result_off">Bu öğenin test sonucu: Kapalı</string>
 </resources>
-
