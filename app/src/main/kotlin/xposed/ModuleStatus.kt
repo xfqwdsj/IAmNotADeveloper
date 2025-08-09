@@ -1,17 +1,26 @@
 package top.ltfan.notdeveloper.xposed
 
-import top.ltfan.notdeveloper.ModuleService
+import android.annotation.SuppressLint
+import android.content.Context
+import top.ltfan.notdeveloper.log.Log
 
-/**
- * Whether the module is activated in the Xposed framework, which signals
- * this by connecting to the module app through the module service.
- */
-val statusIsModuleActivated get() = ModuleService.isActivated
+@Suppress("MayBeConstant", "RedundantSuppression")
+val statusIsModuleActivated get() = StatusProxy.get()
 
-/**
- * Whether the preferences shared with the hooked packages are available.
- * The module app stores the settings in them and the hooked packages read
- * them through the framework; while they are unavailable every hook uses
- * its default.
- */
-val statusIsPreferencesReady get() = ModuleService.preferences != null
+object StatusProxy {
+    fun get() = false
+}
+
+val Context.statusIsPreferencesReady: Boolean
+    @SuppressLint("WorldReadableFiles") get() {
+        return try {
+            @Suppress("DEPRECATION") getSharedPreferences(
+                "testPreferences",
+                Context.MODE_WORLD_READABLE
+            )
+            true
+        } catch (t: Throwable) {
+            Log.Android.e("failed to confirm the state of SharedPreferences", t)
+            false
+        }
+    }
