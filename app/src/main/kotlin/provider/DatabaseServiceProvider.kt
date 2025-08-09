@@ -4,9 +4,12 @@ import android.os.IBinder
 import androidx.room.Room
 import de.robv.android.xposed.XC_MethodHook
 import top.ltfan.notdeveloper.data.PackageSettingsDatabase
-import top.ltfan.notdeveloper.xposed.PackageSettingsDaoService
+import top.ltfan.notdeveloper.service.DatabaseService
+import top.ltfan.notdeveloper.service.wrap
+import top.ltfan.notdeveloper.log.Log
+import top.ltfan.notdeveloper.log.invalidPackage
 
-class PackageSettingsDaoProvider : BinderProvider() {
+class DatabaseServiceProvider : BinderProvider() {
     private var _binder: IBinder? = null
 
     override fun onCreate(): Boolean {
@@ -16,7 +19,7 @@ class PackageSettingsDaoProvider : BinderProvider() {
             PackageSettingsDatabase::class.java,
             PackageSettingsDatabase.DATABASE_NAME,
         ).build()
-        _binder = PackageSettingsDaoService(database.dao()).asBinder()
+        _binder = DatabaseService(database.dao()).wrap()
         return true
     }
 
@@ -28,6 +31,7 @@ class PackageSettingsDaoProvider : BinderProvider() {
 
         fun patch(callingPackage: String, param: XC_MethodHook.MethodHookParam) {
             if (callingPackage !in validPackages) {
+                Log invalidPackage callingPackage requesting DatabaseServiceProvider::class.qualifiedName
                 param.result = null
             }
         }

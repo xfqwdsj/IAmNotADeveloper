@@ -1,4 +1,4 @@
-package top.ltfan.notdeveloper.xposed
+package top.ltfan.notdeveloper.provider
 
 import android.app.AndroidAppHelper
 import android.content.ComponentName
@@ -7,20 +7,22 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.ProviderInfo
 import android.os.IBinder
 import android.os.Process
-import androidx.core.net.toUri
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import top.ltfan.notdeveloper.provider.BinderProvider
-import top.ltfan.notdeveloper.service.INotDevService
+import top.ltfan.notdeveloper.BuildConfig
+import top.ltfan.notdeveloper.service.SystemServiceInterface
+import top.ltfan.notdeveloper.service.wrap
+import top.ltfan.notdeveloper.log.Log
+import top.ltfan.notdeveloper.log.invalidPackage
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-class NotDevServiceProvider(service: INotDevService) : BinderProvider() {
-    override val binder: IBinder = service.asBinder()
+class SystemServiceProvider(service: SystemServiceInterface) : BinderProvider() {
+    override val binder: IBinder = service.wrap()
 
     companion object : BinderProvider.Companion {
-        override val authority: String = NotDevServiceProvider::class.java.name
+        override val authority: String = SystemServiceProvider::class.java.name
         val info = ProviderInfo().apply {
             authority = Companion.authority
             name = Companion.authority
@@ -41,6 +43,13 @@ class NotDevServiceProvider(service: INotDevService) : BinderProvider() {
             lpparam: XC_LoadPackage.LoadPackageParam,
             param: XC_MethodHook.MethodHookParam,
         ) {
+            if (callingPackage != BuildConfig.APPLICATION_ID) {
+                Log invalidPackage callingPackage requesting SystemServiceProvider::class.qualifiedName
+                return
+            }
+
+            Log.d("Building SystemServiceProvider for $callingPackage")
+
             val contentProviderRecordClass = XposedHelpers.findClass(
                 "com.android.server.am.ContentProviderRecord",
                 lpparam.classLoader,
@@ -51,7 +60,7 @@ class NotDevServiceProvider(service: INotDevService) : BinderProvider() {
                 uid = Process.SYSTEM_UID
                 flags = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
             }
-            val providerInfo = NotDevServiceProvider.info.apply {
+            val providerInfo = info.apply {
                 processName = "system_server"
                 this.applicationInfo = applicationInfo
             }
@@ -62,7 +71,7 @@ class NotDevServiceProvider(service: INotDevService) : BinderProvider() {
                 ams,
                 providerInfo,
                 applicationInfo,
-                ComponentName(application, NotDevServiceProvider::class.java),
+                ComponentName(application, SystemServiceProvider::class.java),
                 true
             )
 
@@ -93,7 +102,7 @@ class NotDevServiceProvider(service: INotDevService) : BinderProvider() {
             }
 
             if (processRecord == null) {
-                Log.e("Failed to get process record for NotDevServiceProvider")
+                Log.e("Failed to get process record for SystemServiceProvider")
                 return
             }
 
@@ -140,18 +149,18 @@ class NotDevServiceProvider(service: INotDevService) : BinderProvider() {
             }
 
             if (connection == null) {
-                Log.e("Failed to get connection for NotDevServiceProvider")
+                Log.e("Failed to get connection for SystemServiceProvider")
                 return
             }
 
-            Log.d("Got connection for NotDevServiceProvider")
+            Log.d("Got connection for SystemServiceProvider")
 
             param.result = XposedHelpers.callMethod(
                 record, "newHolder",
                 connection, false,
             )
 
-            Log.d("Returning NotDevServiceProvider holder for $callingPackage")
+            Log.d("Returning SystemServiceProvider holder for $callingPackage")
         }
     }
 }
