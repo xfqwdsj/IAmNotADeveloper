@@ -6,9 +6,9 @@ import android.provider.Settings
 import com.github.kr328.kaidl.BinderInterface
 import top.ltfan.dslutilities.LockableValueDsl
 import top.ltfan.notdeveloper.detection.DetectionMethod
+import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.provider.SystemServiceProvider
 import top.ltfan.notdeveloper.provider.getInterfaceOrNull
-import top.ltfan.notdeveloper.log.Log
 
 const val CallMethodNotify = "NOTIFY"
 const val BundleExtraType = "type"
@@ -33,27 +33,27 @@ suspend fun SystemServiceInterface.notifySettingChange(method: DetectionMethod.S
 
 val SystemServiceInterface.client inline get() = SystemServiceClient(this)
 
-open class SystemServiceClient(service: SystemServiceInterface): SystemServiceInterface by service
+open class SystemServiceClient(service: SystemServiceInterface) : SystemServiceInterface by service
 
 @SystemServiceBuilder.Dsl
 class SystemServiceBuilder : LockableValueDsl() {
-    var queryApps by required<suspend (userId: Int?) -> List<ApplicationInfo>>()
-    var notifySettingChange by required<suspend (name: String, type: Int) -> Unit>()
+    var queryApps by required<suspend SystemServiceInterface.(userId: Int?) -> List<ApplicationInfo>>()
+    var notifySettingChange by required<suspend SystemServiceInterface.(name: String, type: Int) -> Unit>()
 
-    fun queryApps(block: suspend (userId: Int?) -> List<ApplicationInfo>) {
+    fun queryApps(block: suspend SystemServiceInterface.(userId: Int?) -> List<ApplicationInfo>) {
         queryApps = block
     }
 
-    fun notifySettingChange(block: suspend (name: String, type: Int) -> Unit) {
+    fun notifySettingChange(block: suspend SystemServiceInterface.(name: String, type: Int) -> Unit) {
         notifySettingChange = block
     }
 
     fun build(): SystemServiceInterface {
         lock()
         return object : SystemServiceInterface {
-            override suspend fun queryApps(userId: Int?) = queryApps.invoke(userId)
+            override suspend fun queryApps(userId: Int?) = queryApps.invoke(this, userId)
             override suspend fun notifySettingChange(name: String, type: Int) =
-                notifySettingChange.invoke(name, type)
+                notifySettingChange.invoke(this, name, type)
         }
     }
 
