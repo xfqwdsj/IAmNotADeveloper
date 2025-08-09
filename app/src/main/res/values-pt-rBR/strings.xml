@@ -2,9 +2,21 @@
 <resources>
     <string name="app_name">IAmNotADeveloper</string>
 
+    <!-- Categories -->
+    <string name="category_development_mode">Opções do desenvolvedor</string>
+    <string name="category_usb_debugging">Depuração USB</string>
+    <string name="category_wireless_debugging">Depuração por Wi-Fi</string>
+    
     <!-- Detection methods -->
     <string name="toggle_hide_development_mode">Ocultar opções do desenvolvedor</string>
+    <string name="toggle_hide_development_mode_legacy">Ocultar opções do desenvolvedor (antigo)</string>
     <string name="toggle_hide_usb_debugging">Ocultar depuração USB</string>
+    <string name="toggle_hide_usb_debugging_legacy">Ocultar depuração USB (antigo)</string>
+    <string name="toggle_hide_adb_usb_state">Ocultar estado USB do ADB (prop)</string>
+    <string name="toggle_hide_adb_usb_config">Ocultar configuração USB do ADB (prop)</string>
+    <string name="toggle_hide_adb_reboot_func">Ocultar função de reinicialização do ADB (prop)</string>
+    <string name="toggle_hide_adb_svc_adbd">Ocultar daemon do serviço ADB (prop)</string>
+    <string name="toggle_hide_adb_ffs_ready">Ocultar estado pronto do ADB FFS (prop)</string>
     <string name="toggle_hide_wireless_debugging">Ocultar depuração por Wi-Fi</string>
 
     <!-- Status -->
@@ -30,3 +42,4 @@
     <string name="test_result_on">Resultado do teste deste item: Ligado</string>
     <string name="test_result_off">Resultado do teste deste item: Desligado</string>
 </resources>
+
