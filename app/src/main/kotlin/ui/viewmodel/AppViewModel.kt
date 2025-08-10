@@ -8,9 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -65,14 +62,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     return
                 }
 
-                viewModelScope.launch(Dispatchers.IO) {
-                    try {
-                        service.notifySettingChange(method)
-                    } catch (e: Throwable) {
-                        Log.Android.e("Failed to notifySettingChange setting change", e)
-                    } finally {
-                        test()
-                    }
+                try {
+                    service.notifySettingChange(method)
+                } catch (e: Throwable) {
+                    Log.Android.e("Failed to notifySettingChange setting change", e)
+                } finally {
+                    test()
                 }
             }
 
