@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.provider.Settings
 import com.github.kr328.kaidl.BinderInterface
 import top.ltfan.dslutilities.LockableValueDsl
+import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.provider.SystemServiceProvider
@@ -15,7 +16,8 @@ const val BundleExtraType = "type"
 
 @BinderInterface
 interface SystemServiceInterface {
-    fun queryApps(userId: Int? = null): List<ApplicationInfo>
+    fun queryUsers(userIds: List<Int>? = null): List<UserInfo>
+    fun queryApps(userIds: List<Int>? = null): List<ApplicationInfo>
     fun notifySettingChange(name: String, type: Int)
 }
 
@@ -33,14 +35,26 @@ fun SystemServiceInterface.notifySettingChange(method: DetectionMethod.SettingsM
 
 val SystemServiceInterface.client inline get() = SystemServiceClient(this)
 
-open class SystemServiceClient(service: SystemServiceInterface) : SystemServiceInterface by service
+interface SystemServiceClient : SystemServiceInterface {
+    fun queryUsers(vararg userId: Int) = queryUsers(userId.toList())
+    fun queryUser(userId: Int) = queryUsers(listOf(userId)).firstOrNull()
+    fun queryApps(vararg userId: Int) = queryApps(userId.toList())
+}
+
+fun SystemServiceClient(service: SystemServiceInterface): SystemServiceClient =
+    object : SystemServiceClient, SystemServiceInterface by service {}
 
 @SystemServiceBuilder.Dsl
 class SystemServiceBuilder : LockableValueDsl() {
-    var queryApps by required<SystemServiceInterface.(userId: Int?) -> List<ApplicationInfo>>()
+    var queryUsers by required<SystemServiceInterface.(userIds: List<Int>?) -> List<UserInfo>>()
+    var queryApps by required<SystemServiceInterface.(userIds: List<Int>?) -> List<ApplicationInfo>>()
     var notifySettingChange by required<SystemServiceInterface.(name: String, type: Int) -> Unit>()
 
-    fun queryApps(block: SystemServiceInterface.(userId: Int?) -> List<ApplicationInfo>) {
+    fun queryUsers(block: SystemServiceInterface.(userIds: List<Int>?) -> List<UserInfo>) {
+        queryUsers = block
+    }
+
+    fun queryApps(block: SystemServiceInterface.(userIds: List<Int>?) -> List<ApplicationInfo>) {
         queryApps = block
     }
 
@@ -51,7 +65,8 @@ class SystemServiceBuilder : LockableValueDsl() {
     fun build(): SystemServiceInterface {
         lock()
         return object : SystemServiceInterface {
-            override fun queryApps(userId: Int?) = queryApps.invoke(this, userId)
+            override fun queryUsers(userIds: List<Int>?) = queryUsers.invoke(this, userIds)
+            override fun queryApps(userIds: List<Int>?) = queryApps.invoke(this, userIds)
             override fun notifySettingChange(name: String, type: Int) =
                 notifySettingChange.invoke(this, name, type)
         }
