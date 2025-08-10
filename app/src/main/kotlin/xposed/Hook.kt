@@ -6,7 +6,9 @@ import android.content.pm.ApplicationInfo
 import android.os.Binder
 import android.os.Bundle
 import android.os.UserHandle
+import android.os.UserManager
 import androidx.annotation.Keep
+import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
@@ -198,7 +200,51 @@ private fun patchSystem() {
     Log.processing("system") {
         val service = SystemService {
             queryApps { userId ->
-                emptyList()
+                val application = AndroidAppHelper.currentApplication()
+                val uid = Binder.getCallingUid()
+                val packageName =
+                    application.packageManager.getPackagesForUid(uid)
+                        ?.takeIf { it.size == 1 }?.first() ?: run {
+                        Log callingPackageNotFoundWhen "queryApps(userId=$userId)"
+                        return@queryApps emptyList()
+                    }
+
+                if (packageName != BuildConfig.APPLICATION_ID) {
+                    Log invalidPackage packageName log ", skipping queryApps for userId=$userId"
+                    return@queryApps emptyList()
+                }
+
+                val serviceManagerClass = XposedHelpers.findClass(
+                    "android.os.ServiceManager", lpparam.classLoader
+                )
+                val packageManagerService = XposedHelpers.callStaticMethod(
+                    serviceManagerClass, "getService", "package"
+                )
+                val iPackageManagerStubClass = XposedHelpers.findClass(
+                    "android.content.pm.IPackageManager\$Stub", lpparam.classLoader
+                )
+                val packageManager = XposedHelpers.callStaticMethod(
+                    iPackageManagerStubClass, "asInterface", packageManagerService
+                )
+
+                val requestedIds = clearBinderCallingIdentity {
+                    userId?.let { listOf(it) } ?: run {
+                        Log.d("No user ID provided, querying all users")
+                        val userManager = application.getSystemService<UserManager>()
+                        (XposedHelpers.callMethod(userManager, "getUsers") as List<*>).map {
+                            XposedHelpers.getIntField(it, "id")
+                        }
+                    }
+                }
+
+                requestedIds.flatMap {
+                    val slice = XposedHelpers.callMethod(
+                        packageManager, "getInstalledApplications",
+                        0, it
+                    )
+                    @Suppress("UNCHECKED_CAST")
+                    XposedHelpers.getObjectField(slice, "mList") as List<ApplicationInfo>
+                }
             }
 
             notifySettingChange { name, type ->
