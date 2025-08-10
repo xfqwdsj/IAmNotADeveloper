@@ -17,6 +17,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import top.ltfan.notdeveloper.BuildConfig
+import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -196,18 +197,48 @@ private fun patchSystem() {
 
     Log.processing("system") {
         val service = SystemService {
-            queryApps { userId ->
+            queryUsers { userIds ->
                 val application = AndroidAppHelper.currentApplication()
                 val uid = Binder.getCallingUid()
                 val packageName =
                     application.packageManager.getPackagesForUid(uid)
                         ?.takeIf { it.size == 1 }?.first() ?: run {
-                        Log callingPackageNotFoundWhen "queryApps(userId=$userId)"
+                        Log callingPackageNotFoundWhen "queryUsers"
+                        return@queryUsers emptyList()
+                    }
+
+                if (packageName != BuildConfig.APPLICATION_ID) {
+                    Log invalidPackage packageName skipping "queryUsers"
+                    return@queryUsers emptyList()
+                }
+
+                clearBinderCallingIdentity {
+                    val userManager = application.getSystemService<UserManager>()
+                    (XposedHelpers.callMethod(userManager, "getUsers") as List<*>)
+                        .map {
+                            UserInfo(
+                                XposedHelpers.getIntField(it, "id"),
+                                XposedHelpers.getObjectField(it, "name") as String?,
+                                XposedHelpers.getObjectField(it, "iconPath") as String,
+                                XposedHelpers.getIntField(it, "flags"),
+                            )
+                        }
+                        .let { list -> userIds?.let { ids -> list.filter { it.id in ids } } ?: list }
+                }
+            }
+
+            queryApps { userIds ->
+                val application = AndroidAppHelper.currentApplication()
+                val uid = Binder.getCallingUid()
+                val packageName =
+                    application.packageManager.getPackagesForUid(uid)
+                        ?.takeIf { it.size == 1 }?.first() ?: run {
+                        Log callingPackageNotFoundWhen "queryApps($userIds)"
                         return@queryApps emptyList()
                     }
 
                 if (packageName != BuildConfig.APPLICATION_ID) {
-                    Log invalidPackage packageName log ", skipping queryApps for userId=$userId"
+                    Log invalidPackage packageName skipping "queryApps($userIds)"
                     return@queryApps emptyList()
                 }
 
@@ -224,15 +255,7 @@ private fun patchSystem() {
                     iPackageManagerStubClass, "asInterface", packageManagerService
                 )
 
-                val requestedIds = clearBinderCallingIdentity {
-                    userId?.let { listOf(it) } ?: run {
-                        Log.d("No user ID provided, querying all users")
-                        val userManager = application.getSystemService<UserManager>()
-                        (XposedHelpers.callMethod(userManager, "getUsers") as List<*>).map {
-                            XposedHelpers.getIntField(it, "id")
-                        }
-                    }
-                }
+                val requestedIds = userIds ?: queryUsers().map { it.id }
 
                 requestedIds.flatMap {
                     val slice = XposedHelpers.callMethod(
@@ -255,7 +278,7 @@ private fun patchSystem() {
                     }
 
                 if (packageName != BuildConfig.APPLICATION_ID) {
-                    Log invalidPackage packageName log ", skipping notification for $name"
+                    Log invalidPackage packageName skipping "notification for $name"
                     return@notifySettingChange
                 }
 
@@ -377,8 +400,8 @@ private fun patchSettingsProvider() {
                         it == BuildConfig.APPLICATION_ID || it == "android"
                     }
                     if (!valid) {
-                        val string = packageNames.joinToString()
-                        Log.debug invalidPackage string log ", skipping hook for SettingsProvider.call"
+                        val packageNames = packageNames.joinToString()
+                        Log.debug invalidPackage packageNames skipping "hook for SettingsProvider.call"
                         return
                     }
 
