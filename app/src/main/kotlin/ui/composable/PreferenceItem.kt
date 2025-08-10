@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.ui.util.TransparentListItemColors
 
 @Composable
 fun PreferenceItem(
@@ -45,6 +46,6 @@ fun PreferenceItem(
         trailingContent = {
             Switch(checked = checked, onCheckedChange = null, enabled = enabled)
         },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        colors = TransparentListItemColors,
     )
 }
