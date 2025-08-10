@@ -36,6 +36,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             return
         }
 
+        if (page is Overview) {
+            backStack.removeRange(existingIndex + 1, backStack.size)
+            return
+        }
+
         val nextMainIndex = backStack.subList(existingIndex + 1, backStack.size)
             .indexOfFirst { it is Main }
             .let { if (it == -1) backStack.size else existingIndex + 1 + it }
