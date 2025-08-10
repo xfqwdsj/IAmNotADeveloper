@@ -15,11 +15,11 @@ const val BundleExtraType = "type"
 
 @BinderInterface
 interface SystemServiceInterface {
-    suspend fun queryApps(userId: Int? = null): List<ApplicationInfo>
-    suspend fun notifySettingChange(name: String, type: Int)
+    fun queryApps(userId: Int? = null): List<ApplicationInfo>
+    fun notifySettingChange(name: String, type: Int)
 }
 
-suspend fun SystemServiceInterface.notifySettingChange(method: DetectionMethod.SettingsMethod) {
+fun SystemServiceInterface.notifySettingChange(method: DetectionMethod.SettingsMethod) {
     notifySettingChange(
         method.settingKey,
         when (method.settingsClass) {
@@ -37,22 +37,22 @@ open class SystemServiceClient(service: SystemServiceInterface) : SystemServiceI
 
 @SystemServiceBuilder.Dsl
 class SystemServiceBuilder : LockableValueDsl() {
-    var queryApps by required<suspend SystemServiceInterface.(userId: Int?) -> List<ApplicationInfo>>()
-    var notifySettingChange by required<suspend SystemServiceInterface.(name: String, type: Int) -> Unit>()
+    var queryApps by required<SystemServiceInterface.(userId: Int?) -> List<ApplicationInfo>>()
+    var notifySettingChange by required<SystemServiceInterface.(name: String, type: Int) -> Unit>()
 
-    fun queryApps(block: suspend SystemServiceInterface.(userId: Int?) -> List<ApplicationInfo>) {
+    fun queryApps(block: SystemServiceInterface.(userId: Int?) -> List<ApplicationInfo>) {
         queryApps = block
     }
 
-    fun notifySettingChange(block: suspend SystemServiceInterface.(name: String, type: Int) -> Unit) {
+    fun notifySettingChange(block: SystemServiceInterface.(name: String, type: Int) -> Unit) {
         notifySettingChange = block
     }
 
     fun build(): SystemServiceInterface {
         lock()
         return object : SystemServiceInterface {
-            override suspend fun queryApps(userId: Int?) = queryApps.invoke(this, userId)
-            override suspend fun notifySettingChange(name: String, type: Int) =
+            override fun queryApps(userId: Int?) = queryApps.invoke(this, userId)
+            override fun notifySettingChange(name: String, type: Int) =
                 notifySettingChange.invoke(this, name, type)
         }
     }
