@@ -27,7 +27,13 @@ data class ParcelablePackageInfo(
     constructor(packageInfo: PackageInfo) : this(
         packageName = packageInfo.packageName,
         userId = packageInfo.userId,
-        appId = packageInfo.appId
+        appId = packageInfo.appId,
+    )
+
+    fun restore() = PackageInfo(
+        packageName = packageName,
+        userId = userId,
+        appId = appId,
     )
 }
 
