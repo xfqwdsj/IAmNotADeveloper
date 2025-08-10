@@ -14,6 +14,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -33,7 +35,7 @@ import kotlin.math.roundToInt
 class MainActivity : ComponentActivity() {
     private val viewModel: AppViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         @Suppress("DEPRECATION") if (isMiui) {
@@ -93,6 +95,7 @@ class MainActivity : ComponentActivity() {
                         NavDisplay(
                             backStack = viewModel.backStack,
                             modifier = Modifier.consumeWindowInsets(insets.only { bottom }),
+                            sceneStrategy = rememberListDetailSceneStrategy(),
                             entryProvider = { it.navEntry(viewModel, contentPadding) },
                         )
                     }.first().measure(constraints)
