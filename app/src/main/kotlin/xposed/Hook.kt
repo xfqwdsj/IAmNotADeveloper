@@ -1,7 +1,6 @@
 package top.ltfan.notdeveloper.xposed
 
 import android.app.AndroidAppHelper
-import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.Binder
 import android.os.Bundle
@@ -18,7 +17,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import top.ltfan.notdeveloper.BuildConfig
-import top.ltfan.notdeveloper.data.SystemDataDir
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -41,7 +39,6 @@ import top.ltfan.notdeveloper.service.unwrap
 import top.ltfan.notdeveloper.util.clearBinderCallingIdentity
 import top.ltfan.notdeveloper.xposed.hook.RegisteredProvider
 import top.ltfan.notdeveloper.xposed.hook.withContentProviderContext
-import java.io.File
 import kotlin.reflect.jvm.javaMethod
 import kotlin.time.ExperimentalTime
 
@@ -285,34 +282,6 @@ private fun patchSystem() {
                 Log.d("Requested notification for $name with type $type from package $packageName, user ID: $userId")
             }
         }
-
-        val contextImplClass = XposedHelpers.findClass(
-            "android.app.ContextImpl",
-            lpparam.classLoader,
-        )
-
-        XposedBridge.hookAllMethods(
-            contextImplClass, "getDataDir",
-            object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    val context = param.thisObject as Context
-                    if (context.packageName != "android") return
-
-                    Log.d("Providing data directory for system_server")
-                    val dir = File(SystemDataDir)
-                    if (!dir.exists()) {
-                        Log.d("Creating data directory: $dir")
-                        dir.mkdirs()
-                    } else if (!dir.isDirectory) {
-                        Log.w("Data directory is not a directory: $dir")
-                        return
-                    }
-
-                    param.result = dir
-                    Log.d("Provided data directory: $dir")
-                }
-            },
-        )
 
         val activityManagerServiceClass = XposedHelpers.findClass(
             "com.android.server.am.ActivityManagerService",

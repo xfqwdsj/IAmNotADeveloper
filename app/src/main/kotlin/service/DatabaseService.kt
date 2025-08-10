@@ -11,9 +11,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import top.ltfan.notdeveloper.data.PackageInfo
-import top.ltfan.notdeveloper.data.PackageSettingsDao
-import top.ltfan.notdeveloper.data.ParcelablePackageInfo
+import top.ltfan.notdeveloper.database.PackageInfo
+import top.ltfan.notdeveloper.database.PackageSettingsDao
+import top.ltfan.notdeveloper.database.ParcelablePackageInfo
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.util.doBroadcast

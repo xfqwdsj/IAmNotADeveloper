@@ -3,7 +3,7 @@ package top.ltfan.notdeveloper.provider
 import android.os.IBinder
 import androidx.room.Room
 import de.robv.android.xposed.XC_MethodHook
-import top.ltfan.notdeveloper.data.PackageSettingsDatabase
+import top.ltfan.notdeveloper.database.PackageSettingsDatabase
 import top.ltfan.notdeveloper.service.DatabaseService
 import top.ltfan.notdeveloper.service.wrap
 import top.ltfan.notdeveloper.log.Log
