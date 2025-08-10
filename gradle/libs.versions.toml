@@ -11,6 +11,7 @@ lifecycle = "2.9.2"
 activity = "1.10.1"
 navigation = "1.0.0-alpha06"
 compose = "2025.07.00"
+compose-adaptive = "1.0.0-SNAPSHOT"
 room = "2.7.2"
 preference = "1.2.1"
 dsl-utilities = "1.0.0"
@@ -31,6 +32,7 @@ compose-ui = { module = "androidx.compose.ui:ui" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
