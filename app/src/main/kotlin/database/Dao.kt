@@ -1,4 +1,4 @@
-package top.ltfan.notdeveloper.data
+package top.ltfan.notdeveloper.database
 
 import androidx.room.Dao
 import androidx.room.Query
