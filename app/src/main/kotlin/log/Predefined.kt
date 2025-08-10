@@ -15,6 +15,10 @@ class InvalidPackageLogger(
     infix fun requesting(what: String?) {
         log(" requesting $what")
     }
+
+    infix fun skipping(what: String?) {
+        log(", skipping $what")
+    }
 }
 
 infix fun Logger.invalidPackage(callingPackage: String?) =
