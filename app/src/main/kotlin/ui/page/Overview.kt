@@ -14,6 +14,8 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +35,9 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 object Overview : Main() {
     override val navigationLabel: Int = R.string.label_nav_overview
     override val navigationIcon = Icons.Default.Home
+
+    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
+    override val metadata: Map<String, Any> = ListDetailSceneStrategy.listPane(this)
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
