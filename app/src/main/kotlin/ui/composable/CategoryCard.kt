@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
+import top.ltfan.notdeveloper.ui.util.LowestCardColors
 
 @Composable
 fun CategoryCard(
@@ -29,7 +30,7 @@ fun CategoryCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        colors = LowestCardColors,
     ) {
         Column {
             Text(
