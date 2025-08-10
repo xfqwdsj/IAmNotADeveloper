@@ -48,7 +48,9 @@ enum class RegisteredProvider(val authority: String) {
     SystemService(SystemServiceProvider) {
         context(context: ContentProviderContext)
         override fun patch(parameter: ContextProviderParameter) {
-            if (parameter !is ContextProviderParameter.Provider) error("SystemServiceProvider requires a ContentProvider parameter")
+            if (parameter !is ContextProviderParameter.Provider) {
+                error("${SystemService.name} requires a ContentProvider parameter")
+            }
             val provider = parameter.provider
             val (ams, helper, caller, callingPackage, callingUid, userId, stable, lpparam, param) = context
             SystemServiceProvider.patch(
