@@ -1,4 +1,4 @@
-package top.ltfan.notdeveloper.data
+package top.ltfan.notdeveloper.database
 
 import android.os.Parcelable
 import androidx.room.Entity
