@@ -12,6 +12,7 @@ activity = "1.10.1"
 navigation = "1.0.0-alpha06"
 compose = "2025.07.00"
 compose-adaptive = "1.0.0-SNAPSHOT"
+coil = "3.3.0"
 room = "2.7.2"
 preference = "1.2.1"
 dsl-utilities = "1.0.0"
@@ -34,6 +35,7 @@ compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended" }
+coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
