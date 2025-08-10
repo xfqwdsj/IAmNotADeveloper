@@ -2,6 +2,9 @@ package top.ltfan.notdeveloper.ui.composable
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -10,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import top.ltfan.notdeveloper.R
 
@@ -30,12 +32,12 @@ fun PreferenceItem(
         leadingContent = {
             if (testResult) {
                 Icon(
-                    painterResource(R.drawable.warning_24px),
+                    Icons.Outlined.Error,
                     contentDescription = stringResource(R.string.test_result_on)
                 )
             } else {
                 Icon(
-                    painterResource(R.drawable.check_24px),
+                    Icons.Outlined.CheckCircle,
                     contentDescription = stringResource(R.string.test_result_off)
                 )
             }
