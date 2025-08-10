@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
@@ -17,26 +18,51 @@ import top.ltfan.notdeveloper.database.ParcelablePackageInfo
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.util.doBroadcast
+import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
 @BinderInterface
 interface DatabaseServiceInterface {
-    fun insertPackageInfo(packageName: String, userId: Int, appId: Int, isSuccess: BooleanDatabaseCallback)
+    fun insertPackageInfo(
+        packageName: String, userId: Int, appId: Int, isSuccess: BooleanDatabaseCallback
+    )
+
     fun deletePackageInfo(packageName: String, userId: Int, isSuccess: BooleanDatabaseCallback)
     fun getPackageInfoByName(packageName: String, get: PackageInfoListDatabaseCallback)
-    fun listenPackageInfoByName(packageName: String, listener: PackageInfoListDatabaseCallback): Unlistener
+    fun listenPackageInfoByName(
+        packageName: String, listener: PackageInfoListDatabaseCallback
+    ): Unlistener
+
     fun getPackageInfoByUser(userId: Int, get: PackageInfoListDatabaseCallback)
     fun listenPackageInfoByUser(userId: Int, listener: PackageInfoListDatabaseCallback): Unlistener
     fun isPackageExists(packageName: String, userId: Int, get: BooleanDatabaseCallback)
-    fun isDetectionSet(packageName: String, userId: Int, methodName: String, get: BooleanDatabaseCallback)
-    fun isDetectionEnabled(packageName: String, userId: Int, methodName: String, get: BooleanDatabaseCallback)
-    fun listenDetectionEnabled(packageName: String, userId: Int, methodName: String, listener: BooleanDatabaseCallback): Unlistener
+    fun isDetectionSet(
+        packageName: String, userId: Int, methodName: String, get: BooleanDatabaseCallback
+    )
+
+    fun isDetectionEnabled(
+        packageName: String, userId: Int, methodName: String, get: BooleanDatabaseCallback
+    )
+
+    fun listenDetectionEnabled(
+        packageName: String, userId: Int, methodName: String, listener: BooleanDatabaseCallback
+    ): Unlistener
+
     fun clearAllData(isSuccess: BooleanDatabaseCallback)
-    fun toggleDetectionEnabled(packageName: String, userId: Int, methodName: String, isSuccess: BooleanDatabaseCallback)
-    fun enableAllDetectionsForPackage(packageName: String, userId: Int, isSuccess: BooleanDatabaseCallback)
-    fun disableAllDetectionsForPackage(packageName: String, userId: Int, isSuccess: BooleanDatabaseCallback)
+    fun toggleDetectionEnabled(
+        packageName: String, userId: Int, methodName: String, isSuccess: BooleanDatabaseCallback
+    )
+
+    fun enableAllDetectionsForPackage(
+        packageName: String, userId: Int, isSuccess: BooleanDatabaseCallback
+    )
+
+    fun disableAllDetectionsForPackage(
+        packageName: String, userId: Int, isSuccess: BooleanDatabaseCallback
+    )
 }
 
 class DatabaseService(
@@ -272,24 +298,42 @@ interface DatabaseServiceClient {
     suspend fun isDetectionSet(packageName: String, userId: Int, methodName: String): Boolean
     suspend fun isDetectionSet(packageName: String, userId: Int, method: DetectionMethod) =
         isDetectionSet(packageName, userId, method.name)
+
     suspend fun isDetectionSet(packageName: String, userId: Int, methods: List<DetectionMethod>) =
         methods.map { isDetectionSet(packageName, userId, it) }
+
     suspend fun isDetectionEnabled(packageName: String, userId: Int, methodName: String): Boolean
     suspend fun isDetectionEnabled(packageName: String, userId: Int, method: DetectionMethod) =
         isDetectionEnabled(packageName, userId, method.name)
-    suspend fun isDetectionEnabled(packageName: String, userId: Int, methods: List<DetectionMethod>) =
-        methods.map { isDetectionEnabled(packageName, userId, it) }
-    fun listenDetectionEnabled(packageName: String, userId: Int, methodName: String, listener: BooleanDatabaseCallback): Unlistener
-    fun listenDetectionEnabled(packageName: String, userId: Int, method: DetectionMethod, listener: BooleanDatabaseCallback) =
-        listenDetectionEnabled(packageName, userId, method.name, listener)
-    fun listenDetectionEnabled(packageName: String, userId: Int, methods: List<DetectionMethod>, listener: BooleanDatabaseCallback) =
-        methods.map { listenDetectionEnabled(packageName, userId, it, listener) }
+
+    suspend fun isDetectionEnabled(
+        packageName: String, userId: Int, methods: List<DetectionMethod>
+    ) = methods.map { isDetectionEnabled(packageName, userId, it) }
+
+    fun listenDetectionEnabled(
+        packageName: String, userId: Int, methodName: String, listener: BooleanDatabaseCallback
+    ): Unlistener
+
+    fun listenDetectionEnabled(
+        packageName: String, userId: Int, method: DetectionMethod, listener: BooleanDatabaseCallback
+    ) = listenDetectionEnabled(packageName, userId, method.name, listener)
+
+    fun listenDetectionEnabled(
+        packageName: String,
+        userId: Int,
+        methods: List<DetectionMethod>,
+        listener: BooleanDatabaseCallback
+    ) = methods.map { listenDetectionEnabled(packageName, userId, it, listener) }
+
     suspend fun clearAllData()
     suspend fun toggleDetectionEnabled(packageName: String, userId: Int, methodName: String)
     suspend fun toggleDetectionEnabled(packageName: String, userId: Int, method: DetectionMethod) =
         toggleDetectionEnabled(packageName, userId, method.name)
-    suspend fun toggleDetectionEnabled(packageName: String, userId: Int, methods: List<DetectionMethod>) =
-        methods.forEach { toggleDetectionEnabled(packageName, userId, it) }
+
+    suspend fun toggleDetectionEnabled(
+        packageName: String, userId: Int, methods: List<DetectionMethod>
+    ) = methods.forEach { toggleDetectionEnabled(packageName, userId, it) }
+
     suspend fun enableAllDetectionsForPackage(packageName: String, userId: Int)
     suspend fun disableAllDetectionsForPackage(packageName: String, userId: Int)
 
@@ -300,61 +344,65 @@ interface DatabaseServiceClient {
         override fun listenPackageInfo(
             packageName: String, listener: (List<PackageInfo>) -> Unit
         ) = Unlistener
+
         override suspend fun getPackageInfo(userId: Int) = emptyList<PackageInfo>()
         override fun listenPackageInfo(
             userId: Int, listener: (List<PackageInfo>) -> Unit
         ) = Unlistener
+
         override suspend fun isPackageExists(packageName: String, userId: Int) = false
         override suspend fun isDetectionSet(
             packageName: String, userId: Int, methodName: String
         ) = false
+
         override suspend fun isDetectionEnabled(
             packageName: String, userId: Int, methodName: String
         ) = true
+
         override fun listenDetectionEnabled(
             packageName: String, userId: Int, methodName: String, listener: BooleanDatabaseCallback
         ) = Unlistener
+
         override suspend fun clearAllData() {}
         override suspend fun toggleDetectionEnabled(
             packageName: String, userId: Int, methodName: String
-        ) {}
+        ) {
+        }
+
         override suspend fun enableAllDetectionsForPackage(
             packageName: String, userId: Int
-        ) {}
+        ) {
+        }
+
         override suspend fun disableAllDetectionsForPackage(
             packageName: String, userId: Int
-        ) {}
+        ) {
+        }
     }
 }
 
 fun DatabaseServiceClient(service: DatabaseServiceInterface): DatabaseServiceClient =
     object : DatabaseServiceClient, DatabaseServiceInterface by service {
         override suspend fun insertPackageInfo(packageName: String, userId: Int, appId: Int) {
-            withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    insertPackageInfo(packageName, userId, appId) {
-                        continuation.resume(Unit)
-                    }
+            blockWithTimeoutCatching(Unit) { continuation ->
+                insertPackageInfo(packageName, userId, appId) {
+                    continuation.resume(Unit)
                 }
             }
         }
 
         override suspend fun deletePackageInfo(packageName: String, userId: Int) {
-            withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    deletePackageInfo(packageName, userId) {
-                        continuation.resume(Unit)
-                    }
+            blockWithTimeoutCatching(Unit) { continuation ->
+                deletePackageInfo(packageName, userId) {
+                    continuation.resume(Unit)
                 }
             }
         }
 
         override suspend fun getPackageInfo(packageName: String): List<PackageInfo> {
-            return withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    getPackageInfoByName(packageName) { packageInfoList ->
-                        continuation.resume(packageInfoList.restore())
-                    }
+            return blockWithTimeoutCatching(emptyList()) { continuation ->
+                getPackageInfoByName(packageName) { packageInfoList ->
+                    continuation.resume(packageInfoList.restore())
                 }
             }
         }
@@ -366,11 +414,9 @@ fun DatabaseServiceClient(service: DatabaseServiceInterface): DatabaseServiceCli
         }
 
         override suspend fun getPackageInfo(userId: Int): List<PackageInfo> {
-            return withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    getPackageInfoByUser(userId) { packageInfoList ->
-                        continuation.resume(packageInfoList.restore())
-                    }
+            return blockWithTimeoutCatching(emptyList()) { continuation ->
+                getPackageInfoByUser(userId) { packageInfoList ->
+                    continuation.resume(packageInfoList.restore())
                 }
             }
         }
@@ -382,11 +428,9 @@ fun DatabaseServiceClient(service: DatabaseServiceInterface): DatabaseServiceCli
         }
 
         override suspend fun isPackageExists(packageName: String, userId: Int): Boolean {
-            return withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    isPackageExists(packageName, userId) { exists ->
-                        continuation.resume(exists)
-                    }
+            return blockWithTimeoutCatching(false) { continuation ->
+                isPackageExists(packageName, userId) { exists ->
+                    continuation.resume(exists)
                 }
             }
         }
@@ -394,11 +438,9 @@ fun DatabaseServiceClient(service: DatabaseServiceInterface): DatabaseServiceCli
         override suspend fun isDetectionSet(
             packageName: String, userId: Int, methodName: String
         ): Boolean {
-            return withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    isDetectionSet(packageName, userId, methodName) { isSet ->
-                        continuation.resume(isSet)
-                    }
+            return blockWithTimeoutCatching(false) { continuation ->
+                isDetectionSet(packageName, userId, methodName) { isSet ->
+                    continuation.resume(isSet)
                 }
             }
         }
@@ -406,21 +448,17 @@ fun DatabaseServiceClient(service: DatabaseServiceInterface): DatabaseServiceCli
         override suspend fun isDetectionEnabled(
             packageName: String, userId: Int, methodName: String
         ): Boolean {
-            return withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    isDetectionEnabled(packageName, userId, methodName) { isEnabled ->
-                        continuation.resume(isEnabled)
-                    }
+            return blockWithTimeoutCatching(true) { continuation ->
+                isDetectionEnabled(packageName, userId, methodName) { isEnabled ->
+                    continuation.resume(isEnabled)
                 }
             }
         }
 
         override suspend fun clearAllData() {
-            withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    clearAllData {
-                        continuation.resume(Unit)
-                    }
+            blockWithTimeoutCatching(Unit) { continuation ->
+                clearAllData {
+                    continuation.resume(Unit)
                 }
             }
         }
@@ -428,33 +466,50 @@ fun DatabaseServiceClient(service: DatabaseServiceInterface): DatabaseServiceCli
         override suspend fun toggleDetectionEnabled(
             packageName: String, userId: Int, methodName: String
         ) {
-            withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    toggleDetectionEnabled(packageName, userId, methodName) {
-                        continuation.resume(Unit)
-                    }
+            blockWithTimeoutCatching(Unit) { continuation ->
+                toggleDetectionEnabled(packageName, userId, methodName) {
+                    continuation.resume(Unit)
                 }
             }
         }
 
         override suspend fun enableAllDetectionsForPackage(packageName: String, userId: Int) {
-            withTimeout(10.minutes) {
-                suspendCoroutine { continuation ->
-                    enableAllDetectionsForPackage(packageName, userId) {
-                        continuation.resume(Unit)
-                    }
+            blockWithTimeoutCatching(Unit) { continuation ->
+                enableAllDetectionsForPackage(packageName, userId) {
+                    continuation.resume(Unit)
                 }
             }
         }
 
         override suspend fun disableAllDetectionsForPackage(packageName: String, userId: Int) {
-            withTimeout(10.minutes) {
+            blockWithTimeoutCatching(Unit) { continuation ->
+                disableAllDetectionsForPackage(packageName, userId) {
+                    continuation.resume(Unit)
+                }
+            }
+        }
+
+        private suspend inline fun <R> blockWithTimeoutCatching(
+            defaultValue: R,
+            duration: Duration = 10.minutes,
+            crossinline block: (Continuation<R>) -> Unit,
+        ) = try {
+            withTimeout(duration) {
                 suspendCoroutine { continuation ->
-                    disableAllDetectionsForPackage(packageName, userId) {
-                        continuation.resume(Unit)
+                    try {
+                        block(continuation)
+                    } catch (e: Throwable) {
+                        Log.e("Error during database operation", e)
+                        continuation.resume(defaultValue)
                     }
                 }
             }
+        } catch (e: TimeoutCancellationException) {
+            Log.e("Database operation timed out after $duration", e)
+            defaultValue
+        } catch (e: Throwable) {
+            Log.e("Error during database operation", e)
+            defaultValue
         }
 
         private fun List<ParcelablePackageInfo>.restore() = map { it.restore() }
@@ -483,8 +538,8 @@ fun interface PackageInfoListDatabaseCallback : DatabaseCallback {
     operator fun invoke(packageInfoList: List<ParcelablePackageInfo>)
 }
 
-private class IPackageInfoListDatabaseCallback(listener: PackageInfoListDatabaseCallback) : IDatabaseCallback,
-    PackageInfoListDatabaseCallback by listener {
+private class IPackageInfoListDatabaseCallback(callback: PackageInfoListDatabaseCallback) :
+    IDatabaseCallback, PackageInfoListDatabaseCallback by callback {
     override fun asBinder() = wrap()
 }
 
@@ -495,7 +550,8 @@ fun interface BooleanDatabaseCallback : DatabaseCallback {
     operator fun invoke(value: Boolean)
 }
 
-private class IBooleanDatabaseCallback(listener: BooleanDatabaseCallback) : IDatabaseCallback, BooleanDatabaseCallback by listener {
+private class IBooleanDatabaseCallback(callback: BooleanDatabaseCallback) : IDatabaseCallback,
+    BooleanDatabaseCallback by callback {
     override fun asBinder(): IBinder = wrap()
 }
 
