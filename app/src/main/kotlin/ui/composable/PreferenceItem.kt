@@ -3,8 +3,8 @@ package top.ltfan.notdeveloper.ui.composable
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -32,12 +32,12 @@ fun PreferenceItem(
         leadingContent = {
             if (testResult) {
                 Icon(
-                    Icons.Default.Clear,
+                    Icons.Outlined.Error,
                     contentDescription = stringResource(R.string.test_result_on)
                 )
             } else {
                 Icon(
-                    Icons.Default.Check,
+                    Icons.Outlined.CheckCircle,
                     contentDescription = stringResource(R.string.test_result_off)
                 )
             }
