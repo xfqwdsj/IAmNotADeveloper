@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material3.adaptive)
     implementation(libs.compose.icons)
+    implementation(libs.coil)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
