@@ -51,19 +51,19 @@ class PaddingValuesOperationScope(
         return PaddingValues(start, top, end, bottom)
     }
 
-    val PaddingValues.start: Dp
-        @Composable inline get() = calculateStartPadding(LocalLayoutDirection.current)
-
-    val PaddingValues.top inline get() = calculateTopPadding()
-
-    val PaddingValues.end: Dp
-        @Composable inline get() = calculateEndPadding(LocalLayoutDirection.current)
-
-    val PaddingValues.bottom inline get() = calculateBottomPadding()
-
     @DslMarker
     annotation class Dsl
 }
+
+val PaddingValues.start: Dp
+    @Composable inline get() = calculateStartPadding(LocalLayoutDirection.current)
+
+val PaddingValues.top inline get() = calculateTopPadding()
+
+val PaddingValues.end: Dp
+    @Composable inline get() = calculateEndPadding(LocalLayoutDirection.current)
+
+val PaddingValues.bottom inline get() = calculateBottomPadding()
 
 @Composable
 operator fun PaddingValues.plus(other: PaddingValues) = (this with other) {
