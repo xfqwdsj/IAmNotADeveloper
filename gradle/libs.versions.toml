@@ -8,10 +8,12 @@ compileSdk = "36"
 targetSdk = "36"
 minSdk = "27"
 lifecycle = "2.9.2"
+lifecycle-viewmodelNav3 = "1.0.0-alpha04"
 activity = "1.10.1"
 navigation = "1.0.0-alpha06"
 compose = "2025.07.00"
 compose-adaptive = "1.0.0-SNAPSHOT"
+haze = "1.6.9"
 coil = "3.3.0"
 room = "2.7.2"
 preference = "1.2.1"
@@ -23,6 +25,7 @@ xposed-api = "82"
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+lifecycle-viewmodelNav3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle-viewmodelNav3" }
 activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 navigation-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation" }
 navigation-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation" }
@@ -35,6 +38,8 @@ compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
