@@ -7,15 +7,13 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.ui.util.TransparentListItemColors
+import top.ltfan.notdeveloper.ui.util.ListItemColorsTransparent
 
 @Composable
 fun PreferenceItem(
@@ -46,6 +44,6 @@ fun PreferenceItem(
         trailingContent = {
             Switch(checked = checked, onCheckedChange = null, enabled = enabled)
         },
-        colors = TransparentListItemColors,
+        colors = ListItemColorsTransparent,
     )
 }
