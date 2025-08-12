@@ -2,6 +2,7 @@ package top.ltfan.notdeveloper.xposed
 
 import android.app.AndroidAppHelper
 import android.content.pm.ApplicationInfo
+import android.graphics.Bitmap
 import android.os.Binder
 import android.os.Bundle
 import android.os.UserHandle
@@ -196,115 +197,7 @@ private fun patchSystem() {
     if (lpparam.packageName != "android") return
 
     Log.processing("system") {
-        val service = SystemService {
-            queryUsers { userIds ->
-                val application = AndroidAppHelper.currentApplication()
-                val uid = Binder.getCallingUid()
-                val packageName =
-                    application.packageManager.getPackagesForUid(uid)
-                        ?.takeIf { it.size == 1 }?.first() ?: run {
-                        Log callingPackageNotFoundWhen "queryUsers"
-                        return@queryUsers emptyList()
-                    }
-
-                if (packageName != BuildConfig.APPLICATION_ID) {
-                    Log invalidPackage packageName skipping "queryUsers"
-                    return@queryUsers emptyList()
-                }
-
-                clearBinderCallingIdentity {
-                    val userManager = application.getSystemService<UserManager>()
-                    (XposedHelpers.callMethod(userManager, "getUsers") as List<*>)
-                        .map {
-                            UserInfo(
-                                XposedHelpers.getIntField(it, "id"),
-                                XposedHelpers.getObjectField(it, "name") as String?,
-                                XposedHelpers.getObjectField(it, "iconPath") as String,
-                                XposedHelpers.getIntField(it, "flags"),
-                            )
-                        }
-                        .let { list -> userIds?.let { ids -> list.filter { it.id in ids } } ?: list }
-                }
-            }
-
-            queryApps { userIds ->
-                val application = AndroidAppHelper.currentApplication()
-                val uid = Binder.getCallingUid()
-                val packageName =
-                    application.packageManager.getPackagesForUid(uid)
-                        ?.takeIf { it.size == 1 }?.first() ?: run {
-                        Log callingPackageNotFoundWhen "queryApps($userIds)"
-                        return@queryApps emptyList()
-                    }
-
-                if (packageName != BuildConfig.APPLICATION_ID) {
-                    Log invalidPackage packageName skipping "queryApps($userIds)"
-                    return@queryApps emptyList()
-                }
-
-                val serviceManagerClass = XposedHelpers.findClass(
-                    "android.os.ServiceManager", lpparam.classLoader
-                )
-                val packageManagerService = XposedHelpers.callStaticMethod(
-                    serviceManagerClass, "getService", "package"
-                )
-                val iPackageManagerStubClass = XposedHelpers.findClass(
-                    "android.content.pm.IPackageManager\$Stub", lpparam.classLoader
-                )
-                val packageManager = XposedHelpers.callStaticMethod(
-                    iPackageManagerStubClass, "asInterface", packageManagerService
-                )
-
-                val requestedIds = userIds ?: queryUsers().map { it.id }
-
-                requestedIds.flatMap {
-                    val slice = XposedHelpers.callMethod(
-                        packageManager, "getInstalledApplications",
-                        0, it
-                    )
-                    @Suppress("UNCHECKED_CAST")
-                    XposedHelpers.getObjectField(slice, "mList") as List<ApplicationInfo>
-                }
-            }
-
-            notifySettingChange { name, type ->
-                val application = AndroidAppHelper.currentApplication()
-                val uid = Binder.getCallingUid()
-                val packageName =
-                    application.packageManager.getPackagesForUid(uid)
-                        ?.takeIf { it.size == 1 }?.first() ?: run {
-                        Log callingPackageNotFoundWhen "notifySettingChange($name, $type)"
-                        return@notifySettingChange
-                    }
-
-                if (packageName != BuildConfig.APPLICATION_ID) {
-                    Log invalidPackage packageName skipping "notification for $name"
-                    return@notifySettingChange
-                }
-
-                Log.d("Received notification request for $name")
-
-                val userId = XposedHelpers.callStaticMethod(
-                    UserHandle::class.java, "getUserId", uid
-                ) as Int
-
-                val bundle = Bundle().apply {
-                    putInt(BundleExtraType, type)
-                    putInt("_user", userId)
-                }
-
-                clearBinderCallingIdentity {
-                    application.contentResolver.call(
-                        "content://settings".toUri(),
-                        CallMethodNotify,
-                        name,
-                        bundle,
-                    )
-                }
-
-                Log.d("Requested notification for $name with type $type from package $packageName, user ID: $userId")
-            }
-        }
+        val service = SystemService(lpparam)
 
         val activityManagerServiceClass = XposedHelpers.findClass(
             "com.android.server.am.ActivityManagerService",
