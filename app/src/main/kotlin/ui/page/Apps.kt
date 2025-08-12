@@ -130,7 +130,7 @@ object Apps : Main() {
 
             val list = remember {
                 service?.queryApps()?.ifEmpty { null }?.sortedBy { it.packageName }?.also {
-                    isAppListError = true
+                    isAppListError = false
                 } ?: listOf(application.applicationInfo).also {
                     isAppListError = true
                 }
