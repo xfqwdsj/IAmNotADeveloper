@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.application
+import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
@@ -72,9 +73,9 @@ object Apps : Main() {
     @Composable
     context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
-        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
-            state = topAppBarState,
-        )
+        val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+        val myPackageInfo =
+            remember { application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0) }
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
@@ -131,14 +132,16 @@ object Apps : Main() {
             val list = remember {
                 service?.queryApps()?.ifEmpty { null }?.sortedBy { it.packageName }?.also {
                     isAppListError = false
-                } ?: listOf(application.applicationInfo).also {
+                } ?: listOf(myPackageInfo).also {
                     isAppListError = true
                 }
             }
 
             val snackbarMessage = stringResource(R.string.message_snackbar_apps_query_failed)
             LaunchedEffect(isAppListError) {
-                snackbarHostState.showSnackbar(snackbarMessage)
+                if (isAppListError) {
+                    snackbarHostState.showSnackbar(snackbarMessage)
+                }
             }
 
             val cardColors = CardColorsLowest
@@ -172,7 +175,7 @@ object Apps : Main() {
 
                     items(
                         items = list,
-                        key = { "${it.packageName}-${it.uid}" },
+                        key = { "${it.packageName}-${it.applicationInfo?.uid}" },
                         contentType = { "app" },
                         modifier = { Modifier.padding(horizontal = 16.dp) }
                     ) {
