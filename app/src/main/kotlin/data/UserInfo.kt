@@ -8,7 +8,6 @@ import kotlinx.parcelize.parcelableCreator
 data class UserInfo(
     val id: Int,
     val name: String?,
-    val iconPath: String,
     val flags: Int,
 ) : Parcelable {
     companion object {
