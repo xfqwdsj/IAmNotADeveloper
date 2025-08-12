@@ -4,9 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -22,10 +20,6 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
@@ -33,25 +27,17 @@ import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import top.ltfan.dslutilities.LockableValueDsl
-import top.ltfan.notdeveloper.log.Log
-import top.ltfan.notdeveloper.ui.util.bottom
-import top.ltfan.notdeveloper.ui.util.end
-import top.ltfan.notdeveloper.ui.util.start
-import top.ltfan.notdeveloper.ui.util.top
 
 @Composable
 fun GroupedLazyColumn(
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    stickyHeadersContentPaddingOffset: Boolean = false,
     reverseLayout: Boolean = false,
     spacing: Dp = 0.dp,
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
@@ -59,17 +45,6 @@ fun GroupedLazyColumn(
     overscrollEffect: OverscrollEffect? = rememberOverscrollEffect(),
     content: GroupedLazyListScope.() -> Unit,
 ) {
-    val stickyOffsetWithPadding = rememberStickyOffset(
-        isVertical = true,
-        reverse = reverseLayout,
-        state = state,
-        contentPadding = contentPadding,
-        stickyHeadersContentPaddingOffset = stickyHeadersContentPaddingOffset,
-    )
-
-    val stickyOffset = remember { derivedStateOf { stickyOffsetWithPadding.value.first } }
-    val contentPadding by remember { derivedStateOf { stickyOffsetWithPadding.value.second } }
-
     LazyColumn(
         modifier = modifier,
         state = state,
@@ -81,7 +56,6 @@ fun GroupedLazyColumn(
     ) {
         with(
             GroupedLazyListScope(
-                stickyOffset = stickyOffset,
                 isVertical = true,
                 reverse = reverseLayout,
                 spacing = spacing,
@@ -97,7 +71,6 @@ fun GroupedLazyRow(
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    stickyHeadersContentPaddingOffset: Boolean = false,
     reverseLayout: Boolean = false,
     spacing: Dp = 0.dp,
     flingBehavior: FlingBehavior = ScrollableDefaults.flingBehavior(),
@@ -105,17 +78,6 @@ fun GroupedLazyRow(
     overscrollEffect: OverscrollEffect? = rememberOverscrollEffect(),
     content: GroupedLazyListScope.() -> Unit,
 ) {
-    val stickyOffsetWithPadding = rememberStickyOffset(
-        isVertical = false,
-        reverse = reverseLayout,
-        state = state,
-        contentPadding = contentPadding,
-        stickyHeadersContentPaddingOffset = stickyHeadersContentPaddingOffset,
-    )
-
-    val stickyOffset = remember { derivedStateOf { stickyOffsetWithPadding.value.first } }
-    val contentPadding by remember { derivedStateOf { stickyOffsetWithPadding.value.second } }
-
     LazyColumn(
         modifier = modifier,
         state = state,
@@ -127,7 +89,6 @@ fun GroupedLazyRow(
     ) {
         with(
             GroupedLazyListScope(
-                stickyOffset = stickyOffset,
                 isVertical = false,
                 reverse = reverseLayout,
                 spacing = spacing,
@@ -138,70 +99,8 @@ fun GroupedLazyRow(
     }
 }
 
-@Composable
-fun rememberStickyOffset(
-    isVertical: Boolean,
-    reverse: Boolean,
-    state: LazyListState,
-    contentPadding: PaddingValues,
-    stickyHeadersContentPaddingOffset: Boolean,
-): State<Pair<DpOffset, PaddingValues>> {
-    val start = contentPadding.start
-    val top = contentPadding.top
-    val end = contentPadding.end
-    val bottom = contentPadding.bottom
-    val density = LocalDensity.current
-
-    return remember {
-        derivedStateOf {
-            if (!stickyHeadersContentPaddingOffset) return@derivedStateOf DpOffset.Zero to contentPadding
-
-            var newStart = start
-            var newTop = top
-            var newEnd = end
-            var newBottom = bottom
-
-            val target = when (isVertical) {
-                true -> when (reverse) {
-                    false -> top.also { newTop = 0.dp }
-                    true -> bottom.also { newBottom = 0.dp }
-                }
-
-                false -> when (reverse) {
-                    false -> start.also { newStart = 0.dp }
-                    true -> end.also { newEnd = 0.dp }
-                }
-            }
-
-            val offset = with(density) {
-                state.layoutInfo.visibleItemsInfo
-                    .firstOrNull { it.contentType is StickyHeaderContent }
-                    ?.offset?.toDp()
-            }
-
-            val result = if (offset == null || offset >= target) {
-                0.dp
-            } else {
-                target - offset
-            }
-
-            if (isVertical) {
-                DpOffset(0.dp, result)
-            } else {
-                DpOffset(result, 0.dp)
-            } to PaddingValues(
-                start = newStart,
-                top = newTop,
-                end = newEnd,
-                bottom = newBottom,
-            )
-        }
-    }
-}
-
 @LazyScopeMarker
 class GroupedLazyListScope(
-    val stickyOffset: State<DpOffset>,
     val isVertical: Boolean,
     val reverse: Boolean,
     val spacing: Dp,
@@ -227,7 +126,7 @@ class GroupedLazyListScope(
     fun LazyListScope.build() {
         val scope = this@GroupedLazyListScope
         scope.lock()
-        with(LazyListGroupScope(this, this@GroupedLazyListScope.stickyOffset)) {
+        with(LazyListGroupScope(this)) {
             val groups = scope.groups.toList()
             groups.forEachIndexed { index, group ->
                 if (index > 0) {
@@ -254,33 +153,7 @@ class GroupedLazyListScope(
 @LazyScopeMarker
 class LazyListGroupScope(
     private val scope: LazyListScope,
-    private val stickyOffset: State<DpOffset>,
-) : LazyListScope by scope {
-    override fun stickyHeader(
-        key: Any?, contentType: Any?, content: @Composable LazyItemScope.(Int) -> Unit
-    ) {
-        scope.stickyHeader(key, StickyHeaderContent(contentType)) { index ->
-            val offset by this@LazyListGroupScope.stickyOffset
-            val isVertical = offset.y != 0.dp
-            val content = @Composable {
-                Spacer(
-                    if (isVertical) {
-                        Modifier.height(offset.y)
-                    } else {
-                        Modifier.width(offset.x)
-                    }
-                )
-                content(index)
-            }
-
-            if (isVertical) {
-                Column { content() }
-            } else {
-                Row { content() }
-            }
-        }
-    }
-}
+) : LazyListScope by scope
 
 private data class StickyHeaderContent(val contentType: Any?)
 
