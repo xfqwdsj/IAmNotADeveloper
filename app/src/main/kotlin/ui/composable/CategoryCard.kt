@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
-import top.ltfan.notdeveloper.ui.util.LowestCardColors
+import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 
 @Composable
 fun CategoryCard(
@@ -30,7 +29,7 @@ fun CategoryCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = LowestCardColors,
+        colors = CardColorsLowest,
     ) {
         Column {
             Text(
