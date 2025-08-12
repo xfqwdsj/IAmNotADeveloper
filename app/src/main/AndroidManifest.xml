@@ -16,7 +16,7 @@
         tools:targetApi="33">
         <activity
             android:name=".ui.activity.MainActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen"
             android:exported="true"
             android:theme="@style/Theme.IAmNotADeveloper">
             <intent-filter>
