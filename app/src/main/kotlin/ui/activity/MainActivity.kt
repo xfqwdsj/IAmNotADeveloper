@@ -125,7 +125,6 @@ class MainActivity : ComponentActivity() {
                                 sceneStrategy = rememberListDetailSceneStrategy(),
                                 entryProvider = { it.navEntry(contentPadding) },
                             )
-                            Text(contentPadding.toString())
                         }
                     }.first().measure(constraints)
 
