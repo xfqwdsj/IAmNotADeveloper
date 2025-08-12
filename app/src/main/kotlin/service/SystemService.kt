@@ -2,7 +2,7 @@ package top.ltfan.notdeveloper.service
 
 import android.app.AndroidAppHelper
 import android.content.Context
-import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.os.Binder
 import android.os.Bundle
 import android.os.UserHandle
@@ -29,7 +29,7 @@ const val BundleExtraType = "type"
 @BinderInterface
 interface SystemServiceInterface {
     fun queryUsers(userIds: List<Int> = emptyList()): List<UserInfo>
-    fun queryApps(userIds: List<Int> = emptyList()): List<ApplicationInfo>
+    fun queryApps(userIds: List<Int> = emptyList()): List<PackageInfo>
     fun notifySettingChange(name: String, type: Int)
 }
 
@@ -65,7 +65,7 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
         }
     }
 
-    override fun queryApps(userIds: List<Int>): List<ApplicationInfo> {
+    override fun queryApps(userIds: List<Int>): List<PackageInfo> {
         val identity =
             "${SystemService::class.qualifiedName}.${::queryApps.name}(${userIds.joinToString()})"
         val application = AndroidAppHelper.currentApplication()
@@ -99,11 +99,11 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
 
         return requestedIds.flatMap {
             val slice = XposedHelpers.callMethod(
-                packageManager, "getInstalledApplications",
+                packageManager, "getInstalledPackages",
                 0, it
             )
             @Suppress("UNCHECKED_CAST")
-            XposedHelpers.getObjectField(slice, "mList") as List<ApplicationInfo>
+            XposedHelpers.getObjectField(slice, "mList") as List<PackageInfo>
         }
     }
 
