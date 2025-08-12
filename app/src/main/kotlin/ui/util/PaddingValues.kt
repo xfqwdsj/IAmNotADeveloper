@@ -9,8 +9,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import top.ltfan.dslutilities.LockableValueDsl
 
-@PaddingValuesOperationScope.Dsl
-class PaddingValuesOperationScope(
+@TwoPaddingValuesOperationScope.Dsl
+class TwoPaddingValuesOperationScope(
     val first: PaddingValues,
     val second: PaddingValues
 ) : LockableValueDsl() {
@@ -55,10 +55,42 @@ class PaddingValuesOperationScope(
     annotation class Dsl
 }
 
+@PaddingValuesOperationScope.Dsl
+class PaddingValuesOperationScope(private val padding: PaddingValues) : LockableValueDsl() {
+    var start by required<Dp>()
+    var top by required<Dp>()
+    var end by required<Dp>()
+    var bottom by required<Dp>()
+
+    @SuppressLint("ComposableNaming")
+    @Composable
+    fun init() {
+        start = padding.start
+        top = padding.top
+        end = padding.end
+        bottom = padding.bottom
+    }
+
+    @Composable
+    fun build(): PaddingValues {
+        lock()
+        return PaddingValues(start, top, end, bottom)
+    }
+
+    @DslMarker
+    annotation class Dsl
+}
+
+val PaddingValues.left: Dp
+    @Composable inline get() = calculateLeftPadding(LocalLayoutDirection.current)
+
 val PaddingValues.start: Dp
     @Composable inline get() = calculateStartPadding(LocalLayoutDirection.current)
 
 val PaddingValues.top inline get() = calculateTopPadding()
+
+val PaddingValues.right: Dp
+    @Composable inline get() = calculateRightPadding(LocalLayoutDirection.current)
 
 val PaddingValues.end: Dp
     @Composable inline get() = calculateEndPadding(LocalLayoutDirection.current)
@@ -81,7 +113,21 @@ operator fun PaddingValues.minus(other: PaddingValues) = (this with other) {
     bottom { minus }
 }
 
-infix fun PaddingValues.with(other: PaddingValues): @Composable (@Composable PaddingValuesOperationScope.() -> Unit) -> PaddingValues =
+infix fun PaddingValues.with(other: PaddingValues): @Composable (@Composable TwoPaddingValuesOperationScope.() -> Unit) -> PaddingValues =
     {
-        PaddingValuesOperationScope(this, other).apply { it() }.build()
+        TwoPaddingValuesOperationScope(this, other).apply { it() }.build()
     }
+
+@Composable
+inline fun PaddingValues.operate(block: @Composable PaddingValuesOperationScope.() -> Unit) =
+    PaddingValuesOperationScope(this).apply {
+        init()
+        block()
+    }.build()
+
+@Composable
+inline fun PaddingValues.Companion.build(block: @Composable PaddingValuesOperationScope.() -> Unit): PaddingValues =
+    PaddingValuesOperationScope(PaddingValues.Zero).apply {
+        init()
+        block()
+    }.build()
