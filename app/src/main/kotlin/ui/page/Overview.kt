@@ -28,7 +28,14 @@ import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.ui.composable.CategoryCard
 import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.HazeZIndex
+import top.ltfan.notdeveloper.ui.util.LargeTopAppBarColorsTransparent
+import top.ltfan.notdeveloper.ui.util.appBarHazeEffect
+import top.ltfan.notdeveloper.ui.util.contentHazeSource
+import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.util.only
+import top.ltfan.notdeveloper.ui.util.operate
+import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.util.with
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
@@ -51,20 +58,24 @@ object Overview : Main() {
                     title = {
                         Text(stringResource(R.string.app_name))
                     },
+                    modifier = Modifier
+                        .hazeSource(zIndex = HazeZIndex.topBar)
+                        .appBarHazeEffect(),
                     windowInsets = AppWindowInsets.only { horizontal + top },
-                    scrollBehavior = scrollBehavior
+                    scrollBehavior = scrollBehavior,
+                    colors = LargeTopAppBarColorsTransparent,
                 )
             },
-            contentWindowInsets = AppWindowInsets,
-        ) { scaffoldPadding ->
-            val contentPadding = (contentPadding with scaffoldPadding) {
-                start { plus }
-                top { plus + 16.dp }
-                end { plus }
-                bottom { plus + 16.dp }
+            contentWindowInsets = AppWindowInsets + contentPadding,
+        ) { contentPadding ->
+            val contentPadding = contentPadding.operate {
+                top += 16.dp
+                bottom += 16.dp
             }
+
             LazyColumn(
                 modifier = Modifier
+                    .contentHazeSource()
                     .consumeWindowInsets(contentPadding)
                     .fillMaxSize(),
                 contentPadding = contentPadding,

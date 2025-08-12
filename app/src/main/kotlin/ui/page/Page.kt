@@ -15,7 +15,8 @@ sealed class Page {
     context(contentPadding: PaddingValues)
     abstract fun AppViewModel.Content()
 
-    fun navEntry(viewModel: AppViewModel, contentPadding: PaddingValues) = NavEntry(
+    context(viewModel: AppViewModel)
+    fun navEntry(contentPadding: PaddingValues) = NavEntry(
         key = this,
         metadata = metadata,
     ) {
