@@ -5,9 +5,11 @@ import androidx.room.Room
 import top.ltfan.notdeveloper.database.PackageSettingsDatabase
 
 class NotDevApplication : Application() {
-    val database = Room.databaseBuilder(
-        this,
-        PackageSettingsDatabase::class.java,
-        PackageSettingsDatabase.DATABASE_NAME,
-    ).build()
+    val database by lazy {
+        Room.databaseBuilder(
+            this,
+            PackageSettingsDatabase::class.java,
+            PackageSettingsDatabase.DATABASE_NAME,
+        ).build()
+    }
 }
