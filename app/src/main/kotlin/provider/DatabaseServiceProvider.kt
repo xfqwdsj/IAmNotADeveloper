@@ -1,20 +1,16 @@
 package top.ltfan.notdeveloper.provider
 
 import android.os.IBinder
-import androidx.room.Room
 import de.robv.android.xposed.XC_MethodHook
-import top.ltfan.notdeveloper.application.NotDevApplication
-import top.ltfan.notdeveloper.database.PackageSettingsDatabase
-import top.ltfan.notdeveloper.service.DatabaseService
-import top.ltfan.notdeveloper.service.wrap
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.log.invalidPackage
+import top.ltfan.notdeveloper.service.DatabaseService
+import top.ltfan.notdeveloper.service.wrap
 
 class DatabaseServiceProvider : BinderProvider() {
     private var _binder: IBinder? = null
 
     override fun onCreate(): Boolean {
-        val application = context as NotDevApplication
         _binder = DatabaseService(application.database.dao()).wrap()
         return true
     }
