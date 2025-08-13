@@ -15,7 +15,7 @@ const val BundleExtraService = "service"
 
 abstract class BinderProvider : ContentProvider() {
     protected abstract val binder: IBinder
-    protected val application = context as NotDevApplication
+    protected val application by lazy { context as NotDevApplication }
 
     interface Companion {
         val authority: String
