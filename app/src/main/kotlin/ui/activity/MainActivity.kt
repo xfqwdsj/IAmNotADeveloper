@@ -27,7 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.ui.NavDisplay
+import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.service.systemService
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
@@ -43,7 +45,13 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: AppViewModel by viewModels()
+    private val viewModel: AppViewModel by viewModels {
+        viewModelFactory {
+            addInitializer(AppViewModel::class) {
+                AppViewModel(this@MainActivity.application as NotDevApplication)
+            }
+        }
+    }
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
