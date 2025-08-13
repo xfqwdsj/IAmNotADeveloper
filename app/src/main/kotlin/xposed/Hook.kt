@@ -345,10 +345,11 @@ private inline fun <R> withLpparamContext(
 ) = with(lpparam, block)
 
 @Suppress("ObjectPropertyName")
-private var _databaseServiceClient = databaseServiceClient
+private var _databaseServiceClient: DatabaseServiceClient? = databaseServiceClient
 private val databaseServiceClient: DatabaseServiceClient
     get() {
-        if (_databaseServiceClient.remote?.isBinderAlive == true) return _databaseServiceClient
+        val instance = _databaseServiceClient
+        if (instance?.remote?.isBinderAlive == true) return instance
 
         return clearBinderCallingIdentity {
             runCatching {
