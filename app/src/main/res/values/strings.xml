@@ -54,8 +54,19 @@
     <string name="label_nav_apps">Apps</string>
     <string name="label_list_header_apps_configured">Configured Apps</string>
     <string name="label_list_header_apps_unconfigured">Unconfigured Apps</string>
+    <string name="action_bottom_sheet_filter_show">Filter</string>
+    <string name="title_bottom_sheet_filter">Filter Apps</string>
+    <string name="label_bottom_sheet_filter">Filter by</string>
+    <string name="item_apps_filter_all">All</string>
+    <string name="item_apps_filter_configured">Configured</string>
+    <string name="item_apps_filter_unconfigured">Unconfigured</string>
+    <string name="item_apps_filter_system">System</string>
+    <string name="label_bottom_sheet_filter_sort">Sort by</string>
+    <string name="item_apps_filter_sort_label">Label</string>
+    <string name="item_apps_filter_sort_package">Package name</string>
+    <string name="item_apps_filter_sort_updated">Last updated</string>
     <string name="message_snackbar_apps_query_failed">Failed to query apps</string>
-    <string name="action_apps_info_query_show">Needs awareness, apps query failed, click to show</string>
+    <string name="action_apps_query_details_show">Apps query failed. Click to show details</string>
     <string name="title_dialog_apps_query_failed">Failed to query apps</string>
-    <string name="message_dialog_apps_query_failed">Failed to query apps. Please check if the module is activated and the service is running.</string>
+    <string name="message_dialog_apps_query_failed">Please check if the module is activated and the service is running.</string>
 </resources>
