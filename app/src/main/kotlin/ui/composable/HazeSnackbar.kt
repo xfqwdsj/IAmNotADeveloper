@@ -17,7 +17,6 @@
 package top.ltfan.notdeveloper.ui.composable
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,9 +55,7 @@ import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.LocalHazeStyle
-import top.ltfan.notdeveloper.ui.util.HazeZIndex
 import top.ltfan.notdeveloper.ui.util.hazeEffect
-import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
 import kotlin.math.min
