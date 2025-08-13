@@ -8,10 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,7 +31,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.application
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.composable.AppListItem
@@ -42,6 +40,7 @@ import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 import top.ltfan.notdeveloper.ui.util.HazeZIndex
+import top.ltfan.notdeveloper.ui.util.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.util.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHazeEffect
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
@@ -69,6 +68,8 @@ object Apps : Main() {
     var isAppListError by mutableStateOf(false)
     var showAppListErrorInfoDialog by mutableStateOf(false)
 
+    var showFilterBottomSheet by mutableStateOf(false)
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     context(contentPadding: PaddingValues)
@@ -88,14 +89,11 @@ object Apps : Main() {
                         .appBarHazeEffect(),
                     actions = {
                         if (isAppListError) {
-                            IconButton(
+                            IconButtonWithTooltip(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = R.string.action_apps_query_details_show,
                                 onClick = { showAppListErrorInfoDialog = true },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = stringResource(R.string.action_apps_info_query_show),
-                                )
-                            }
+                            )
 
                             if (showAppListErrorInfoDialog) {
                                 HazeAlertDialog(
@@ -116,6 +114,12 @@ object Apps : Main() {
                                 )
                             }
                         }
+
+                        IconButtonWithTooltip(
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = R.string.action_bottom_sheet_apps_filter_show,
+                            onClick = { showFilterBottomSheet = true },
+                        )
                     },
                     windowInsets = AppWindowInsets.only { horizontal + top },
                     colors = TopAppBarColorsTransparent,
@@ -129,7 +133,7 @@ object Apps : Main() {
                 bottom += 16.dp
             }
 
-            val list = remember {
+            val appList = remember {
                 service?.queryApps()?.ifEmpty { null }?.sortedBy { it.packageName }?.also {
                     isAppListError = false
                 } ?: listOf(myPackageInfo).also {
@@ -174,7 +178,7 @@ object Apps : Main() {
                     }
 
                     items(
-                        items = list,
+                        items = appList,
                         key = { "${it.packageName}-${it.applicationInfo?.uid}" },
                         contentType = { "app" },
                         modifier = { Modifier.padding(horizontal = 16.dp) }
