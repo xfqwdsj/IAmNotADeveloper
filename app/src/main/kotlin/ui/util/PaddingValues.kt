@@ -2,11 +2,14 @@ package top.ltfan.notdeveloper.ui.util
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import top.ltfan.dslutilities.LockableValueDsl
 
 @TwoPaddingValuesOperationScope.Dsl
@@ -131,3 +134,41 @@ inline fun PaddingValues.Companion.build(block: @Composable PaddingValuesOperati
         init()
         block()
     }.build()
+
+fun PaddingValues.asWindowInsets(): WindowInsets = PaddingValuesInsets(this)
+
+class PaddingValuesInsets(private val paddingValues: PaddingValues) : WindowInsets {
+    override fun getLeft(density: Density, layoutDirection: LayoutDirection) =
+        with(density) { paddingValues.calculateLeftPadding(layoutDirection).roundToPx() }
+
+    override fun getTop(density: Density) =
+        with(density) { paddingValues.calculateTopPadding().roundToPx() }
+
+    override fun getRight(density: Density, layoutDirection: LayoutDirection) =
+        with(density) { paddingValues.calculateRightPadding(layoutDirection).roundToPx() }
+
+    override fun getBottom(density: Density) =
+        with(density) { paddingValues.calculateBottomPadding().roundToPx() }
+
+    override fun toString(): String {
+        val layoutDirection = LayoutDirection.Ltr
+        val start = paddingValues.calculateLeftPadding(layoutDirection)
+        val top = paddingValues.calculateTopPadding()
+        val end = paddingValues.calculateRightPadding(layoutDirection)
+        val bottom = paddingValues.calculateBottomPadding()
+        return "PaddingValues($start, $top, $end, $bottom)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is PaddingValuesInsets) {
+            return false
+        }
+
+        return other.paddingValues == paddingValues
+    }
+
+    override fun hashCode(): Int = paddingValues.hashCode()
+}
