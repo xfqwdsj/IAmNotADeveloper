@@ -54,6 +54,19 @@
     <string name="label_nav_apps">应用</string>
     <string name="label_list_header_apps_configured">已配置的应用</string>
     <string name="label_list_header_apps_unconfigured">未配置的应用</string>
+    <string name="action_bottom_sheet_filter_show">筛选</string>
+    <string name="title_bottom_sheet_filter">筛选应用</string>
+    <string name="label_bottom_sheet_filter">筛选方式</string>
+    <string name="item_apps_filter_all">全部</string>
+    <string name="item_apps_filter_configured">已配置</string>
+    <string name="item_apps_filter_unconfigured">未配置</string>
+    <string name="item_apps_filter_system">系统应用</string>
+    <string name="label_bottom_sheet_filter_sort">排序方式</string>
+    <string name="item_apps_filter_sort_label">名称</string>
+    <string name="item_apps_filter_sort_package">包名</string>
+    <string name="item_apps_filter_sort_updated">最近更新</string>
+    <string name="message_snackbar_apps_query_failed">查询应用列表失败</string>
+    <string name="action_apps_query_details_show">查询应用列表失败，点击查看详情</string>
     <string name="title_dialog_apps_query_failed">查询应用列表失败</string>
-    <string name="message_dialog_apps_query_failed">查询应用列表失败。请检查模块是否已激活以及服务是否正在运行。</string>
+    <string name="message_dialog_apps_query_failed">请检查模块是否已激活以及服务是否正在运行。</string>
 </resources>
