@@ -40,7 +40,7 @@ import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 import top.ltfan.notdeveloper.ui.util.HazeZIndex
-import top.ltfan.notdeveloper.ui.util.IconButtonWithTooltip
+import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.util.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHazeEffect
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
