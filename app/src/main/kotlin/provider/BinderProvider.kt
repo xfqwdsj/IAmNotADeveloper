@@ -8,12 +8,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import androidx.core.net.toUri
+import top.ltfan.notdeveloper.application.NotDevApplication
 
 const val CallMethodGet = "GET"
 const val BundleExtraService = "service"
 
 abstract class BinderProvider : ContentProvider() {
     protected abstract val binder: IBinder
+    protected val application = context as NotDevApplication
 
     interface Companion {
         val authority: String
