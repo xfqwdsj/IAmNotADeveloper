@@ -220,7 +220,7 @@ object Apps : Main() {
                     Spacer(Modifier.height(24.dp))
                     Text(
                         text = stringResource(R.string.label_bottom_sheet_apps_filter_sort),
-                        modifier = Modifier.padding(horizontal = 16.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Spacer(Modifier.height(8.dp))
@@ -249,7 +249,7 @@ object Apps : Main() {
                     Spacer(Modifier.height(16.dp))
                     Text(
                         text = stringResource(R.string.label_bottom_sheet_apps_filter),
-                        modifier = Modifier.padding(horizontal = 16.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Spacer(Modifier.height(8.dp))
