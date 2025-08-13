@@ -1,15 +1,13 @@
 package top.ltfan.notdeveloper.ui.viewmodel
 
-import android.app.Application
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.application
 import dev.chrisbanes.haze.HazeState
+import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -18,7 +16,7 @@ import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.page.Overview
 import top.ltfan.notdeveloper.ui.page.Page
 
-class AppViewModel(app: Application) : AndroidViewModel(app) {
+class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
     val hazeState = HazeState()
 
     val snackbarHostState = SnackbarHostState()
