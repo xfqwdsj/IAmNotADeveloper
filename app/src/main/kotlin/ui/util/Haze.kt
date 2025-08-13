@@ -1,5 +1,6 @@
 package top.ltfan.notdeveloper.ui.util
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.ui.Modifier
 import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeEffectScope
@@ -10,6 +11,8 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
+
+val HazeEasing = CubicBezierEasing(.15f, .0f, .2f, .1f)
 
 context(viewModel: AppViewModel)
 fun Modifier.hazeSource(
@@ -30,6 +33,7 @@ fun Modifier.hazeEffectTop(
     block: (HazeEffectScope.() -> Unit)? = null,
 ) = hazeEffect(state, style) {
     progressive = HazeProgressive.verticalGradient(
+        easing = HazeEasing,
         startY = Float.POSITIVE_INFINITY,
         endY = 0f,
     )
@@ -42,7 +46,7 @@ fun Modifier.hazeEffectBottom(
     style: HazeStyle = HazeStyle.Unspecified,
     block: (HazeEffectScope.() -> Unit)? = null,
 ) = hazeEffect(state, style) {
-    progressive = HazeProgressive.verticalGradient()
+    progressive = HazeProgressive.verticalGradient(easing = HazeEasing)
     block?.invoke(this)
 }
 
