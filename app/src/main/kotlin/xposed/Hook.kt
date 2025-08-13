@@ -2,14 +2,11 @@ package top.ltfan.notdeveloper.xposed
 
 import android.app.AndroidAppHelper
 import android.content.pm.ApplicationInfo
-import android.graphics.Bitmap
 import android.os.Binder
 import android.os.Bundle
+import android.os.IBinder
 import android.os.UserHandle
-import android.os.UserManager
 import androidx.annotation.Keep
-import androidx.core.content.getSystemService
-import androidx.core.net.toUri
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
@@ -18,7 +15,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import top.ltfan.notdeveloper.BuildConfig
-import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -348,15 +344,31 @@ private inline fun <R> withLpparamContext(
     block: context(XC_LoadPackage.LoadPackageParam) () -> R,
 ) = with(lpparam, block)
 
-private val databaseServiceClient
-    inline get() = clearBinderCallingIdentity {
-        runCatching {
-            AndroidAppHelper.currentApplication().contentResolver
-                .getInterfaceOrNull(DatabaseServiceProvider) {
-                    it.unwrap(DatabaseServiceInterface::class).client
-                }
-        }.getOrNull()
-    } ?: run {
-        Log.w("${DatabaseService::class.qualifiedName} not found, using stub implementation")
-        DatabaseServiceClient
+@Suppress("ObjectPropertyName")
+private var _databaseServiceClient = databaseServiceClient
+private val databaseServiceClient: DatabaseServiceClient
+    get() {
+        if (_databaseServiceClient.remote?.isBinderAlive == true) return _databaseServiceClient
+
+        return clearBinderCallingIdentity {
+            runCatching {
+                AndroidAppHelper.currentApplication().contentResolver
+                    .getInterfaceOrNull(DatabaseServiceProvider) {
+                        it.linkToDeath(
+                            object : IBinder.DeathRecipient {
+                                override fun binderDied() {
+                                    Log.w("DatabaseService binder died, reconnecting")
+                                    it.unlinkToDeath(this, 0)
+                                    _databaseServiceClient = databaseServiceClient
+                                }
+                            },
+                            0,
+                        )
+                        it.unwrap(DatabaseServiceInterface::class).client
+                    }
+            }.getOrNull()
+        } ?: run {
+            Log.w("${DatabaseService::class.qualifiedName} not found, using stub implementation")
+            DatabaseServiceClient
+        }
     }
