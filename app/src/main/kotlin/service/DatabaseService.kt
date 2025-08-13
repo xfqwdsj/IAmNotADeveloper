@@ -337,6 +337,8 @@ interface DatabaseServiceClient {
     suspend fun enableAllDetectionsForPackage(packageName: String, userId: Int)
     suspend fun disableAllDetectionsForPackage(packageName: String, userId: Int)
 
+    val remote: IBinder?
+
     companion object : DatabaseServiceClient {
         override suspend fun insertPackageInfo(packageName: String, userId: Int, appId: Int) {}
         override suspend fun deletePackageInfo(packageName: String, userId: Int) {}
@@ -378,6 +380,8 @@ interface DatabaseServiceClient {
             packageName: String, userId: Int
         ) {
         }
+
+        override val remote: IBinder? = null
     }
 }
 
@@ -488,6 +492,8 @@ fun DatabaseServiceClient(service: DatabaseServiceInterface): DatabaseServiceCli
                 }
             }
         }
+
+        override val remote = (service as? DatabaseServiceInterfaceProxy)?.remote
 
         private suspend inline fun <R> blockWithTimeoutCatching(
             defaultValue: R,
