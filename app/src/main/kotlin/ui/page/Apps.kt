@@ -1,17 +1,30 @@
 package top.ltfan.notdeveloper.ui.page
 
+import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,10 +33,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -36,11 +51,11 @@ import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
+import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 import top.ltfan.notdeveloper.ui.util.HazeZIndex
-import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.util.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHazeEffect
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
@@ -64,6 +79,9 @@ object Apps : Main() {
         initialContentOffset = 0f,
     )
     val lazyListState = LazyListState()
+
+    var sortMethod by mutableStateOf(Sort.Label)
+    var filteredMethods = mutableStateSetOf<Filter>()
 
     var isAppListError by mutableStateOf(false)
     var showAppListErrorInfoDialog by mutableStateOf(false)
@@ -187,6 +205,124 @@ object Apps : Main() {
                     }
                 }
             }
+
+            if (showFilterBottomSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showFilterBottomSheet = false },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                ) {
+                    Text(
+                        text = stringResource(R.string.title_bottom_sheet_apps_filter),
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Text(
+                        text = stringResource(R.string.label_bottom_sheet_apps_filter_sort),
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Sort.entries.forEach {
+                            val selected = sortMethod == it
+                            FilterChip(
+                                selected = selected,
+                                onClick = { sortMethod = it },
+                                label = { Text(stringResource(it.labelRes)) },
+                                leadingIcon = {
+                                    AnimatedVisibility(selected) {
+                                        Icon(Icons.Default.Check, contentDescription = null)
+                                    }
+                                },
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    HorizontalDivider(Modifier.padding(horizontal = 8.dp))
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.label_bottom_sheet_apps_filter),
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val allSelected = filteredMethods.isEmpty()
+                        FilterChip(
+                            selected = allSelected,
+                            onClick = {
+                                if (allSelected) {
+                                    filteredMethods.clear()
+                                    filteredMethods.addAll(Filter.usableEntries)
+                                } else {
+                                    filteredMethods.clear()
+                                }
+                            },
+                            label = { Text(stringResource(Filter.All.labelRes)) },
+                            leadingIcon = {
+                                AnimatedContent(allSelected) { allSelected ->
+                                    Icon(
+                                        imageVector = if (allSelected) Icons.Default.Check else Icons.Default.Remove,
+                                        contentDescription = null,
+                                    )
+                                }
+                            },
+                        )
+                        Filter.usableEntries.forEach {
+                            val selected = !filteredMethods.contains(it)
+                            FilterChip(
+                                selected = selected,
+                                onClick = {
+                                    if (filteredMethods.contains(it)) {
+                                        filteredMethods.remove(it)
+                                    } else {
+                                        filteredMethods.add(it)
+                                    }
+                                },
+                                label = { Text(stringResource(it.labelRes)) },
+                                leadingIcon = {
+                                    AnimatedContent(selected) { selected ->
+                                        Icon(
+                                            imageVector = if (selected) Icons.Default.Check else Icons.Default.Remove,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(64.dp))
+                }
+            }
+        }
+    }
+
+    enum class Sort(@param:StringRes val labelRes: Int) {
+        Label(R.string.item_apps_filter_sort_label),
+        Package(R.string.item_apps_filter_sort_package),
+        Updated(R.string.item_apps_filter_sort_updated);
+    }
+
+    enum class Filter(@param:StringRes val labelRes: Int) {
+        All(R.string.item_apps_filter_all),
+        Configured(R.string.item_apps_filter_configured),
+        Unconfigured(R.string.item_apps_filter_unconfigured),
+        System(R.string.item_apps_filter_system);
+
+        companion object {
+            val usableEntries = Filter.entries.drop(1)
         }
     }
 }
