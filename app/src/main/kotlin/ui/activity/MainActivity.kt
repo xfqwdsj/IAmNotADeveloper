@@ -7,20 +7,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -35,7 +36,6 @@ import top.ltfan.notdeveloper.ui.util.HazeZIndex
 import top.ltfan.notdeveloper.ui.util.hazeEffectBottom
 import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.util.only
-import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
@@ -65,6 +65,9 @@ class MainActivity : ComponentActivity() {
                 val insets = AppWindowInsets
                 val navBarHeightFactor by animateFloatAsState(if (showNavBar) 1f else 0f)
                 SubcomposeLayout { constraints ->
+                    val width = constraints.maxWidth
+                    val height = constraints.maxHeight
+
                     val insetsBottom = insets.getBottom(this)
 
                     val navBar = subcompose("navBar") {
@@ -105,32 +108,40 @@ class MainActivity : ComponentActivity() {
                     val paddingBottom = navBarHeight?.let { max(insetsBottom, it) } ?: insetsBottom
                     val contentPadding = PaddingValues(bottom = paddingBottom.toDp())
 
-                    val contentPlaceable = subcompose("content") {
-                        Scaffold(
-                            modifier = Modifier.consumeWindowInsets(insets.only { bottom }),
-                            snackbarHost = {
-                                SnackbarHost(snackbarHostState) {
-//                                    HazeSnackbar(
-                                    Snackbar(
-                                        snackbarData = it,
-                                        modifier = Modifier.hazeSource(zIndex = HazeZIndex.bottomBar),
-                                    )
-                                }
-                            },
-                            contentWindowInsets = insets + contentPadding,
-                        ) { contentPadding ->
-                            NavDisplay(
-                                backStack = backStack,
-                                modifier = Modifier.hazeSource(zIndex = HazeZIndex.navDisplay),
-                                sceneStrategy = rememberListDetailSceneStrategy(),
-                                entryProvider = { it.navEntry(contentPadding) },
-                            )
+                    val snackbarHostPlaceable = subcompose("snackbarHost") {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            SnackbarHost(snackbarHostState) {
+                                Snackbar(
+                                    snackbarData = it,
+                                    modifier = Modifier.hazeSource(zIndex = HazeZIndex.bottomBar),
+                                )
+                            }
                         }
                     }.first().measure(constraints)
 
-                    layout(constraints.maxWidth, constraints.maxHeight) {
+                    val snackbarHeight = snackbarHostPlaceable.height
+                    val snackbarY = height - paddingBottom - snackbarHeight
+
+                    val contentPlaceable = subcompose("content") {
+                        NavDisplay(
+                            backStack = backStack,
+                            modifier = Modifier
+                                .consumeWindowInsets(insets.only { bottom })
+                                .hazeSource(zIndex = HazeZIndex.navDisplay),
+                            // TODO: Can cause LazyList unscrollable issue when orientated from
+                            // TODO: landscape to portrait. Uncomment when fixed.
+//                            sceneStrategy = rememberListDetailSceneStrategy(),
+                            entryProvider = { it.navEntry(contentPadding) },
+                        )
+                    }.first().measure(constraints)
+
+                    layout(width, height) {
                         contentPlaceable.place(0, 0)
                         navBarPlaceable?.place(0, navBarY!!)
+                        snackbarHostPlaceable.place(0, snackbarY)
                     }
                 }
             }
