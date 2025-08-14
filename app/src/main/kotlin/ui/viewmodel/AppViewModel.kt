@@ -1,5 +1,6 @@
 package top.ltfan.notdeveloper.ui.viewmodel
 
+import android.content.Context
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -8,13 +9,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dev.chrisbanes.haze.HazeState
 import top.ltfan.notdeveloper.application.NotDevApplication
+import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.service.SystemServiceClient
+import top.ltfan.notdeveloper.service.systemService
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.page.Overview
 import top.ltfan.notdeveloper.ui.page.Page
+import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
     val hazeState = HazeState()
@@ -29,6 +33,8 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     var isPreferencesReady by mutableStateOf(false)
     val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
     var service: SystemServiceClient? by mutableStateOf(null)
+
+    var users by mutableStateOf(queryUsers())
 
     fun navigateMain(page: Main) {
         if (currentPage == page) return
@@ -81,5 +87,27 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
             is DetectionMethod.SystemPropertiesMethod -> test()
         }
+    }
+
+    context(context: Context)
+    fun onResume() {
+        isPreferencesReady = context.statusIsPreferencesReady
+        connectService()
+        test()
+    }
+
+    context(context: Context)
+    fun connectService() {
+        if (service != null) return
+        service = context.systemService
+        updateUsers()
+    }
+
+    fun queryUsers() = service?.queryUsers() ?: emptyList()
+
+    fun updateUsers(): List<UserInfo> {
+        val list = queryUsers()
+        users = list
+        return list
     }
 }

@@ -159,10 +159,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.isPreferencesReady = statusIsPreferencesReady
-        if (viewModel.service == null) {
-            viewModel.service = systemService
-        }
-        viewModel.test()
+        viewModel.onResume()
     }
 }

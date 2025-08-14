@@ -26,8 +26,14 @@ interface PackageSettingsDao {
     @Query("SELECT * FROM PackageInfo WHERE userId = :userId")
     fun getPackageInfoFlow(userId: Int): Flow<List<PackageInfo>>
 
+    @Query("SELECT * FROM PackageInfo")
+    fun getPackageInfoFlow(): Flow<List<PackageInfo>>
+
     @Query("SELECT EXISTS(SELECT 1 FROM PackageInfo WHERE packageName = :packageName AND userId = :userId)")
     suspend fun isPackageExists(packageName: String, userId: Int): Boolean
+
+    @Query("SELECT EXISTS(SELECT 1 FROM PackageInfo WHERE packageName = :packageName AND userId = :userId)")
+    fun isPackageExistsFlow(packageName: String, userId: Int): Flow<Boolean>
 
     @Query("INSERT OR REPLACE INTO Detection (packageName, userId, methodName, enabled) VALUES (:packageName, :userId, :methodName, :enabled)")
     suspend fun insertDetection(
