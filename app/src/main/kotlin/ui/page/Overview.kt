@@ -1,12 +1,9 @@
 package top.ltfan.notdeveloper.ui.page
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,15 +15,15 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.detection.DetectionCategory
-import top.ltfan.notdeveloper.ui.composable.CategoryCard
+import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.StatusCard
+import top.ltfan.notdeveloper.ui.composable.categoryCards
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.HazeZIndex
 import top.ltfan.notdeveloper.ui.util.LargeTopAppBarColorsTransparent
@@ -72,32 +69,31 @@ object Overview : Main() {
                 bottom += 16.dp
             }
 
-            LazyColumn(
+            GroupedLazyColumn(
                 modifier = Modifier
                     .contentHazeSource()
                     .consumeWindowInsets(contentPadding)
                     .fillMaxSize(),
                 contentPadding = contentPadding,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                spacing = 16.dp,
             ) {
-                item {
-                    StatusCard(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        isPreferencesReady = isPreferencesReady,
-                        isServiceConnected = service != null,
-                    )
+                group {
+                    item {
+                        StatusCard(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            isPreferencesReady = isPreferencesReady,
+                            isServiceConnected = service != null,
+                        )
+                    }
                 }
 
-                items(DetectionCategory.values) { category ->
-                    CategoryCard(
-                        category = category,
-                        testResults = testResults,
-                        afterChange = ::afterStatusChange,
-                        isPreferencesReady = isPreferencesReady,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
-                }
+                categoryCards(
+                    groups = DetectionCategory.values,
+                    testResults = testResults,
+                    afterChange = ::afterStatusChange,
+                    isPreferencesReady = isPreferencesReady,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
             }
         }
     }
