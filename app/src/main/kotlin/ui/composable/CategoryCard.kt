@@ -1,67 +1,70 @@
 package top.ltfan.notdeveloper.ui.composable
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 
-@Composable
-fun CategoryCard(
+fun GroupedLazyListScope.categoryCards(
+    groups: List<DetectionCategory>,
+    testResults: SnapshotStateMap<DetectionMethod, Boolean>,
+    afterChange: (DetectionMethod) -> Unit,
+    isPreferencesReady: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    cards(
+        groups = groups,
+        colors = { CardColorsLowest },
+    ) {
+        categoryCard(
+            category = it,
+            testResults = testResults,
+            afterChange = afterChange,
+            isPreferencesReady = isPreferencesReady,
+            modifier = modifier,
+        )
+    }
+}
+
+fun CardLazyGroup.categoryCard(
     category: DetectionCategory,
     testResults: SnapshotStateMap<DetectionMethod, Boolean>,
     afterChange: (DetectionMethod) -> Unit,
     isPreferencesReady: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardColorsLowest,
-    ) {
-        Column {
-            Text(
-                text = stringResource(category.labelResId),
-                modifier = Modifier.padding(start = 16.dp, top = 16.dp),
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium,
-            )
+    header(
+        text = category.labelResId,
+        modifier = modifier,
+    )
 
-            Spacer(Modifier.height(12.dp))
+    items(
+        items = category.methods,
+        key = { it.toString() },
+        contentType = { "detection-method" },
+        modifier = { modifier },
+    ) { method ->
+        @Suppress("DEPRECATION")
+        @SuppressLint("WorldReadableFiles")
+        var pref by rememberBooleanSharedPreference(
+            mode = android.content.Context.MODE_WORLD_READABLE,
+            key = method.name,
+            defaultValue = true,
+            afterSet = { afterChange(method) }
+        )
 
-            category.methods.forEach { method ->
-                @Suppress("DEPRECATION")
-                @SuppressLint("WorldReadableFiles")
-                var pref by rememberBooleanSharedPreference(
-                    mode = android.content.Context.MODE_WORLD_READABLE,
-                    key = method.name,
-                    defaultValue = true,
-                    afterSet = { afterChange(method) }
-                )
+        val testResult = testResults[method] ?: false
 
-                val testResult = testResults[method] ?: false
-
-                PreferenceItem(
-                    nameId = method.labelResId,
-                    testResult = testResult,
-                    checked = pref,
-                    onClick = { pref = !pref },
-                    enabled = isPreferencesReady
-                )
-            }
-        }
+        PreferenceItem(
+            nameId = method.labelResId,
+            testResult = testResult,
+            checked = pref,
+            onClick = { pref = !pref },
+            enabled = isPreferencesReady
+        )
     }
 }
