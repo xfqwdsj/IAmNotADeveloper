@@ -134,6 +134,23 @@ class GroupedLazyListScope(
         }
     }
 
+    fun item(
+        key: Any? = null,
+        contentType: Any? = null,
+        content: @Composable LazyItemScope.() -> Unit,
+    ) {
+        group { item(key, contentType, content) }
+    }
+
+    inline fun <T> items(
+        items: List<T>,
+        crossinline key: (item: T) -> Any? = { null },
+        crossinline contentType: (item: T) -> Any? = { null },
+        crossinline itemContent: @Composable LazyItemScope.(T) -> Unit,
+    ) {
+        group { items(items, key, contentType, itemContent) }
+    }
+
     fun LazyListScope.build() {
         val scope = this@GroupedLazyListScope
         scope.lock()
@@ -164,7 +181,20 @@ class GroupedLazyListScope(
 @LazyScopeMarker
 class LazyListGroupScope(
     private val scope: LazyListScope,
-) : LazyListScope by scope
+) : LazyListScope by scope {
+    inline fun <T> items(
+        items: List<T>,
+        key: (item: T) -> Any? = { null },
+        contentType: (item: T) -> Any? = { null },
+        crossinline itemContent: @Composable LazyItemScope.(T) -> Unit,
+    ) {
+        items.forEach { item ->
+            item(key(item), contentType(item)) {
+                itemContent(item)
+            }
+        }
+    }
+}
 
 private data class StickyHeaderContent(val contentType: Any?)
 
