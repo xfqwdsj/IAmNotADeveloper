@@ -54,6 +54,9 @@
     <string name="label_nav_apps">应用</string>
     <string name="label_list_header_apps_configured">已配置的应用</string>
     <string name="label_list_header_apps_unconfigured">未配置的应用</string>
+    <string name="label_apps_user_select">选择用户</string>
+    <string name="label_user_zero">默认用户</string>
+    <string name="action_apps_user_list_refresh">刷新用户列表</string>
     <string name="action_bottom_sheet_apps_filter_show">筛选</string>
     <string name="title_bottom_sheet_apps_filter">筛选应用</string>
     <string name="label_bottom_sheet_apps_filter_sort">排序方式</string>
