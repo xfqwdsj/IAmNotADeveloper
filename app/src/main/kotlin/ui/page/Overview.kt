@@ -77,14 +77,12 @@ object Overview : Main() {
                 contentPadding = contentPadding,
                 spacing = 16.dp,
             ) {
-                group {
-                    item {
-                        StatusCard(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            isPreferencesReady = isPreferencesReady,
-                            isServiceConnected = service != null,
-                        )
-                    }
+                item {
+                    StatusCard(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        isPreferencesReady = isPreferencesReady,
+                        isServiceConnected = service != null,
+                    )
                 }
 
                 categoryCards(
