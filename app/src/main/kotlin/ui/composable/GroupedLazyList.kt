@@ -1,12 +1,17 @@
 package top.ltfan.notdeveloper.ui.composable
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
@@ -19,7 +24,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
@@ -27,6 +36,8 @@ import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -196,6 +207,50 @@ class CardLazyGroup(
         items += LazyItem(key, contentType, modifier, false, content)
     }
 
+    fun header(
+        key: Any? = null,
+        contentType: Any? = null,
+        modifier: Modifier = Modifier,
+        sticky: Boolean = false,
+        text: @Composable () -> Unit,
+    ) {
+        items.removeIf { it.contentType is CardHeaderContent }
+        items.add(
+            index = 0,
+            element = LazyItem(
+                key = key,
+                contentType = CardHeaderContent(contentType ?: "card-header"),
+                modifier = modifier.fillMaxWidth(),
+                sticky = sticky,
+            ) {
+                Column {
+                    CompositionLocalProvider(
+                        LocalTextStyle provides MaterialTheme.typography.titleMedium.merge(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                    ) {
+                        Spacer(Modifier.height(16.dp))
+                        Box(Modifier.padding(horizontal = 16.dp)) { text() }
+                        Spacer(Modifier.height(12.dp))
+                    }
+                }
+            },
+        )
+    }
+
+    fun header(
+        @StringRes text: Int,
+        key: Any? = "card-header-${text}",
+        contentType: Any? = "card-header",
+        modifier: Modifier = Modifier,
+        sticky: Boolean = false,
+    ) {
+        header(key, contentType, modifier, sticky) {
+            Text(stringResource(text))
+        }
+    }
+
     inline fun <T> items(
         items: List<T>,
         key: (item: T) -> Any? = { null },
@@ -320,6 +375,8 @@ class CardLazyGroup(
         }
     }
 }
+
+private data class CardHeaderContent(val contentType: Any?)
 
 inline fun GroupedLazyListScope.card(
     useStickyHeader: Boolean = false,
