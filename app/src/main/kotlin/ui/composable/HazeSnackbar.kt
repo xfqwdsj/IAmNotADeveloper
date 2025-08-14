@@ -17,6 +17,12 @@
 package top.ltfan.notdeveloper.ui.composable
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,11 +40,14 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDefaults
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,17 +57,90 @@ import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.AccessibilityManager
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.dismiss
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.LocalHazeStyle
+import kotlinx.coroutines.delay
 import top.ltfan.notdeveloper.ui.util.hazeEffect
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
 import kotlin.math.min
+
+@Composable
+context(viewModel: AppViewModel)
+fun HazeSnackbarHost(
+    hostState: SnackbarHostState,
+    modifier: Modifier = Modifier,
+    snackbar: @Composable (SnackbarData) -> Unit = { HazeSnackbar(it) }
+) {
+    val currentSnackbarData = hostState.currentSnackbarData
+    val accessibilityManager = LocalAccessibilityManager.current
+    LaunchedEffect(currentSnackbarData) {
+        if (currentSnackbarData != null) {
+            val duration =
+                currentSnackbarData.visuals.duration.toMillis(
+                    currentSnackbarData.visuals.actionLabel != null,
+                    accessibilityManager
+                )
+            delay(duration)
+            currentSnackbarData.dismiss()
+        }
+    }
+    AnimatedContent(
+        targetState = currentSnackbarData,
+        modifier = modifier,
+        transitionSpec = {
+            fadeIn(tween(220, 90)) +
+                    scaleIn(tween(220, 90), 0.92f) togetherWith
+                    fadeOut(tween(90)) using null
+        }
+    ) { currentSnackbarData ->
+        if (currentSnackbarData != null) {
+            Box(
+                Modifier.semantics {
+                    liveRegion = LiveRegionMode.Polite
+                    dismiss {
+                        currentSnackbarData.dismiss()
+                        true
+                    }
+                }
+            ) {
+                snackbar(currentSnackbarData)
+            }
+        }
+    }
+}
+
+internal fun SnackbarDuration.toMillis(
+    hasAction: Boolean,
+    accessibilityManager: AccessibilityManager?
+): Long {
+    val original =
+        when (this) {
+            SnackbarDuration.Indefinite -> Long.MAX_VALUE
+            SnackbarDuration.Long -> 10000L
+            SnackbarDuration.Short -> 4000L
+        }
+    if (accessibilityManager == null) {
+        return original
+    }
+    return accessibilityManager.calculateRecommendedTimeoutMillis(
+        original,
+        containsIcons = true,
+        containsText = true,
+        containsControls = hasAction
+    )
+}
 
 @Composable
 context(viewModel: AppViewModel)
@@ -67,7 +149,7 @@ fun HazeSnackbar(
     modifier: Modifier = Modifier,
     actionOnNewLine: Boolean = false,
     shape: Shape = SnackbarDefaults.shape,
-    containerColor: Color = SnackbarDefaults.color.copy(alpha = .7f),
+    containerColor: Color = SnackbarDefaults.color.copy(alpha = .8f),
     contentColor: Color = SnackbarDefaults.contentColor,
     actionColor: Color = SnackbarDefaults.actionColor,
     actionContentColor: Color = SnackbarDefaults.actionContentColor,
@@ -124,7 +206,7 @@ fun HazeSnackbar(
     dismissAction: @Composable (() -> Unit)? = null,
     actionOnNewLine: Boolean = false,
     shape: Shape = SnackbarDefaults.shape,
-    containerColor: Color = SnackbarDefaults.color.copy(alpha = .7f),
+    containerColor: Color = SnackbarDefaults.color.copy(alpha = .8f),
     contentColor: Color = SnackbarDefaults.contentColor,
     actionContentColor: Color = SnackbarDefaults.actionContentColor,
     dismissActionContentColor: Color = SnackbarDefaults.dismissActionContentColor,
@@ -137,13 +219,12 @@ fun HazeSnackbar(
         contentColor = contentColor,
     ) {
         Box(
-            Modifier
-                .hazeEffect(
-                    style = LocalHazeStyle.current.copy(
-                        backgroundColor = containerColor,
-                        tints = listOf(HazeDefaults.tint(containerColor)),
-                    )
+            Modifier.hazeEffect(
+                style = LocalHazeStyle.current.copy(
+                    backgroundColor = containerColor,
+                    tints = listOf(HazeDefaults.tint(containerColor)),
                 )
+            )
         ) {
             val textStyle = MaterialTheme.typography.bodyMedium
             val actionTextStyle = MaterialTheme.typography.labelLarge
