@@ -166,8 +166,6 @@ object Apps : Main() {
                 }
             }
 
-            val cardColors = CardColorsLowest
-
             GroupedLazyColumn(
                 modifier = Modifier
                     .contentHazeSource()
@@ -177,7 +175,7 @@ object Apps : Main() {
                 contentPadding = contentPadding,
             ) {
                 card(
-                    colors = cardColors,
+                    colors = { CardColorsLowest },
                 ) {
                     header(
                         text = R.string.label_list_header_apps_unconfigured,

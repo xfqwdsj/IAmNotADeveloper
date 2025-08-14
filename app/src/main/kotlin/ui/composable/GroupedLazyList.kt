@@ -191,10 +191,10 @@ class CardLazyGroup(
     val useStickyHeader: Boolean,
     private val isVertical: Boolean,
     private val reverse: Boolean,
-    private val shape: Shape?,
-    private val colors: CardColors?,
-    private val elevation: CardElevation?,
-    private val border: BorderStroke?,
+    private val shape: @Composable () -> Shape = { CardDefaults.shape },
+    private val colors: @Composable () -> CardColors = { CardDefaults.cardColors() },
+    private val elevation: @Composable () -> CardElevation = { CardDefaults.cardElevation() },
+    private val border: @Composable () -> BorderStroke? = { null },
 ) : LockableValueDsl(), LazyGroup {
     private val items by list<LazyItem>()
 
@@ -302,9 +302,9 @@ class CardLazyGroup(
                 Card(
                     modifier = modifier,
                     shape = shape,
-                    colors = scope.colors ?: CardDefaults.cardColors(),
-                    elevation = scope.elevation ?: CardDefaults.cardElevation(),
-                    border = scope.border,
+                    colors = scope.colors(),
+                    elevation = scope.elevation(),
+                    border = scope.border(),
                 ) { content() }
             }
         }
@@ -313,7 +313,7 @@ class CardLazyGroup(
     @Composable
     private fun getShape(footer: Boolean): Shape {
         val reverse = if (footer) !reverse else reverse
-        val shape = shape ?: CardDefaults.shape
+        val shape = shape()
         return object : Shape {
             override fun createOutline(
                 size: Size, layoutDirection: LayoutDirection, density: Density
@@ -380,11 +380,11 @@ private data class CardHeaderContent(val contentType: Any?)
 
 inline fun GroupedLazyListScope.card(
     useStickyHeader: Boolean = false,
-    shape: Shape? = null,
-    colors: CardColors? = null,
-    elevation: CardElevation? = null,
-    border: BorderStroke? = null,
-    crossinline content: CardLazyGroup.() -> Unit,
+    noinline shape: @Composable () -> Shape = { CardDefaults.shape },
+    noinline colors: @Composable () -> CardColors = { CardDefaults.cardColors() },
+    noinline elevation: @Composable () -> CardElevation = { CardDefaults.cardElevation() },
+    noinline border: @Composable () -> BorderStroke? = { null },
+    content: CardLazyGroup.() -> Unit,
 ) {
     group(
         CardLazyGroup(
@@ -397,4 +397,24 @@ inline fun GroupedLazyListScope.card(
             border = border,
         ).apply(content)
     )
+}
+
+inline fun <T> GroupedLazyListScope.cards(
+    groups: List<T>,
+    useStickyHeader: (T) -> Boolean = { false },
+    crossinline shape: @Composable (T) -> Shape = { CardDefaults.shape },
+    crossinline colors: @Composable (T) -> CardColors = { CardDefaults.cardColors() },
+    crossinline elevation: @Composable (T) -> CardElevation = { CardDefaults.cardElevation() },
+    crossinline border: @Composable (T) -> BorderStroke? = { null },
+    content: CardLazyGroup.(T) -> Unit,
+) = groups.forEach { group ->
+    card(
+        useStickyHeader = useStickyHeader(group),
+        shape = { shape(group) },
+        colors = { colors(group) },
+        elevation = { elevation(group) },
+        border = { border(group) },
+    ) {
+        content(group)
+    }
 }
