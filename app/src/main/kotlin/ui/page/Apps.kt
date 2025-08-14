@@ -179,21 +179,10 @@ object Apps : Main() {
                 card(
                     colors = cardColors,
                 ) {
-                    item(
-                        key = "header-configured",
-                        contentType = "header",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.label_list_header_apps_configured),
-                            modifier = Modifier.padding(16.dp),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
+                    header(
+                        text = R.string.label_list_header_apps_unconfigured,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
 
                     items(
                         items = appList,
