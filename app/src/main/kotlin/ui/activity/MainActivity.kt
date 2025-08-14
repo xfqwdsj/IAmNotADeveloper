@@ -16,8 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.getValue
@@ -31,6 +29,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.ui.NavDisplay
 import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.service.systemService
+import top.ltfan.notdeveloper.ui.composable.HazeSnackbar
+import top.ltfan.notdeveloper.ui.composable.HazeSnackbarHost
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -117,12 +117,12 @@ class MainActivity : ComponentActivity() {
                     val contentPadding = PaddingValues(bottom = paddingBottom.toDp())
 
                     val snackbarHostPlaceable = subcompose("snackbarHost") {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            SnackbarHost(snackbarHostState) {
-                                Snackbar(
+                        Box(contentAlignment = Alignment.Center) {
+                            HazeSnackbarHost(
+                                hostState = snackbarHostState,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                HazeSnackbar(
                                     snackbarData = it,
                                     modifier = Modifier.hazeSource(zIndex = HazeZIndex.bottomBar),
                                 )
