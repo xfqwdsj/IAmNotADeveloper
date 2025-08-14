@@ -201,7 +201,7 @@ private data class StickyHeaderContent(val contentType: Any?)
 data class LazyItem(
     val key: Any? = null,
     val contentType: Any? = null,
-    val modifier: Modifier = Modifier,
+    val modifier: @Composable LazyItemScope.() -> Modifier = { Modifier },
     val sticky: Boolean = false,
     val content: @Composable LazyItemScope.() -> Unit,
 )
@@ -231,16 +231,25 @@ class CardLazyGroup(
     fun item(
         key: Any? = null,
         contentType: Any? = null,
-        modifier: Modifier = Modifier,
+        modifier: @Composable LazyItemScope.() -> Modifier = { Modifier },
         content: @Composable LazyItemScope.() -> Unit,
     ) {
         items += LazyItem(key, contentType, modifier, false, content)
     }
 
-    fun header(
+    fun item(
         key: Any? = null,
         contentType: Any? = null,
         modifier: Modifier = Modifier,
+        content: @Composable LazyItemScope.() -> Unit,
+    ) {
+        item(key, contentType, { modifier }, content)
+    }
+
+    fun header(
+        key: Any? = null,
+        contentType: Any? = null,
+        modifier: @Composable LazyItemScope.() -> Modifier = { Modifier },
         sticky: Boolean = false,
         text: @Composable () -> Unit,
     ) {
@@ -250,7 +259,7 @@ class CardLazyGroup(
             element = LazyItem(
                 key = key,
                 contentType = CardHeaderContent(contentType ?: "card-header"),
-                modifier = modifier.fillMaxWidth(),
+                modifier = { modifier().fillMaxWidth() },
                 sticky = sticky,
             ) {
                 Column {
@@ -273,7 +282,7 @@ class CardLazyGroup(
         @StringRes text: Int,
         key: Any? = "card-header-${text}",
         contentType: Any? = "card-header",
-        modifier: Modifier = Modifier,
+        modifier: @Composable LazyItemScope.() -> Modifier = { Modifier },
         sticky: Boolean = false,
     ) {
         header(key, contentType, modifier, sticky) {
@@ -281,15 +290,31 @@ class CardLazyGroup(
         }
     }
 
+    fun header(
+        @StringRes text: Int,
+        key: Any? = "card-header-${text}",
+        contentType: Any? = "card-header",
+        modifier: Modifier = Modifier,
+        sticky: Boolean = false,
+    ) {
+        header(
+            text = text,
+            key = key,
+            contentType = contentType,
+            modifier = { modifier },
+            sticky = sticky,
+        )
+    }
+
     inline fun <T> items(
         items: List<T>,
         key: (item: T) -> Any? = { null },
         contentType: (item: T) -> Any? = { null },
-        modifier: (item: T) -> Modifier = { Modifier },
+        crossinline modifier: @Composable LazyItemScope.(item: T) -> Modifier = { Modifier },
         crossinline itemContent: @Composable LazyItemScope.(T) -> Unit,
     ) {
         items.forEach { item ->
-            item(key(item), contentType(item), modifier(item)) {
+            item(key(item), contentType(item), { modifier(item) }) {
                 itemContent(item)
             }
         }
@@ -298,10 +323,19 @@ class CardLazyGroup(
     fun stickyHeader(
         key: Any? = null,
         contentType: Any? = null,
-        modifier: Modifier = Modifier,
+        modifier: @Composable LazyItemScope.() -> Modifier = { Modifier },
         content: @Composable LazyItemScope.() -> Unit,
     ) {
         items += LazyItem(key, contentType, modifier, true, content)
+    }
+
+    fun stickyHeader(
+        key: Any? = null,
+        contentType: Any? = null,
+        modifier: Modifier = Modifier,
+        content: @Composable LazyItemScope.() -> Unit,
+    ) {
+        stickyHeader(key, contentType, { modifier }, content)
     }
 
     override fun LazyListGroupScope.build() {
@@ -330,7 +364,7 @@ class CardLazyGroup(
                 }
 
                 Card(
-                    modifier = modifier,
+                    modifier = modifier(),
                     shape = shape,
                     colors = scope.colors(),
                     elevation = scope.elevation(),

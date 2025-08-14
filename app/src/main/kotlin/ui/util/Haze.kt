@@ -33,6 +33,21 @@ fun Modifier.hazeEffect(
 
 @Composable
 context(viewModel: AppViewModel)
+fun Modifier.hazeEffectStart(
+    state: HazeState = viewModel.hazeState,
+    style: HazeStyle = HazeStyleAppBar,
+    block: (HazeEffectScope.() -> Unit)? = null,
+) = hazeEffect(state, style) {
+    progressive = HazeProgressive.horizontalGradient(
+        easing = HazeEasing,
+        startX = Float.POSITIVE_INFINITY,
+        endX = 0f,
+    )
+    block?.invoke(this)
+}
+
+@Composable
+context(viewModel: AppViewModel)
 fun Modifier.hazeEffectTop(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyleAppBar,
@@ -43,6 +58,17 @@ fun Modifier.hazeEffectTop(
         startY = Float.POSITIVE_INFINITY,
         endY = 0f,
     )
+    block?.invoke(this)
+}
+
+@Composable
+context(viewModel: AppViewModel)
+fun Modifier.hazeEffectEnd(
+    state: HazeState = viewModel.hazeState,
+    style: HazeStyle = HazeStyleAppBar,
+    block: (HazeEffectScope.() -> Unit)? = null,
+) = hazeEffect(state, style) {
+    progressive = HazeProgressive.horizontalGradient(easing = HazeEasing)
     block?.invoke(this)
 }
 
