@@ -15,6 +15,7 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.data.UserInfo
+import top.ltfan.notdeveloper.database.ParcelablePackageInfo
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.log.callingPackageNotFoundWhen
@@ -22,6 +23,8 @@ import top.ltfan.notdeveloper.log.invalidPackage
 import top.ltfan.notdeveloper.provider.SystemServiceProvider
 import top.ltfan.notdeveloper.provider.getInterfaceOrNull
 import top.ltfan.notdeveloper.util.clearBinderCallingIdentity
+import kotlin.reflect.KFunction
+import top.ltfan.notdeveloper.database.PackageInfo as DatabasePackageInfo
 
 const val CallMethodNotify = "NOTIFY"
 const val BundleExtraType = "type"
@@ -29,7 +32,8 @@ const val BundleExtraType = "type"
 @BinderInterface
 interface SystemServiceInterface {
     fun queryUsers(userIds: List<Int> = emptyList()): List<UserInfo>
-    fun queryApps(userIds: List<Int> = emptyList()): List<PackageInfo>
+    fun queryAppsByUserId(userIds: List<Int> = emptyList()): List<PackageInfo>
+    fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfo>
     fun notifySettingChange(name: String, type: Int)
 }
 
@@ -65,9 +69,9 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
         }
     }
 
-    override fun queryApps(userIds: List<Int>): List<PackageInfo> {
+    override fun queryAppsByUserId(userIds: List<Int>): List<PackageInfo> {
         val identity =
-            "${SystemService::class.qualifiedName}.${::queryApps.name}(${userIds.joinToString()})"
+            "${SystemService::class.qualifiedName}.${::queryAppsByUserId.name}(${userIds.joinToString()})"
         val application = AndroidAppHelper.currentApplication()
         val uid = Binder.getCallingUid()
         val packageName =
@@ -100,10 +104,62 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
         return requestedIds.flatMap {
             val slice = XposedHelpers.callMethod(
                 packageManager, "getInstalledPackages",
-                0, it
+                0, it,
             )
             @Suppress("UNCHECKED_CAST")
             XposedHelpers.getObjectField(slice, "mList") as List<PackageInfo>
+        }
+    }
+
+    override fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfo> {
+        val identity =
+            "${SystemService::class.qualifiedName}.${::queryAppsByInfo.name}(${databaseList.joinToString()})"
+        val application = AndroidAppHelper.currentApplication()
+        val uid = Binder.getCallingUid()
+        val packageName =
+            application.packageManager.getPackagesForUid(uid)
+                ?.takeIf { it.size == 1 }?.first() ?: run {
+                Log callingPackageNotFoundWhen identity
+                return emptyList()
+            }
+
+        if (packageName != BuildConfig.APPLICATION_ID) {
+            Log invalidPackage packageName skipping identity
+            return emptyList()
+        }
+
+        val serviceManagerClass = XposedHelpers.findClass(
+            "android.os.ServiceManager", lpparam.classLoader
+        )
+        val packageManagerService = XposedHelpers.callStaticMethod(
+            serviceManagerClass, "getService", "package"
+        )
+        val iPackageManagerStubClass = XposedHelpers.findClass(
+            "android.content.pm.IPackageManager\$Stub", lpparam.classLoader
+        )
+        val packageManager = XposedHelpers.callStaticMethod(
+            iPackageManagerStubClass, "asInterface", packageManagerService
+        )
+
+        return buildList {
+            databaseList.forEach { (packageName, userId, appId) ->
+                val info = XposedHelpers.callMethod(
+                    packageManager, "getPackageInfo",
+                    packageName, 0, userId,
+                ) as? PackageInfo? ?: return@forEach
+
+                val queriedAppId = XposedHelpers.callStaticMethod(
+                    UserHandle::class.java, "getAppId",
+                    info.applicationInfo?.uid,
+                ) as? Int? ?: return@forEach
+
+                if (appId != queriedAppId) {
+                    Log.i("App ID mismatch for package $packageName: expected $appId, got $queriedAppId")
+                    return@forEach
+                }
+
+                add(info)
+            }
         }
     }
 
@@ -153,7 +209,9 @@ val SystemServiceInterface.client inline get() = SystemServiceClient(this)
 interface SystemServiceClient : SystemServiceInterface {
     fun queryUsers(vararg userId: Int) = queryUsers(userId.toList())
     fun queryUser(userId: Int) = queryUsers(listOf(userId)).firstOrNull()
-    fun queryApps(vararg userId: Int) = queryApps(userId.toList())
+    fun queryApps(vararg userId: Int) = queryAppsByUserId(userId.toList())
+    fun queryApps(databaseList: List<DatabasePackageInfo>) =
+        queryAppsByInfo(databaseList.map { ParcelablePackageInfo(it) })
     fun notifySettingChange(method: DetectionMethod.SettingsMethod)
 }
 

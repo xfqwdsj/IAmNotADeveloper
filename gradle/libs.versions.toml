@@ -47,7 +47,7 @@ coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
-datastore = { module = "androidx.datastore:datastore-core", version.ref = "datastore" }
+datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 preference = { module = "androidx.preference:preference-ktx", version.ref = "preference" }
 dslUtilities = { module = "top.ltfan.dslutilities:dsl-utilities", version.ref = "dsl-utilities" }
 kaidl = { module = "com.github.kr328.kaidl:kaidl", version.ref = "kaidl" }
