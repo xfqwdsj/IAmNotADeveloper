@@ -55,8 +55,9 @@
     <string name="label_list_header_apps_configured">Configured Apps</string>
     <string name="label_list_header_apps_unconfigured">Unconfigured Apps</string>
     <string name="label_apps_user_select">Select user</string>
-    <string name="label_user_zero">Default user</string>
+    <string name="label_user_current">Current user</string>
     <string name="action_apps_user_list_refresh">Refresh user list</string>
+    <string name="label_apps_user_list_refresh_done">User list refreshed</string>
     <string name="action_bottom_sheet_apps_filter_show">Filter</string>
     <string name="title_bottom_sheet_apps_filter">Filter Apps</string>
     <string name="label_bottom_sheet_apps_filter_sort">Sort by</string>
