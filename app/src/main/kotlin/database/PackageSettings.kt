@@ -1,10 +1,84 @@
 package top.ltfan.notdeveloper.database
 
+import android.app.Application
+import android.os.Parcelable
 import androidx.room.Dao
+import androidx.room.Database
+import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Query
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.parcelableCreator
 import top.ltfan.notdeveloper.detection.DetectionCategory
+
+@Database(entities = [PackageInfo::class, Detection::class], version = 1)
+abstract class PackageSettingsDatabase : RoomDatabase() {
+    abstract fun dao(): PackageSettingsDao
+
+    companion object {
+        const val DATABASE_NAME = "package_settings.db"
+
+        context(application: Application)
+        fun get() = Room.databaseBuilder(
+            application,
+            PackageSettingsDatabase::class.java,
+            DATABASE_NAME,
+        ).build()
+    }
+}
+
+@Entity(primaryKeys = ["packageName", "userId"])
+data class PackageInfo(
+    val packageName: String,
+    val userId: Int,
+    val appId: Int,
+)
+
+@Parcelize
+data class ParcelablePackageInfo(
+    var packageName: String,
+    var userId: Int,
+    var appId: Int,
+) : Parcelable {
+    companion object {
+        val CREATOR: Parcelable.Creator<ParcelablePackageInfo> =
+            parcelableCreator<ParcelablePackageInfo>()
+    }
+
+    constructor(packageInfo: PackageInfo) : this(
+        packageName = packageInfo.packageName,
+        userId = packageInfo.userId,
+        appId = packageInfo.appId,
+    )
+
+    fun restore() = PackageInfo(
+        packageName = packageName,
+        userId = userId,
+        appId = appId,
+    )
+}
+
+@Entity(
+    primaryKeys = ["packageName", "userId", "methodName"],
+    foreignKeys = [
+        ForeignKey(
+            entity = PackageInfo::class,
+            parentColumns = ["packageName", "userId"],
+            childColumns = ["packageName", "userId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
+data class Detection(
+    val packageName: String,
+    val userId: Int,
+    val methodName: String,
+    val enabled: Boolean,
+)
 
 @Dao
 interface PackageSettingsDao {
