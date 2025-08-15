@@ -13,9 +13,11 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -82,6 +84,7 @@ import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppSort
 import top.ltfan.notdeveloper.datastore.util.rememberPropertyAsState
+import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyListScope
@@ -235,7 +238,11 @@ object Apps : Main() {
                         windowInsets = AppWindowInsets.only { horizontal + top },
                         colors = TopAppBarColorsTransparent,
                     )
-                    AnimatedVisibility(showUserFilter) {
+                    AnimatedVisibilityWithBlur(
+                        visible = showUserFilter,
+                        enter = fadeIn() + expandVertically(clip = false),
+                        exit = fadeOut() + shrinkVertically(clip = false),
+                    ) {
                         FilterBar(
                             leading = {
                                 Box(
