@@ -17,7 +17,6 @@ data class UserInfo(
     val flags: Int,
 ) : Parcelable {
     companion object {
-        @JvmStatic
         val CREATOR = parcelableCreator<UserInfo>()
 
         val current = UserInfo(

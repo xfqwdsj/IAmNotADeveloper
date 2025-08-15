@@ -45,8 +45,7 @@ data class ParcelablePackageInfo(
     var appId: Int,
 ) : Parcelable {
     companion object {
-        val CREATOR: Parcelable.Creator<ParcelablePackageInfo> =
-            parcelableCreator<ParcelablePackageInfo>()
+        val CREATOR = parcelableCreator<ParcelablePackageInfo>()
     }
 
     constructor(packageInfo: PackageInfo) : this(
