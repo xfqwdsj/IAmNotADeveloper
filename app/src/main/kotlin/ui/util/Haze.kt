@@ -1,6 +1,7 @@
 package top.ltfan.notdeveloper.ui.util
 
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Easing
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.chrisbanes.haze.ExperimentalHazeApi
@@ -21,7 +22,9 @@ val HazeEasing = CubicBezierEasing(.2f, .0f, .2f, 1f)
 
 context(viewModel: AppViewModel)
 fun Modifier.hazeSource(
-    state: HazeState = viewModel.hazeState, zIndex: Float = 0f, key: Any? = null
+    state: HazeState = viewModel.hazeState,
+    zIndex: Float = 0f,
+    key: Any? = null,
 ) = hazeSource(state, zIndex, key)
 
 context(viewModel: AppViewModel)
@@ -36,10 +39,11 @@ context(viewModel: AppViewModel)
 fun Modifier.hazeEffectStart(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyleAppBar,
+    easing: Easing = HazeEasing,
     block: (HazeEffectScope.() -> Unit)? = null,
 ) = hazeEffect(state, style) {
     progressive = HazeProgressive.horizontalGradient(
-        easing = HazeEasing,
+        easing = easing,
         startX = Float.POSITIVE_INFINITY,
         endX = 0f,
     )
@@ -51,10 +55,11 @@ context(viewModel: AppViewModel)
 fun Modifier.hazeEffectTop(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyleAppBar,
+    easing: Easing = HazeEasing,
     block: (HazeEffectScope.() -> Unit)? = null,
 ) = hazeEffect(state, style) {
     progressive = HazeProgressive.verticalGradient(
-        easing = HazeEasing,
+        easing = easing,
         startY = Float.POSITIVE_INFINITY,
         endY = 0f,
     )
@@ -66,9 +71,10 @@ context(viewModel: AppViewModel)
 fun Modifier.hazeEffectEnd(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyleAppBar,
+    easing: Easing = HazeEasing,
     block: (HazeEffectScope.() -> Unit)? = null,
 ) = hazeEffect(state, style) {
-    progressive = HazeProgressive.horizontalGradient(easing = HazeEasing)
+    progressive = HazeProgressive.horizontalGradient(easing = easing)
     block?.invoke(this)
 }
 
@@ -77,9 +83,10 @@ context(viewModel: AppViewModel)
 fun Modifier.hazeEffectBottom(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyleAppBar,
+    easing: Easing = HazeEasing,
     block: (HazeEffectScope.() -> Unit)? = null,
 ) = hazeEffect(state, style) {
-    progressive = HazeProgressive.verticalGradient(easing = HazeEasing)
+    progressive = HazeProgressive.verticalGradient(easing = easing)
     block?.invoke(this)
 }
 
@@ -96,8 +103,9 @@ context(viewModel: AppViewModel, page: Page)
 fun Modifier.appBarHazeEffect(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyleAppBar,
+    easing: Easing = HazeEasing,
     block: (HazeEffectScope.() -> Unit)? = null,
-) = hazeEffectTop(state, style) {
+) = hazeEffectTop(state, style, easing) {
     canDrawArea = { area ->
         area.key == page
     }
