@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.parcelableCreator
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
