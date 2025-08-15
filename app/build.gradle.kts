@@ -97,6 +97,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
+    implementation(libs.datastore)
     implementation(libs.room.ktx)
     implementation(libs.preference)
     implementation(libs.dslUtilities)
