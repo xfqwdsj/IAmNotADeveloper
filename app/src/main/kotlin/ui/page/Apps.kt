@@ -58,6 +58,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -180,6 +181,7 @@ object Apps : Main() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
+                                    .pointerInteropFilter { true }
                                     .padding(8.dp)
                                     .padding(horizontal = 8.dp),
                                 contentAlignment = Alignment.Center,
@@ -191,6 +193,7 @@ object Apps : Main() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
+                                    .pointerInteropFilter { true }
                                     .padding(8.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
