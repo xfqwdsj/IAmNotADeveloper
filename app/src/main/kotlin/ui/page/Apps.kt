@@ -384,7 +384,7 @@ object Apps : Main() {
             AnimatedContent(
                 targetState = AppListStatus(
                     isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
-                    isAllFiltered = filteredMethods.containsAll(AppFilter.usableEntries),
+                    isFiltered = filteredMethods.isNotEmpty(),
                 ),
             ) { (isEmpty, isAllFiltered) ->
                 Column(
@@ -619,7 +619,7 @@ object Apps : Main() {
 
     data class AppListStatus(
         val isEmpty: Boolean,
-        val isAllFiltered: Boolean,
+        val isFiltered: Boolean,
     )
 
     val PackageInfo.listKey: String get() = "${packageName}-${applicationInfo?.uid}"
