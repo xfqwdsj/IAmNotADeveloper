@@ -6,6 +6,7 @@ import android.os.UserHandle
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
@@ -77,12 +81,12 @@ import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 import top.ltfan.notdeveloper.ui.util.HazeZIndex
+import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHazeEffect
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
-import top.ltfan.notdeveloper.ui.util.hazeEffectEnd
-import top.ltfan.notdeveloper.ui.util.hazeEffectStart
 import top.ltfan.notdeveloper.ui.util.hazeSource
+import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
@@ -127,7 +131,7 @@ object Apps : Main() {
             topBar = {
                 Column(
                     Modifier
-                        .hazeSource(zIndex = HazeZIndex.topBar)
+                        .hazeSource(zIndex = HazeZIndex.topBar, key = "123123")
                         .appBarHazeEffect(),
                 ) {
                     TopAppBar(
@@ -176,8 +180,6 @@ object Apps : Main() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .hazeSource(zIndex = HazeZIndex.topBar)
-                                    .hazeEffectStart()
                                     .padding(8.dp)
                                     .padding(horizontal = 8.dp),
                                 contentAlignment = Alignment.Center,
@@ -189,8 +191,6 @@ object Apps : Main() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .hazeSource(zIndex = HazeZIndex.topBar)
-                                    .hazeEffectEnd()
                                     .padding(8.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
@@ -204,7 +204,23 @@ object Apps : Main() {
                     ) { contentPadding ->
                         val userZeroName = stringResource(R.string.label_user_zero)
                         LazyRow(
-                            modifier = Modifier.hazeSource(zIndex = HazeZIndex.content),
+                            modifier = Modifier
+                                .horizontalAlphaMaskLinear(
+                                    LinearMaskData(
+                                        startDp = contentPadding.calculateStartPadding(
+                                            LocalLayoutDirection.current
+                                        ),
+                                        endDp = 0.dp,
+                                    ),
+                                    LinearMaskData(
+                                        startDp = contentPadding.calculateEndPadding(
+                                            LocalLayoutDirection.current
+                                        ),
+                                        endDp = 0.dp,
+                                        reverse = true,
+                                    ),
+                                    map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
+                                ),
                             contentPadding = contentPadding.operate {
                                 start += 8.dp
                                 end += 8.dp
