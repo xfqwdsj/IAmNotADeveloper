@@ -25,12 +25,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
@@ -45,16 +47,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,9 +72,7 @@ import androidx.compose.ui.util.fastMaxBy
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
@@ -91,6 +90,7 @@ import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
+import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.reflect.full.staticFunctions
 
@@ -101,19 +101,12 @@ object Apps : Main() {
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     override val metadata: Map<String, Any> = ListDetailSceneStrategy.listPane(this)
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    val topAppBarState = TopAppBarState(
-        initialHeightOffsetLimit = -Float.MAX_VALUE,
-        initialHeightOffset = 0f,
-        initialContentOffset = 0f,
-    )
     val lazyListState = LazyListState()
 
     var fullList by mutableStateOf(listOf<FlaggedPackageInfo>())
     var configuredList by mutableStateOf(listOf<PackageInfo>())
     var unconfiguredList by mutableStateOf(listOf<PackageInfo>())
 
-    var user by mutableStateOf<UserInfo?>(null)
     var sortMethod by mutableStateOf(Sort.Label)
     var filteredMethods = mutableStateSetOf<Filter>()
 
@@ -126,13 +119,11 @@ object Apps : Main() {
     @Composable
     context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
-        val myPackageInfo =
-            remember { application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0) }
         Scaffold(
             topBar = {
                 Column(
                     Modifier
-                        .hazeSource(zIndex = HazeZIndex.topBar, key = "123123")
+                        .hazeSource(zIndex = HazeZIndex.topBar)
                         .appBarHazeEffect(),
                 ) {
                     TopAppBar(
@@ -181,11 +172,15 @@ object Apps : Main() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .pointerInteropFilter { true }
                                     .padding(8.dp)
                                     .padding(horizontal = 8.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
+                                Spacer(
+                                    Modifier
+                                        .matchParentSize()
+                                        .pointerInteropFilter { true }
+                                )
                                 Text(stringResource(R.string.label_apps_user_select))
                             }
                         },
@@ -193,19 +188,42 @@ object Apps : Main() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .pointerInteropFilter { true }
                                     .padding(8.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                IconButtonWithTooltip(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = R.string.action_apps_user_list_refresh,
-                                    onClick = { updateUsers() },
+                                var refreshFinished by rememberAutoRestorableState(false)
+                                Spacer(
+                                    Modifier
+                                        .matchParentSize()
+                                        .pointerInteropFilter { true }
                                 )
+                                AnimatedContent(refreshFinished) {
+                                    if (it) {
+                                        Box(
+                                            modifier = Modifier
+                                                .minimumInteractiveComponentSize()
+                                                .size(40.dp),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Done,
+                                                contentDescription = stringResource(R.string.label_apps_user_list_refresh_done),
+                                            )
+                                        }
+                                    } else {
+                                        IconButtonWithTooltip(
+                                            imageVector = Icons.Default.Refresh,
+                                            contentDescription = R.string.action_apps_user_list_refresh,
+                                            onClick = {
+                                                updateUsers()
+                                                refreshFinished = true
+                                            },
+                                        )
+                                    }
+                                }
                             }
                         },
                     ) { contentPadding ->
-                        val userZeroName = stringResource(R.string.label_user_zero)
                         LazyRow(
                             modifier = Modifier
                                 .horizontalAlphaMaskLinear(
@@ -224,37 +242,15 @@ object Apps : Main() {
                                     ),
                                     map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
                                 ),
-                            contentPadding = contentPadding.operate {
-                                start += 8.dp
-                                end += 8.dp
-                            },
+                            contentPadding = contentPadding,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            val users = users.ifEmpty {
-                                listOf(
-                                    UserInfo(
-                                        id = 0,
-                                        name = userZeroName,
-                                        flags = ApplicationInfo.FLAG_INSTALLED,
-                                    ).also { user = it }
-                                ) + buildList {
-                                    for (i in 0..10) {
-                                        add(
-                                            UserInfo(
-                                                id = i + 1,
-                                                name = "User ${i + 1}",
-                                                flags = ApplicationInfo.FLAG_INSTALLED,
-                                            )
-                                        )
-                                    }
-                                }
-                            }
                             items(users, { it }) {
-                                val selected = user == it
+                                val selected = selectedUser == it
                                 FilterChip(
                                     selected = selected,
-                                    onClick = { user = it },
-                                    label = { Text(it.name.toString()) },
+                                    onClick = { selectedUser = it },
+                                    label = { Text(it.name.getString()) },
                                     leadingIcon = {
                                         AnimatedVisibility(
                                             visible = selected,
@@ -581,12 +577,16 @@ object Apps : Main() {
     suspend fun PackageInfo.flagged(): FlaggedPackageInfo {
         val packageManager = viewModel.application.packageManager
         val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
-        val getUserId = UserHandle::class.staticFunctions.first { it.name == "getUserId" }
-        val userId = getUserId.call(applicationInfo.uid) as Int
+        val userId = getUserId(applicationInfo.uid)
         val dao = viewModel.application.database.dao()
         val isConfigured = dao.isPackageExists(packageName, userId)
         val isSystem =
             applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
         return FlaggedPackageInfo(isConfigured, isSystem, this)
+    }
+
+    fun getUserId(uid: Int): Int {
+        val function = UserHandle::class.staticFunctions.first { it.name == "getUserId" }
+        return function.call(uid) as Int
     }
 }
