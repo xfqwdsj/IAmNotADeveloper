@@ -77,6 +77,7 @@ android {
 
 dependencies {
     implementation(libs.kotlin.reflect)
+    implementation(libs.kotlinx.serialization.cbor)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.viewmodelNav3)

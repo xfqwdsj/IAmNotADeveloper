@@ -2,6 +2,7 @@
 app-versionName = "1.6.2"
 app-versionCode = "12"
 kotlin = "2.2.0"
+kotlinx-serialization = "1.9.0"
 ksp = "2.2.0-2.0.2"
 agp = "8.13.0-alpha04"
 compileSdk = "36"
@@ -24,6 +25,7 @@ xposed-api = "82"
 
 [libraries]
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serialization-cbor", version.ref = "kotlinx-serialization" }
 lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 lifecycle-viewmodelNav3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle-viewmodelNav3" }
