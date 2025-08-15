@@ -53,6 +53,7 @@
     <!-- Apps -->
     <string name="label_nav_apps">Apps</string>
     <string name="message_apps_empty">There are no apps to show</string>
+    <string name="label_apps_empty_filter_show">Show filter</string>
     <string name="label_list_header_apps_configured">Configured Apps</string>
     <string name="label_list_header_apps_unconfigured">Unconfigured Apps</string>
     <string name="action_apps_user_select_show">Show user selection</string>

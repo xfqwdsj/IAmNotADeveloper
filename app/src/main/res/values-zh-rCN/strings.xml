@@ -53,6 +53,7 @@
     <!-- Apps -->
     <string name="label_nav_apps">应用</string>
     <string name="message_apps_empty">没有应用可显示</string>
+    <string name="label_apps_empty_filter_show">显示筛选</string>
     <string name="label_list_header_apps_configured">已配置的应用</string>
     <string name="label_list_header_apps_unconfigured">未配置的应用</string>
     <string name="action_apps_user_select_show">显示用户选择</string>
