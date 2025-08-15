@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dev.chrisbanes.haze.HazeState
+import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.detection.DetectionCategory
@@ -34,7 +35,9 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
     var service: SystemServiceClient? by mutableStateOf(null)
 
+    val myPackageInfo = application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0)!!
     var users by mutableStateOf(queryUsers())
+    var selectedUser by mutableStateOf(users.first())
 
     fun navigateMain(page: Main) {
         if (currentPage == page) return
@@ -98,16 +101,15 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     context(context: Context)
     fun connectService() {
-        if (service != null) return
-        service = context.systemService
+        if (service == null) {
+            service = context.systemService
+        }
         updateUsers()
     }
 
-    fun queryUsers() = service?.queryUsers() ?: emptyList()
+    fun queryUsers() = service?.queryUsers() ?: listOf(UserInfo.current)
 
-    fun updateUsers(): List<UserInfo> {
-        val list = queryUsers()
-        users = list
-        return list
+    fun updateUsers() {
+        users = queryUsers()
     }
 }
