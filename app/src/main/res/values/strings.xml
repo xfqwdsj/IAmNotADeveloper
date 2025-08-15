@@ -52,8 +52,11 @@
 
     <!-- Apps -->
     <string name="label_nav_apps">Apps</string>
+    <string name="message_apps_empty">There are no apps to show</string>
     <string name="label_list_header_apps_configured">Configured Apps</string>
     <string name="label_list_header_apps_unconfigured">Unconfigured Apps</string>
+    <string name="action_apps_user_select_show">Show user selection</string>
+    <string name="action_apps_user_select_hide">Hide user selection</string>
     <string name="label_apps_user_select">Select user</string>
     <string name="label_user_current">Current user</string>
     <string name="action_apps_user_list_refresh">Refresh user list</string>

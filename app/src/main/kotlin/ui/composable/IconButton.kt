@@ -10,6 +10,7 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -26,6 +27,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 fun IconButtonWithTooltip(
     imageVector: ImageVector,
     @StringRes contentDescription: Int?,
+    modifier: Modifier = Modifier,
     preferredTooltipPosition: TooltipPosition = TooltipPosition.Bottom,
     tooltipSpacing: Dp = 8.dp,
     onClick: () -> Unit,
@@ -61,6 +63,7 @@ fun IconButtonWithTooltip(
             contentDescription?.let { PlainTooltip { Text(stringResource(it)) } }
         },
         state = rememberTooltipState(),
+        modifier = modifier,
         focusable = contentDescription != null,
         enableUserInput = contentDescription != null,
     ) {
