@@ -362,22 +362,6 @@ object Apps : Main() {
                 }
             }
 
-            AnimatedContent(configuredList.isEmpty() && unconfiguredList.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (it) {
-                        Text(
-                            text = stringResource(R.string.message_apps_empty),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
-            }
-
             GroupedLazyColumn(
                 modifier = Modifier
                     .contentHazeSource()
@@ -395,6 +379,37 @@ object Apps : Main() {
                     list = unconfiguredList,
                     header = R.string.label_list_header_apps_unconfigured,
                 )
+            }
+
+            AnimatedContent(
+                targetState = AppListStatus(
+                    isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
+                    isAllFiltered = filteredMethods.containsAll(AppFilter.usableEntries),
+                ),
+            ) { (isEmpty, isAllFiltered) ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    if (isEmpty) {
+                        Text(
+                            text = stringResource(R.string.message_apps_empty),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+
+                        if (isAllFiltered) {
+                            Spacer(Modifier.height(24.dp))
+                            TextButton(
+                                onClick = { showFilterBottomSheet = true },
+                            ) {
+                                Text(stringResource(R.string.label_apps_empty_filter_show))
+                            }
+                        }
+                    }
+                }
             }
 
             if (showFilterBottomSheet) {
@@ -601,6 +616,11 @@ object Apps : Main() {
             )
         }
     }
+
+    data class AppListStatus(
+        val isEmpty: Boolean,
+        val isAllFiltered: Boolean,
+    )
 
     val PackageInfo.listKey: String get() = "${packageName}-${applicationInfo?.uid}"
 
