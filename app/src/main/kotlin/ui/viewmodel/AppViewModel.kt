@@ -2,15 +2,20 @@ package top.ltfan.notdeveloper.ui.viewmodel
 
 import android.content.Context
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewModelScope
 import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.data.UserInfo
+import top.ltfan.notdeveloper.datastore.AppListSettings
+import top.ltfan.notdeveloper.datastore.model.AppDataStore
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -22,6 +27,8 @@ import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
+    val settingsStore = AppListSettings.createDataStore()
+
     val hazeState = HazeState()
 
     val snackbarHostState = SnackbarHostState()
@@ -37,7 +44,6 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     val myPackageInfo = application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0)!!
     var users by mutableStateOf(queryUsers())
-    var selectedUser by mutableStateOf(users.first())
 
     fun navigateMain(page: Main) {
         if (currentPage == page) return
@@ -111,5 +117,23 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     fun updateUsers() {
         users = queryUsers()
+    }
+
+    private fun <T, R> AppDataStore<T>.propertyAsState(
+        defaultValue: T = this.defaultValue,
+        get: (T) -> R,
+        set: (T, R) -> T,
+    ): MutableState<R> {
+        val delegate = mutableStateOf(defaultValue)
+        viewModelScope.launch { data.collect { delegate.value = it } }
+        return object : MutableState<R> by mutableStateOf(get(delegate.value)) {
+            override var value: R
+                get() = get(delegate.value)
+                set(newValue) {
+                    viewModelScope.launch {
+                        updateData { set(delegate.value, newValue) }
+                    }
+                }
+        }
     }
 }
