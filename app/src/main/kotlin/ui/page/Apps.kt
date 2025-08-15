@@ -1,18 +1,24 @@
 package top.ltfan.notdeveloper.ui.page
 
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.os.UserHandle
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,7 +31,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -33,6 +38,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
@@ -49,16 +56,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -73,9 +79,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.datastore.AppFilter
+import top.ltfan.notdeveloper.datastore.AppSort
+import top.ltfan.notdeveloper.datastore.util.rememberPropertyAsState
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
+import top.ltfan.notdeveloper.ui.composable.GroupedLazyListScope
 import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
+import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -103,12 +114,11 @@ object Apps : Main() {
 
     val lazyListState = LazyListState()
 
-    var fullList by mutableStateOf(listOf<FlaggedPackageInfo>())
+    var fullList by mutableStateOf(listOf<PackageInfo>())
     var configuredList by mutableStateOf(listOf<PackageInfo>())
     var unconfiguredList by mutableStateOf(listOf<PackageInfo>())
 
-    var sortMethod by mutableStateOf(Sort.Label)
-    var filteredMethods = mutableStateSetOf<Filter>()
+    var showUserFilter by mutableStateOf(false)
 
     var isAppListError by mutableStateOf(false)
     var showAppListErrorInfoDialog by mutableStateOf(false)
@@ -119,6 +129,26 @@ object Apps : Main() {
     @Composable
     context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
+        var selectedUser by settingsStore.rememberPropertyAsState(
+            get = { it.selectedUser },
+            set = { settings, user -> settings.copy(selectedUser = user) },
+        )
+
+        var sortMethod by settingsStore.rememberPropertyAsState(
+            get = { it.sort },
+            set = { settings, sort -> settings.copy(sort = sort) },
+        )
+
+        var filteredMethods by settingsStore.rememberPropertyAsState(
+            get = { it.filtered },
+            set = { settings, filters -> settings.copy(filtered = filters) },
+        )
+
+        LaunchedEffect(users, selectedUser) {
+            if (selectedUser in users) return@LaunchedEffect
+            selectedUser = users.first()
+        }
+
         Scaffold(
             topBar = {
                 Column(
@@ -158,6 +188,44 @@ object Apps : Main() {
                                 }
                             }
 
+                            AnimatedContent(
+                                targetState = showUserFilter,
+                                transitionSpec = {
+                                    ContentTransform(
+                                        targetContentEnter = EnterTransition.None,
+                                        initialContentExit = ExitTransition.None,
+                                        sizeTransform = null,
+                                    )
+                                }
+                            ) { showing ->
+                                val rotation by transition.animateFloat(
+                                    label = "user_filter_rotation",
+                                    transitionSpec = { tween(durationMillis = 300) }
+                                ) {
+                                    val factor = if (showUserFilter) 1f else -1f
+                                    when (it) {
+                                        EnterExitState.PreEnter -> -180f * factor
+                                        EnterExitState.Visible -> 0f
+                                        EnterExitState.PostExit -> 180f * factor
+                                    }
+                                }
+                                if (showing) {
+                                    IconButtonWithTooltip(
+                                        imageVector = Icons.Default.ExpandLess,
+                                        contentDescription = R.string.action_apps_user_select_hide,
+                                        modifier = Modifier.rotate(rotation),
+                                        onClick = { showUserFilter = false },
+                                    )
+                                } else {
+                                    IconButtonWithTooltip(
+                                        imageVector = Icons.Default.ExpandMore,
+                                        contentDescription = R.string.action_apps_user_select_show,
+                                        modifier = Modifier.rotate(rotation),
+                                        onClick = { showUserFilter = true },
+                                    )
+                                }
+                            }
+
                             IconButtonWithTooltip(
                                 imageVector = Icons.Default.FilterList,
                                 contentDescription = R.string.action_bottom_sheet_apps_filter_show,
@@ -167,100 +235,87 @@ object Apps : Main() {
                         windowInsets = AppWindowInsets.only { horizontal + top },
                         colors = TopAppBarColorsTransparent,
                     )
-                    FilterBar(
-                        leading = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .padding(8.dp)
-                                    .padding(horizontal = 8.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Spacer(
-                                    Modifier
-                                        .matchParentSize()
-                                        .pointerInteropFilter { true }
-                                )
-                                Text(stringResource(R.string.label_apps_user_select))
-                            }
-                        },
-                        trailing = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                var refreshFinished by rememberAutoRestorableState(false)
-                                Spacer(
-                                    Modifier
-                                        .matchParentSize()
-                                        .pointerInteropFilter { true }
-                                )
-                                AnimatedContent(refreshFinished) {
-                                    if (it) {
-                                        Box(
-                                            modifier = Modifier
-                                                .minimumInteractiveComponentSize()
-                                                .size(40.dp),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            Icon(
+                    AnimatedVisibility(showUserFilter) {
+                        FilterBar(
+                            leading = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(8.dp)
+                                        .padding(horizontal = 8.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    PointerInjector()
+                                    Text(stringResource(R.string.label_apps_user_select))
+                                }
+                            },
+                            trailing = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(8.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    var refreshFinished by rememberAutoRestorableState(false)
+                                    PointerInjector()
+                                    AnimatedContent(refreshFinished) {
+                                        if (it) {
+                                            IconButtonSizedIcon(
                                                 imageVector = Icons.Default.Done,
                                                 contentDescription = stringResource(R.string.label_apps_user_list_refresh_done),
                                             )
+                                        } else {
+                                            IconButtonWithTooltip(
+                                                imageVector = Icons.Default.Refresh,
+                                                contentDescription = R.string.action_apps_user_list_refresh,
+                                                onClick = {
+                                                    updateUsers()
+                                                    refreshFinished = true
+                                                },
+                                            )
                                         }
-                                    } else {
-                                        IconButtonWithTooltip(
-                                            imageVector = Icons.Default.Refresh,
-                                            contentDescription = R.string.action_apps_user_list_refresh,
-                                            onClick = {
-                                                updateUsers()
-                                                refreshFinished = true
-                                            },
-                                        )
                                     }
                                 }
-                            }
-                        },
-                    ) { contentPadding ->
-                        LazyRow(
-                            modifier = Modifier
-                                .horizontalAlphaMaskLinear(
-                                    LinearMaskData(
-                                        startDp = contentPadding.calculateStartPadding(
-                                            LocalLayoutDirection.current
+                            },
+                        ) { contentPadding ->
+                            LazyRow(
+                                modifier = Modifier
+                                    .horizontalAlphaMaskLinear(
+                                        LinearMaskData(
+                                            startDp = contentPadding.calculateStartPadding(
+                                                LocalLayoutDirection.current
+                                            ),
+                                            endDp = 0.dp,
                                         ),
-                                        endDp = 0.dp,
-                                    ),
-                                    LinearMaskData(
-                                        startDp = contentPadding.calculateEndPadding(
-                                            LocalLayoutDirection.current
+                                        LinearMaskData(
+                                            startDp = contentPadding.calculateEndPadding(
+                                                LocalLayoutDirection.current
+                                            ),
+                                            endDp = 0.dp,
+                                            reverse = true,
                                         ),
-                                        endDp = 0.dp,
-                                        reverse = true,
+                                        map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
                                     ),
-                                    map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
-                                ),
-                            contentPadding = contentPadding,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            items(users, { it }) {
-                                val selected = selectedUser == it
-                                FilterChip(
-                                    selected = selected,
-                                    onClick = { selectedUser = it },
-                                    label = { Text(it.name.getString()) },
-                                    leadingIcon = {
-                                        AnimatedVisibility(
-                                            visible = selected,
-                                            enter = fadeIn() + expandHorizontally(),
-                                            exit = fadeOut() + shrinkHorizontally(),
-                                        ) {
-                                            Icon(Icons.Default.Check, contentDescription = null)
-                                        }
-                                    },
-                                )
+                                contentPadding = contentPadding,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                items(users, { it }) {
+                                    val selected = selectedUser == it
+                                    FilterChip(
+                                        selected = selected,
+                                        onClick = { selectedUser = it },
+                                        label = { Text(it.name.getString()) },
+                                        leadingIcon = {
+                                            AnimatedVisibility(
+                                                visible = selected,
+                                                enter = fadeIn() + expandHorizontally(),
+                                                exit = fadeOut() + shrinkHorizontally(),
+                                            ) {
+                                                Icon(Icons.Default.Check, contentDescription = null)
+                                            }
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -273,7 +328,7 @@ object Apps : Main() {
                 bottom += 16.dp
             }
 
-            val configuredList = application.database.dao().getPackageInfoFlow()
+            val databaseList by application.database.dao().getPackageInfoFlow()
                 .collectAsStateWithLifecycle(listOf())
 
             LaunchedEffect(Unit) {
@@ -282,16 +337,21 @@ object Apps : Main() {
                         isAppListError = false
                     } ?: listOf(myPackageInfo).also {
                         isAppListError = true
-                    }).map { it.flagged() }
+                    })
                 }
             }
 
-            LaunchedEffect(fullList, sortMethod, filteredMethods.size) {
-                val groupFilters = listOf(Filter.Configured, Filter.Unconfigured)
+            LaunchedEffect(fullList, databaseList, sortMethod, filteredMethods.size) {
+                val queriedList = service?.queryApps(databaseList) ?: emptyList()
+                val groupFilters = listOf(AppFilter.Configured, AppFilter.Unconfigured)
                 val filters = filteredMethods.subtract(groupFilters)
-                val fullList = fullList.toMutableList()
-                fullList.forEach {
-
+                withContext(Dispatchers.IO) {
+                    configuredList = if (AppFilter.Configured !in filteredMethods) {
+                        queriedList.processed(sortMethod, filters)
+                    } else emptyList()
+                    unconfiguredList = if (AppFilter.Unconfigured !in filteredMethods) {
+                        fullList.filter { it !in configuredList }.processed(sortMethod, filters)
+                    } else emptyList()
                 }
             }
 
@@ -299,6 +359,22 @@ object Apps : Main() {
             LaunchedEffect(isAppListError) {
                 if (isAppListError) {
                     snackbarHostState.showSnackbar(snackbarMessage)
+                }
+            }
+
+            AnimatedContent(configuredList.isEmpty() && unconfiguredList.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (it) {
+                        Text(
+                            text = stringResource(R.string.message_apps_empty),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
                 }
             }
 
@@ -310,27 +386,15 @@ object Apps : Main() {
                 state = lazyListState,
                 contentPadding = contentPadding,
             ) {
-                card(
-                    colors = { CardColorsLowest },
-                ) {
-                    header(
-                        text = R.string.label_list_header_apps_unconfigured,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+                appList(
+                    list = configuredList,
+                    header = R.string.label_list_header_apps_configured,
+                )
 
-                    items(
-                        items = fullList,
-                        key = { it.listKey },
-                        contentType = { "app" },
-                        modifier = {
-                            Modifier
-                                .animateItem()
-                                .padding(horizontal = 16.dp)
-                        },
-                    ) {
-                        AppListItem(it.info)
-                    }
-                }
+                appList(
+                    list = unconfiguredList,
+                    header = R.string.label_list_header_apps_unconfigured,
+                )
             }
 
             if (showFilterBottomSheet) {
@@ -357,7 +421,7 @@ object Apps : Main() {
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Sort.entries.forEach {
+                        AppSort.entries.forEach {
                             val selected = sortMethod == it
                             FilterChip(
                                 selected = selected,
@@ -390,14 +454,13 @@ object Apps : Main() {
                         FilterChip(
                             selected = allSelected,
                             onClick = {
-                                if (allSelected) {
-                                    filteredMethods.clear()
-                                    filteredMethods.addAll(Filter.usableEntries)
+                                filteredMethods = if (allSelected) {
+                                    AppFilter.usableEntries
                                 } else {
-                                    filteredMethods.clear()
+                                    emptySet()
                                 }
                             },
-                            label = { Text(stringResource(Filter.All.labelRes)) },
+                            label = { Text(stringResource(AppFilter.All.labelRes)) },
                             leadingIcon = {
                                 AnimatedContent(allSelected) { allSelected ->
                                     Icon(
@@ -407,15 +470,15 @@ object Apps : Main() {
                                 }
                             },
                         )
-                        Filter.usableEntries.forEach {
+                        AppFilter.usableEntries.forEach {
                             val selected = !filteredMethods.contains(it)
                             FilterChip(
                                 selected = selected,
                                 onClick = {
                                     if (filteredMethods.contains(it)) {
-                                        filteredMethods.remove(it)
+                                        filteredMethods -= it
                                     } else {
-                                        filteredMethods.add(it)
+                                        filteredMethods += it
                                     }
                                 },
                                 label = { Text(stringResource(it.labelRes)) },
@@ -497,93 +560,65 @@ object Apps : Main() {
         }
     }
 
-    val FlaggedPackageInfo.listKey: String get() = "${packageName}-${applicationInfo?.uid}"
+    context(viewModel: AppViewModel)
+    fun GroupedLazyListScope.appList(
+        list: List<PackageInfo>,
+        @StringRes header: Int,
+    ) {
+        if (list.isEmpty()) return
 
-    enum class Sort(@param:StringRes val labelRes: Int) {
-        Label(R.string.item_apps_filter_sort_label) {
-            override operator fun invoke(viewModel: AppViewModel) = compareBy<FlaggedPackageInfo> {
-                val packageManager = viewModel.application.packageManager
-                val applicationInfo = packageManager.getApplicationInfo(it.packageName, 0)
-                applicationInfo.loadLabel(packageManager).toString()
+        card(
+            colors = { CardColorsLowest },
+        ) {
+            header(
+                text = header,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+
+            items(
+                items = list,
+                key = { it.listKey },
+                contentType = { "app" },
+                modifier = {
+                    Modifier
+                        .animateItem()
+                        .padding(horizontal = 16.dp)
+                },
+            ) {
+                viewModel.AppListItem(it)
             }
-
-            context(viewModel: AppViewModel)
-            override fun List<FlaggedPackageInfo>.sorted() = sortedWith(
-                invoke(viewModel) then Package(viewModel) then Updated(viewModel)
-            )
-        },
-        Package(R.string.item_apps_filter_sort_package) {
-            override operator fun invoke(viewModel: AppViewModel) =
-                compareBy<FlaggedPackageInfo> { it.packageName }
-
-            context(viewModel: AppViewModel)
-            override fun List<FlaggedPackageInfo>.sorted() = sortedWith(
-                invoke(viewModel) then Label(viewModel) then Updated(viewModel)
-            )
-        },
-        Updated(R.string.item_apps_filter_sort_updated) {
-            override operator fun invoke(viewModel: AppViewModel) =
-                compareByDescending<FlaggedPackageInfo> { it.lastUpdateTime }
-
-            context(viewModel: AppViewModel)
-            override fun List<FlaggedPackageInfo>.sorted() = sortedWith(
-                invoke(viewModel) then Package(viewModel) then Label(viewModel)
-            )
-        };
-
-        abstract operator fun invoke(viewModel: AppViewModel): Comparator<FlaggedPackageInfo>
-
-        context(viewModel: AppViewModel)
-        abstract fun List<FlaggedPackageInfo>.sorted(): List<FlaggedPackageInfo>
-    }
-
-    enum class Filter(@param:StringRes val labelRes: Int) {
-        All(R.string.item_apps_filter_all) {
-            context(viewModel: AppViewModel)
-            override fun List<FlaggedPackageInfo>.filtered(): List<FlaggedPackageInfo> = emptyList()
-        },
-        Configured(R.string.item_apps_filter_configured) {
-            context(viewModel: AppViewModel)
-            override fun List<FlaggedPackageInfo>.filtered() = filter { !it.isConfigured }
-        },
-        Unconfigured(R.string.item_apps_filter_unconfigured) {
-            context(viewModel: AppViewModel)
-            override fun List<FlaggedPackageInfo>.filtered() = filter { it.isConfigured }
-        },
-        System(R.string.item_apps_filter_system) {
-            context(viewModel: AppViewModel)
-            override fun List<FlaggedPackageInfo>.filtered() = filter { !it.isSystem }
-        };
-
-        context(viewModel: AppViewModel)
-        abstract fun List<FlaggedPackageInfo>.filtered(): List<FlaggedPackageInfo>
-
-        companion object {
-            val usableEntries = Filter.entries.drop(1)
         }
     }
 
-    data class FlaggedPackageInfo(
-        val isConfigured: Boolean,
-        val isSystem: Boolean,
-        val info: PackageInfo,
-    ) {
-        val applicationInfo = info.applicationInfo
-        val packageName = info.packageName
-        val lastUpdateTime = info.lastUpdateTime
+    @Composable
+    context(boxScope: BoxScope)
+    fun PointerInjector() {
+        with(boxScope) {
+            Spacer(
+                Modifier
+                    .matchParentSize()
+                    .pointerInteropFilter { true }
+            )
+        }
+    }
+
+    val PackageInfo.listKey: String get() = "${packageName}-${applicationInfo?.uid}"
+
+    context(viewModel: AppViewModel)
+    fun List<PackageInfo>.filtered(filters: Set<AppFilter>) = filters.fold(this) { acc, filter ->
+        with(filter) {
+            acc.filtered()
+        }
     }
 
     context(viewModel: AppViewModel)
-    suspend fun PackageInfo.flagged(): FlaggedPackageInfo {
-        val packageManager = viewModel.application.packageManager
-        val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
-        val userId = getUserId(applicationInfo.uid)
-        val dao = viewModel.application.database.dao()
-        val isConfigured = dao.isPackageExists(packageName, userId)
-        val isSystem =
-            applicationInfo.flags and (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-        return FlaggedPackageInfo(isConfigured, isSystem, this)
+    fun List<PackageInfo>.sorted(sort: AppSort) = with(sort) {
+        sorted()
     }
+
+    context(viewModel: AppViewModel)
+    fun List<PackageInfo>.processed(sort: AppSort, filters: Set<AppFilter>) =
+        filtered(filters).sorted(sort)
 
     fun getUserId(uid: Int): Int {
         val function = UserHandle::class.staticFunctions.first { it.name == "getUserId" }

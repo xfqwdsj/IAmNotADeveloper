@@ -4,9 +4,12 @@ import android.content.Context
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.parcelableCreator
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
+@Serializable
 @Parcelize
 data class UserInfo(
     val id: Int,
@@ -35,12 +38,15 @@ data class UserInfo(
     )
 }
 
+@Serializable
 @Parcelize
 sealed class UserInfoName : Parcelable {
+    @Serializable
     data class StringName(val name: String?) : UserInfoName() {
         override fun getNameBase(context: Context): String = name.toString()
     }
 
+    @Serializable
     data object Current : UserInfoName() {
         override fun getNameBase(context: Context): String =
             context.getString(R.string.label_user_current)
