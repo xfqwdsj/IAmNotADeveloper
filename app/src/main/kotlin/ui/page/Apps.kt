@@ -79,6 +79,7 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -103,12 +104,10 @@ import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.CardColorsLowest
-import top.ltfan.notdeveloper.ui.util.HazeZIndex
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
-import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
@@ -190,7 +189,6 @@ object Apps : Main() {
                 GroupedLazyColumn(
                     modifier = Modifier
                         .contentHazeSource()
-                        .consumeWindowInsets(contentPadding)
                         .fillMaxSize(),
                     state = lazyListState,
                     contentPadding = contentPadding,
@@ -459,6 +457,7 @@ object Apps : Main() {
     @Composable
     context(contentPadding: PaddingValues)
     fun NoAppsBackground(status: AppListStatus) {
+        // TODO: 无障碍
         AnimatedContent(
             targetState = status,
         ) { (isEmpty, isAllFiltered) ->
@@ -693,6 +692,7 @@ object Apps : Main() {
                     targetState = currentConfiguringPackageInfo != info,
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                 ) { visible ->
+
                     if (visible) {
                         with(sharedTransitionScope) {
                             viewModel.AppListItem(
@@ -712,7 +712,9 @@ object Apps : Main() {
                     } else {
                         viewModel.AppListItem(
                             packageInfo = info,
-                            modifier = Modifier.alpha(0f),
+                            modifier = Modifier
+                                .alpha(0f)
+                                .clearAndSetSemantics {},
                         )
                     }
                 }
