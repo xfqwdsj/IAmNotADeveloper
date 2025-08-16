@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.ui.NavDisplay
 import top.ltfan.notdeveloper.application.NotDevApplication
-import top.ltfan.notdeveloper.service.systemService
 import top.ltfan.notdeveloper.ui.composable.HazeSnackbar
 import top.ltfan.notdeveloper.ui.composable.HazeSnackbarHost
 import top.ltfan.notdeveloper.ui.page.Main
@@ -40,7 +39,6 @@ import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
-import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 import kotlin.math.max
 import kotlin.math.roundToInt
 
