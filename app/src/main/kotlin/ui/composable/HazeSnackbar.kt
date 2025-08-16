@@ -71,6 +71,7 @@ import androidx.compose.ui.util.fastFirstOrNull
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.LocalHazeStyle
 import kotlinx.coroutines.delay
+import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 import top.ltfan.notdeveloper.ui.util.hazeEffect
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
@@ -99,11 +100,7 @@ fun HazeSnackbarHost(
     AnimatedContent(
         targetState = currentSnackbarData,
         modifier = modifier,
-        transitionSpec = {
-            fadeIn(tween(220, 90)) +
-                    scaleIn(tween(220, 90), 0.92f) togetherWith
-                    fadeOut(tween(90)) using null
-        }
+        transitionSpec = { AnimatedContentDefaultTransform using null }
     ) { currentSnackbarData ->
         if (currentSnackbarData != null) {
             Box(
