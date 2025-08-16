@@ -22,8 +22,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -81,6 +83,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppSort
 import top.ltfan.notdeveloper.datastore.util.rememberPropertyAsState
@@ -106,6 +109,7 @@ import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
+import top.ltfan.notdeveloper.util.mutableProperty
 import kotlin.reflect.full.staticFunctions
 
 object Apps : Main() {
@@ -161,169 +165,14 @@ object Apps : Main() {
                 ) {
                     TopAppBar(
                         title = { Text(stringResource(navigationLabel)) },
-                        actions = {
-                            if (isAppListError) {
-                                IconButtonWithTooltip(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = R.string.action_apps_query_details_show,
-                                    onClick = { showAppListErrorInfoDialog = true },
-                                )
-
-                                if (showAppListErrorInfoDialog) {
-                                    HazeAlertDialog(
-                                        onDismissRequest = { showAppListErrorInfoDialog = false },
-                                        confirmButton = {
-                                            TextButton(
-                                                onClick = { showAppListErrorInfoDialog = false },
-                                            ) {
-                                                Text(stringResource(android.R.string.ok))
-                                            }
-                                        },
-                                        title = {
-                                            Text(stringResource(R.string.title_dialog_apps_query_failed))
-                                        },
-                                        text = {
-                                            Text(stringResource(R.string.message_dialog_apps_query_failed))
-                                        },
-                                    )
-                                }
-                            }
-
-                            AnimatedContent(
-                                targetState = showUserFilter,
-                                transitionSpec = {
-                                    ContentTransform(
-                                        targetContentEnter = EnterTransition.None,
-                                        initialContentExit = ExitTransition.None,
-                                        sizeTransform = null,
-                                    )
-                                }
-                            ) { showing ->
-                                val rotation by transition.animateFloat(
-                                    label = "UserFilterRotation",
-                                    transitionSpec = { tween(durationMillis = 300) },
-                                ) {
-                                    val factor = if (showUserFilter) 1f else -1f
-                                    when (it) {
-                                        EnterExitState.PreEnter -> -180f * factor
-                                        EnterExitState.Visible -> 0f
-                                        EnterExitState.PostExit -> 180f * factor
-                                    }
-                                }
-                                if (showing) {
-                                    IconButtonWithTooltip(
-                                        imageVector = Icons.Default.ExpandLess,
-                                        contentDescription = R.string.action_apps_user_select_hide,
-                                        modifier = Modifier.rotate(rotation),
-                                        onClick = { showUserFilter = false },
-                                    )
-                                } else {
-                                    IconButtonWithTooltip(
-                                        imageVector = Icons.Default.ExpandMore,
-                                        contentDescription = R.string.action_apps_user_select_show,
-                                        modifier = Modifier.rotate(rotation),
-                                        onClick = { showUserFilter = true },
-                                    )
-                                }
-                            }
-
-                            IconButtonWithTooltip(
-                                imageVector = Icons.Default.FilterList,
-                                contentDescription = R.string.action_bottom_sheet_apps_filter_show,
-                                onClick = { showFilterBottomSheet = true },
-                            )
-                        },
+                        actions = { AppBarActions() },
                         windowInsets = AppWindowInsets.only { horizontal + top },
                         colors = TopAppBarColorsTransparent,
                     )
-                    AnimatedVisibilityWithBlur(
-                        visible = showUserFilter,
-                        enter = fadeIn() + expandVertically(clip = false),
-                        exit = fadeOut() + shrinkVertically(clip = false),
-                    ) {
-                        FilterBar(
-                            leading = {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .padding(8.dp)
-                                        .padding(horizontal = 8.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    PointerInjector()
-                                    Text(stringResource(R.string.label_apps_user_select))
-                                }
-                            },
-                            trailing = {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .padding(8.dp),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    var refreshFinished by rememberAutoRestorableState(false)
-                                    PointerInjector()
-                                    AnimatedContent(refreshFinished) {
-                                        if (it) {
-                                            IconButtonSizedIcon(
-                                                imageVector = Icons.Default.Done,
-                                                contentDescription = stringResource(R.string.label_apps_user_list_refresh_done),
-                                            )
-                                        } else {
-                                            IconButtonWithTooltip(
-                                                imageVector = Icons.Default.Refresh,
-                                                contentDescription = R.string.action_apps_user_list_refresh,
-                                                onClick = {
-                                                    updateUsers()
-                                                    refreshFinished = true
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                        ) { contentPadding ->
-                            LazyRow(
-                                modifier = Modifier
-                                    .horizontalAlphaMaskLinear(
-                                        LinearMaskData(
-                                            startDp = contentPadding.calculateStartPadding(
-                                                LocalLayoutDirection.current
-                                            ),
-                                            endDp = 0.dp,
-                                        ),
-                                        LinearMaskData(
-                                            startDp = contentPadding.calculateEndPadding(
-                                                LocalLayoutDirection.current
-                                            ),
-                                            endDp = 0.dp,
-                                            reverse = true,
-                                        ),
-                                        map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
-                                    ),
-                                contentPadding = contentPadding,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                items(users, { it }) {
-                                    val selected = selectedUser == it
-                                    FilterChip(
-                                        selected = selected,
-                                        onClick = { selectedUser = it },
-                                        label = { Text(it.name.getString()) },
-                                        leadingIcon = {
-                                            AnimatedVisibility(
-                                                visible = selected,
-                                                enter = fadeIn() + expandHorizontally(),
-                                                exit = fadeOut() + shrinkHorizontally(),
-                                            ) {
-                                                Icon(Icons.Default.Check, contentDescription = null)
-                                            }
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    FilterBar(
+                        selectedUser,
+                        { selectedUser = it },
+                    )
                 }
             },
             contentWindowInsets = AppWindowInsets + contentPadding,
@@ -352,136 +201,19 @@ object Apps : Main() {
                 )
             }
 
-            AnimatedContent(
-                targetState = AppListStatus(
+            NoAppsBackground(
+                status = AppListStatus(
                     isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
                     isFiltered = filteredMethods.isNotEmpty(),
                 ),
-            ) { (isEmpty, isAllFiltered) ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    if (isEmpty) {
-                        Text(
-                            text = stringResource(R.string.message_apps_empty),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
+            )
 
-                        if (isAllFiltered) {
-                            Spacer(Modifier.height(24.dp))
-                            TextButton(
-                                onClick = { showFilterBottomSheet = true },
-                            ) {
-                                Text(stringResource(R.string.label_apps_empty_filter_show))
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (showFilterBottomSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = { showFilterBottomSheet = false },
-                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-                ) {
-                    Text(
-                        text = stringResource(R.string.title_bottom_sheet_apps_filter),
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineMedium,
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    Text(
-                        text = stringResource(R.string.label_bottom_sheet_apps_filter_sort),
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        AppSort.entries.forEach {
-                            val selected = sortMethod == it
-                            FilterChip(
-                                selected = selected,
-                                onClick = { sortMethod = it },
-                                label = { Text(stringResource(it.labelRes)) },
-                                leadingIcon = {
-                                    AnimatedVisibility(selected) {
-                                        Icon(Icons.Default.Check, contentDescription = null)
-                                    }
-                                },
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    HorizontalDivider(Modifier.padding(horizontal = 8.dp))
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.label_bottom_sheet_apps_filter),
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val allSelected = filteredMethods.isEmpty()
-                        FilterChip(
-                            selected = allSelected,
-                            onClick = {
-                                filteredMethods = if (allSelected) {
-                                    AppFilter.usableEntries
-                                } else {
-                                    emptySet()
-                                }
-                            },
-                            label = { Text(stringResource(AppFilter.All.labelRes)) },
-                            leadingIcon = {
-                                AnimatedContent(allSelected) { allSelected ->
-                                    Icon(
-                                        imageVector = if (allSelected) Icons.Default.Check else Icons.Default.Remove,
-                                        contentDescription = null,
-                                    )
-                                }
-                            },
-                        )
-                        AppFilter.usableEntries.forEach {
-                            val selected = !filteredMethods.contains(it)
-                            FilterChip(
-                                selected = selected,
-                                onClick = {
-                                    if (filteredMethods.contains(it)) {
-                                        filteredMethods -= it
-                                    } else {
-                                        filteredMethods += it
-                                    }
-                                },
-                                label = { Text(stringResource(it.labelRes)) },
-                                leadingIcon = {
-                                    AnimatedContent(selected) { selected ->
-                                        Icon(
-                                            imageVector = if (selected) Icons.Default.Check else Icons.Default.Remove,
-                                            contentDescription = null,
-                                        )
-                                    }
-                                },
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(64.dp))
-                }
-            }
+            FilterBottomSheet(
+                sortMethod,
+                { sortMethod = it },
+                filteredMethods,
+                { filteredMethods = it },
+            )
         }
 
         LaunchedEffect(users, selectedUser) {
@@ -522,7 +254,325 @@ object Apps : Main() {
 
     @Composable
     context(viewModel: AppViewModel)
-    fun FilterBar(
+    fun RowScope.AppBarActions() {
+        if (isAppListError) {
+            IconButtonWithTooltip(
+                imageVector = Icons.Default.Warning,
+                contentDescription = R.string.action_apps_query_details_show,
+                onClick = { showAppListErrorInfoDialog = true },
+            )
+
+            if (showAppListErrorInfoDialog) {
+                HazeAlertDialog(
+                    onDismissRequest = { showAppListErrorInfoDialog = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = { showAppListErrorInfoDialog = false },
+                        ) {
+                            Text(stringResource(android.R.string.ok))
+                        }
+                    },
+                    title = {
+                        Text(stringResource(R.string.title_dialog_apps_query_failed))
+                    },
+                    text = {
+                        Text(stringResource(R.string.message_dialog_apps_query_failed))
+                    },
+                )
+            }
+        }
+
+        AnimatedContent(
+            targetState = showUserFilter,
+            transitionSpec = {
+                ContentTransform(
+                    targetContentEnter = EnterTransition.None,
+                    initialContentExit = ExitTransition.None,
+                    sizeTransform = null,
+                )
+            }
+        ) { showing ->
+            val rotation by transition.animateFloat(
+                label = "UserFilterRotation",
+                transitionSpec = { tween(durationMillis = 300) },
+            ) {
+                val factor = if (showUserFilter) 1f else -1f
+                when (it) {
+                    EnterExitState.PreEnter -> -180f * factor
+                    EnterExitState.Visible -> 0f
+                    EnterExitState.PostExit -> 180f * factor
+                }
+            }
+            if (showing) {
+                IconButtonWithTooltip(
+                    imageVector = Icons.Default.ExpandLess,
+                    contentDescription = R.string.action_apps_user_select_hide,
+                    modifier = Modifier.rotate(rotation),
+                    onClick = { showUserFilter = false },
+                )
+            } else {
+                IconButtonWithTooltip(
+                    imageVector = Icons.Default.ExpandMore,
+                    contentDescription = R.string.action_apps_user_select_show,
+                    modifier = Modifier.rotate(rotation),
+                    onClick = { showUserFilter = true },
+                )
+            }
+        }
+
+        IconButtonWithTooltip(
+            imageVector = Icons.Default.FilterList,
+            contentDescription = R.string.action_bottom_sheet_apps_filter_show,
+            onClick = { showFilterBottomSheet = true },
+        )
+    }
+
+    @Composable
+    context(viewModel: AppViewModel)
+    fun ColumnScope.FilterBar(
+        selectedUser: UserInfo,
+        setSelectedUser: (UserInfo) -> Unit,
+    ) {
+        var selectedUser by mutableProperty(selectedUser, setSelectedUser)
+
+        with(viewModel) {
+            AnimatedVisibilityWithBlur(
+                visible = showUserFilter,
+                enter = fadeIn() + expandVertically(clip = false),
+                exit = fadeOut() + shrinkVertically(clip = false),
+            ) {
+                FilterBarLayout(
+                    leading = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(8.dp)
+                                .padding(horizontal = 8.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            PointerInjector()
+                            Text(stringResource(R.string.label_apps_user_select))
+                        }
+                    },
+                    trailing = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            var refreshFinished by rememberAutoRestorableState(false)
+                            PointerInjector()
+                            AnimatedContent(refreshFinished) {
+                                if (it) {
+                                    IconButtonSizedIcon(
+                                        imageVector = Icons.Default.Done,
+                                        contentDescription = stringResource(R.string.label_apps_user_list_refresh_done),
+                                    )
+                                } else {
+                                    IconButtonWithTooltip(
+                                        imageVector = Icons.Default.Refresh,
+                                        contentDescription = R.string.action_apps_user_list_refresh,
+                                        onClick = {
+                                            updateUsers()
+                                            refreshFinished = true
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    },
+                ) { contentPadding ->
+                    LazyRow(
+                        modifier = Modifier
+                            .horizontalAlphaMaskLinear(
+                                LinearMaskData(
+                                    startDp = contentPadding.calculateStartPadding(
+                                        LocalLayoutDirection.current
+                                    ),
+                                    endDp = 0.dp,
+                                ),
+                                LinearMaskData(
+                                    startDp = contentPadding.calculateEndPadding(
+                                        LocalLayoutDirection.current
+                                    ),
+                                    endDp = 0.dp,
+                                    reverse = true,
+                                ),
+                                map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
+                            ),
+                        contentPadding = contentPadding,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(users, { it }) {
+                            val selected = selectedUser == it
+                            FilterChip(
+                                selected = selected,
+                                onClick = { selectedUser = it },
+                                label = { Text(it.name.getString()) },
+                                leadingIcon = {
+                                    AnimatedVisibility(
+                                        visible = selected,
+                                        enter = fadeIn() + expandHorizontally(),
+                                        exit = fadeOut() + shrinkHorizontally(),
+                                    ) {
+                                        Icon(Icons.Default.Check, contentDescription = null)
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    context(contentPadding: PaddingValues)
+    fun NoAppsBackground(status: AppListStatus) {
+        AnimatedContent(
+            targetState = status,
+        ) { (isEmpty, isAllFiltered) ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (isEmpty) {
+                    Text(
+                        text = stringResource(R.string.message_apps_empty),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+
+                    if (isAllFiltered) {
+                        Spacer(Modifier.height(24.dp))
+                        TextButton(
+                            onClick = { showFilterBottomSheet = true },
+                        ) {
+                            Text(stringResource(R.string.label_apps_empty_filter_show))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun FilterBottomSheet(
+        sortMethod: AppSort,
+        setSortMethod: (AppSort) -> Unit,
+        filteredMethods: Set<AppFilter>,
+        setFilteredMethods: (Set<AppFilter>) -> Unit,
+    ) {
+        var sortMethod by mutableProperty(sortMethod, setSortMethod)
+        var filteredMethods by mutableProperty(filteredMethods, setFilteredMethods)
+
+        if (showFilterBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showFilterBottomSheet = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            ) {
+                Text(
+                    text = stringResource(R.string.title_bottom_sheet_apps_filter),
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Spacer(Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.label_bottom_sheet_apps_filter_sort),
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Spacer(Modifier.height(8.dp))
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    AppSort.entries.forEach {
+                        val selected = sortMethod == it
+                        FilterChip(
+                            selected = selected,
+                            onClick = { sortMethod = it },
+                            label = { Text(stringResource(it.labelRes)) },
+                            leadingIcon = {
+                                AnimatedVisibility(selected) {
+                                    Icon(Icons.Default.Check, contentDescription = null)
+                                }
+                            },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                HorizontalDivider(Modifier.padding(horizontal = 8.dp))
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.label_bottom_sheet_apps_filter),
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Spacer(Modifier.height(8.dp))
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val allSelected = filteredMethods.isEmpty()
+                    FilterChip(
+                        selected = allSelected,
+                        onClick = {
+                            filteredMethods = if (allSelected) {
+                                AppFilter.usableEntries
+                            } else {
+                                emptySet()
+                            }
+                        },
+                        label = { Text(stringResource(AppFilter.All.labelRes)) },
+                        leadingIcon = {
+                            AnimatedContent(allSelected) { allSelected ->
+                                Icon(
+                                    imageVector = if (allSelected) Icons.Default.Check else Icons.Default.Remove,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
+                    )
+                    AppFilter.usableEntries.forEach {
+                        val selected = !filteredMethods.contains(it)
+                        FilterChip(
+                            selected = selected,
+                            onClick = {
+                                if (filteredMethods.contains(it)) {
+                                    filteredMethods -= it
+                                } else {
+                                    filteredMethods += it
+                                }
+                            },
+                            label = { Text(stringResource(it.labelRes)) },
+                            leadingIcon = {
+                                AnimatedContent(selected) { selected ->
+                                    Icon(
+                                        imageVector = if (selected) Icons.Default.Check else Icons.Default.Remove,
+                                        contentDescription = null,
+                                    )
+                                }
+                            },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(64.dp))
+            }
+        }
+    }
+
+    @Composable
+    fun FilterBarLayout(
         modifier: Modifier = Modifier,
         leading: @Composable (() -> Unit)? = null,
         trailing: @Composable (() -> Unit)? = null,
@@ -612,15 +662,12 @@ object Apps : Main() {
     }
 
     @Composable
-    context(boxScope: BoxScope)
-    fun PointerInjector() {
-        with(boxScope) {
-            Spacer(
-                Modifier
-                    .matchParentSize()
-                    .pointerInteropFilter { true }
-            )
-        }
+    fun BoxScope.PointerInjector() {
+        Spacer(
+            Modifier
+                .matchParentSize()
+                .pointerInteropFilter { true }
+        )
     }
 
     data class AppListStatus(
