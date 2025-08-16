@@ -33,8 +33,8 @@ fun ColumnScope.AnimatedVisibilityWithBlur(
     visible: Boolean,
     modifier: Modifier = Modifier,
     maxRadius: Dp = 8.dp,
-    enter: EnterTransition = fadeIn() + expandVertically(),
-    exit: ExitTransition = fadeOut() + shrinkVertically(),
+    enter: EnterTransition = fadeIn() + expandVertically(clip = false),
+    exit: ExitTransition = fadeOut() + shrinkVertically(clip = false),
     label: String = "AnimatedVisibility",
     content: @Composable AnimatedVisibilityScope.() -> Unit,
 ) {
