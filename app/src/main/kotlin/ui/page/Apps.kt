@@ -16,11 +16,9 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -363,11 +361,7 @@ object Apps : Main() {
         var selectedUser by mutableProperty(selectedUser, setSelectedUser)
 
         with(viewModel) {
-            AnimatedVisibilityWithBlur(
-                visible = showUserFilter,
-                enter = fadeIn() + expandVertically(clip = false),
-                exit = fadeOut() + shrinkVertically(clip = false),
-            ) {
+            AnimatedVisibilityWithBlur(showUserFilter) {
                 FilterBarLayout(
                     leading = {
                         Box(
