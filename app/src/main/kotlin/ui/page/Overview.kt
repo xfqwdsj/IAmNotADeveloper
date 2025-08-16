@@ -70,7 +70,6 @@ object Overview : Main() {
             GroupedLazyColumn(
                 modifier = Modifier
                     .contentHazeSource()
-                    .consumeWindowInsets(contentPadding)
                     .fillMaxSize(),
                 contentPadding = contentPadding,
                 spacing = 16.dp,
