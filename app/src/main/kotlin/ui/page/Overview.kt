@@ -27,7 +27,7 @@ import top.ltfan.notdeveloper.ui.composable.categoryCards
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.HazeZIndex
 import top.ltfan.notdeveloper.ui.util.LargeTopAppBarColorsTransparent
-import top.ltfan.notdeveloper.ui.util.appBarHazeEffect
+import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
 import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.util.only
@@ -54,9 +54,7 @@ object Overview : Main() {
                     title = {
                         Text(stringResource(R.string.app_name))
                     },
-                    modifier = Modifier
-                        .hazeSource(zIndex = HazeZIndex.topBar)
-                        .appBarHazeEffect(),
+                    modifier = Modifier.appBarHaze(),
                     windowInsets = AppWindowInsets.only { horizontal + top },
                     scrollBehavior = scrollBehavior,
                     colors = LargeTopAppBarColorsTransparent,

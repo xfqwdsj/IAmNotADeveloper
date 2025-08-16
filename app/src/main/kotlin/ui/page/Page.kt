@@ -5,11 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavEntry
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Serializable
 sealed class Page {
-    abstract val metadata: Map<String, Any>
+    @Transient
+    open val metadata: Map<String, Any> = emptyMap()
 
     @Composable
     context(contentPadding: PaddingValues)
