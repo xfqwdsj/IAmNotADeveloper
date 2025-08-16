@@ -147,10 +147,10 @@ object Apps : Main() {
             set = { settings, filters -> settings.copy(filtered = filters) },
         )
 
-        LaunchedEffect(users, selectedUser) {
-            if (selectedUser in users) return@LaunchedEffect
-            selectedUser = users.first()
-        }
+        val databaseList by application.database.dao().getPackageInfoFlow()
+            .collectAsStateWithLifecycle(listOf())
+
+        val snackbarMessage = stringResource(R.string.message_snackbar_apps_query_failed)
 
         Scaffold(
             topBar = {
@@ -160,9 +160,7 @@ object Apps : Main() {
                         .appBarHazeEffect(),
                 ) {
                     TopAppBar(
-                        title = {
-                            Text(stringResource(navigationLabel))
-                        },
+                        title = { Text(stringResource(navigationLabel)) },
                         actions = {
                             if (isAppListError) {
                                 IconButtonWithTooltip(
@@ -335,40 +333,6 @@ object Apps : Main() {
                 bottom += 16.dp
             }
 
-            val databaseList by application.database.dao().getPackageInfoFlow()
-                .collectAsStateWithLifecycle(listOf())
-
-            LaunchedEffect(Unit) {
-                withContext(Dispatchers.IO) {
-                    fullList = (service?.queryApps()?.ifEmpty { null }?.also {
-                        isAppListError = false
-                    } ?: listOf(myPackageInfo).also {
-                        isAppListError = true
-                    })
-                }
-            }
-
-            LaunchedEffect(fullList, databaseList, sortMethod, filteredMethods.size) {
-                val queriedList = service?.queryApps(databaseList) ?: emptyList()
-                val groupFilters = listOf(AppFilter.Configured, AppFilter.Unconfigured)
-                val filters = filteredMethods.subtract(groupFilters)
-                withContext(Dispatchers.IO) {
-                    configuredList = if (AppFilter.Configured !in filteredMethods) {
-                        queriedList.processed(sortMethod, filters)
-                    } else emptyList()
-                    unconfiguredList = if (AppFilter.Unconfigured !in filteredMethods) {
-                        fullList.filter { it !in configuredList }.processed(sortMethod, filters)
-                    } else emptyList()
-                }
-            }
-
-            val snackbarMessage = stringResource(R.string.message_snackbar_apps_query_failed)
-            LaunchedEffect(isAppListError) {
-                if (isAppListError) {
-                    snackbarHostState.showSnackbar(snackbarMessage)
-                }
-            }
-
             GroupedLazyColumn(
                 modifier = Modifier
                     .contentHazeSource()
@@ -517,6 +481,41 @@ object Apps : Main() {
                     }
                     Spacer(Modifier.height(64.dp))
                 }
+            }
+        }
+
+        LaunchedEffect(users, selectedUser) {
+            if (selectedUser in users) return@LaunchedEffect
+            selectedUser = users.first()
+        }
+
+        LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                fullList = (service?.queryApps()?.ifEmpty { null }?.also {
+                    isAppListError = false
+                } ?: listOf(myPackageInfo).also {
+                    isAppListError = true
+                })
+            }
+        }
+
+        LaunchedEffect(fullList, databaseList, sortMethod, filteredMethods.size) {
+            val queriedList = service?.queryApps(databaseList) ?: emptyList()
+            val groupFilters = listOf(AppFilter.Configured, AppFilter.Unconfigured)
+            val filters = filteredMethods.subtract(groupFilters)
+            withContext(Dispatchers.IO) {
+                configuredList = if (AppFilter.Configured !in filteredMethods) {
+                    queriedList.processed(sortMethod, filters)
+                } else emptyList()
+                unconfiguredList = if (AppFilter.Unconfigured !in filteredMethods) {
+                    fullList.filter { it !in configuredList }.processed(sortMethod, filters)
+                } else emptyList()
+            }
+        }
+
+        LaunchedEffect(isAppListError) {
+            if (isAppListError) {
+                snackbarHostState.showSnackbar(snackbarMessage)
             }
         }
     }
