@@ -29,6 +29,11 @@
     <string name="status_entry_activation_n">Module not activated</string>
     <string name="status_entry_activation_description">The module\'s activation status directly affects its functionality. If the module isn\'t activated, it won\'t work. The module reports its activation status by hooking its own members. If you suspect a false report, force stop the app and reopen it.</string>
 
+    <!-- Service status -->
+    <string name="status_entry_service_y">Service connected</string>
+    <string name="status_entry_service_n">Service not connected</string>
+    <string name="status_entry_service_description">Service status determines whether system-level hiding can function. If the service is abnormal, system-level hiding will not work. Select System Framework in LSPosed and reboot to start the service.</string>
+
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">Preferences ready</string>
     <string name="status_entry_prefs_n">Preferences not working</string>
@@ -41,4 +46,35 @@
     <!-- Test results -->
     <string name="test_result_on">Test result of this item: On</string>
     <string name="test_result_off">Test result of this item: Off</string>
+
+    <!-- Overview -->
+    <string name="label_nav_overview">Overview</string>
+
+    <!-- Apps -->
+    <string name="label_nav_apps">Apps</string>
+    <string name="message_apps_empty">There are no apps to show</string>
+    <string name="label_apps_empty_filter_show">Show filter</string>
+    <string name="label_list_header_apps_configured">Configured Apps</string>
+    <string name="label_list_header_apps_unconfigured">Unconfigured Apps</string>
+    <string name="action_apps_user_select_show">Show user selection</string>
+    <string name="action_apps_user_select_hide">Hide user selection</string>
+    <string name="label_apps_user_select">Select user</string>
+    <string name="label_user_current">Current user</string>
+    <string name="action_apps_user_list_refresh">Refresh user list</string>
+    <string name="label_apps_user_list_refresh_done">User list refreshed</string>
+    <string name="action_bottom_sheet_apps_filter_show">Filter</string>
+    <string name="title_bottom_sheet_apps_filter">Filter Apps</string>
+    <string name="label_bottom_sheet_apps_filter_sort">Sort by</string>
+    <string name="item_apps_filter_sort_label">Label</string>
+    <string name="item_apps_filter_sort_package">Package name</string>
+    <string name="item_apps_filter_sort_updated">Last updated</string>
+    <string name="label_bottom_sheet_apps_filter">Filter by</string>
+    <string name="item_apps_filter_all">All</string>
+    <string name="item_apps_filter_configured">Configured</string>
+    <string name="item_apps_filter_unconfigured">Unconfigured</string>
+    <string name="item_apps_filter_system">System</string>
+    <string name="message_snackbar_apps_query_failed">Failed to query apps</string>
+    <string name="action_apps_query_details_show">Apps query failed. Click to show details</string>
+    <string name="title_dialog_apps_query_failed">Failed to query apps</string>
+    <string name="message_dialog_apps_query_failed">Please check if the module is activated and the service is running.</string>
 </resources>

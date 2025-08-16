@@ -1,0 +1,139 @@
+package top.ltfan.notdeveloper.ui.viewmodel
+
+import android.content.Context
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewModelScope
+import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.launch
+import top.ltfan.notdeveloper.BuildConfig
+import top.ltfan.notdeveloper.application.NotDevApplication
+import top.ltfan.notdeveloper.data.UserInfo
+import top.ltfan.notdeveloper.datastore.AppListSettings
+import top.ltfan.notdeveloper.datastore.model.AppDataStore
+import top.ltfan.notdeveloper.detection.DetectionCategory
+import top.ltfan.notdeveloper.detection.DetectionMethod
+import top.ltfan.notdeveloper.log.Log
+import top.ltfan.notdeveloper.service.SystemServiceClient
+import top.ltfan.notdeveloper.service.systemService
+import top.ltfan.notdeveloper.ui.page.Main
+import top.ltfan.notdeveloper.ui.page.Overview
+import top.ltfan.notdeveloper.ui.page.Page
+import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
+
+class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
+    val settingsStore = AppListSettings.createDataStore()
+
+    val hazeState = HazeState()
+
+    val snackbarHostState = SnackbarHostState()
+
+    var showNavBar by mutableStateOf(true)
+    val backStack = mutableStateListOf<Page>(Overview)
+    val currentPage inline get() = backStack.last()
+    val navBarEntry inline get() = backStack.last { it is Main }
+
+    var isPreferencesReady by mutableStateOf(false)
+    val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
+    var service: SystemServiceClient? by mutableStateOf(null)
+
+    val myPackageInfo = application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0)!!
+    var users by mutableStateOf(queryUsers())
+
+    fun navigateMain(page: Main) {
+        if (currentPage == page) return
+        val existingIndex = backStack.indexOfFirst { it == page }
+
+        if (existingIndex == -1) {
+            backStack.add(page)
+            return
+        }
+
+        if (page is Overview) {
+            backStack.removeRange(existingIndex + 1, backStack.size)
+            return
+        }
+
+        val nextMainIndex = backStack.subList(existingIndex + 1, backStack.size)
+            .indexOfFirst { it is Main }
+            .let { if (it == -1) backStack.size else existingIndex + 1 + it }
+
+        val pagesToMove = backStack.subList(existingIndex, nextMainIndex)
+        backStack.addAll(pagesToMove)
+        backStack.removeRange(existingIndex, nextMainIndex)
+    }
+
+    fun test() {
+        DetectionCategory.allMethods.forEach { method ->
+            val result = method.test(application)
+            testResults[method] = result
+            Log.v("${method.name} test result: $result")
+        }
+    }
+
+    fun afterStatusChange(method: DetectionMethod) {
+        when (method) {
+            is DetectionMethod.SettingsMethod -> {
+                val service = service
+                if (service == null) {
+                    Log.Android.w("Service not connected, cannot notifySettingChange settings changes")
+                    return
+                }
+
+                try {
+                    service.notifySettingChange(method)
+                } catch (e: Throwable) {
+                    Log.Android.e("Failed to notifySettingChange setting change", e)
+                } finally {
+                    test()
+                }
+            }
+
+            is DetectionMethod.SystemPropertiesMethod -> test()
+        }
+    }
+
+    context(context: Context)
+    fun onResume() {
+        isPreferencesReady = context.statusIsPreferencesReady
+        connectService()
+        test()
+    }
+
+    context(context: Context)
+    fun connectService() {
+        if (service == null) {
+            service = context.systemService
+        }
+        updateUsers()
+    }
+
+    fun queryUsers() = service?.queryUsers() ?: listOf(UserInfo.current)
+
+    fun updateUsers() {
+        users = queryUsers()
+    }
+
+    private fun <T, R> AppDataStore<T>.propertyAsState(
+        defaultValue: T = this.defaultValue,
+        get: (T) -> R,
+        set: (T, R) -> T,
+    ): MutableState<R> {
+        val delegate = mutableStateOf(defaultValue)
+        viewModelScope.launch { data.collect { delegate.value = it } }
+        return object : MutableState<R> by mutableStateOf(get(delegate.value)) {
+            override var value: R
+                get() = get(delegate.value)
+                set(newValue) {
+                    viewModelScope.launch {
+                        updateData { set(delegate.value, newValue) }
+                    }
+                }
+        }
+    }
+}
