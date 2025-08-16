@@ -200,8 +200,8 @@ object Apps : Main() {
                                 }
                             ) { showing ->
                                 val rotation by transition.animateFloat(
-                                    label = "user_filter_rotation",
-                                    transitionSpec = { tween(durationMillis = 300) }
+                                    label = "UserFilterRotation",
+                                    transitionSpec = { tween(durationMillis = 300) },
                                 ) {
                                     val factor = if (showUserFilter) 1f else -1f
                                     when (it) {
