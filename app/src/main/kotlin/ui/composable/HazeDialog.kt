@@ -122,9 +122,11 @@ internal fun HazeAlertDialogContent(
         color = containerColor,
         tonalElevation = tonalElevation,
     ) {
-        Column(modifier = Modifier
+        Column(
+            modifier = Modifier
             .hazeEffect(hazeState)
-            .padding(DialogPadding)) {
+            .padding(DialogPadding),
+        ) {
             icon?.let {
                 CompositionLocalProvider(LocalContentColor provides iconContentColor) {
                     Box(

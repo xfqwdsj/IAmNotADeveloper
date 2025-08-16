@@ -9,6 +9,9 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -18,6 +21,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -62,12 +66,14 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -100,7 +106,7 @@ import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 import top.ltfan.notdeveloper.ui.util.HazeZIndex
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.TopAppBarColorsTransparent
-import top.ltfan.notdeveloper.ui.util.appBarHazeEffect
+import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
 import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
@@ -127,12 +133,14 @@ object Apps : Main() {
 
     var showUserFilter by mutableStateOf(false)
 
+    var currentConfiguringPackageInfo by mutableStateOf<PackageInfo?>(null)
+
     var isAppListError by mutableStateOf(false)
     var showAppListErrorInfoDialog by mutableStateOf(false)
 
     var showFilterBottomSheet by mutableStateOf(false)
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     @Composable
     context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
@@ -156,64 +164,73 @@ object Apps : Main() {
 
         val snackbarMessage = stringResource(R.string.message_snackbar_apps_query_failed)
 
-        Scaffold(
-            topBar = {
-                Column(
-                    Modifier
-                        .hazeSource(zIndex = HazeZIndex.topBar)
-                        .appBarHazeEffect(),
+        SharedTransitionLayout {
+            Scaffold(
+                topBar = {
+                    Column(Modifier.appBarHaze()) {
+                        TopAppBar(
+                            title = { Text(stringResource(navigationLabel)) },
+                            actions = { AppBarActions() },
+                            windowInsets = AppWindowInsets.only { horizontal + top },
+                            colors = TopAppBarColorsTransparent,
+                        )
+                        FilterBar(
+                            selectedUser,
+                            { selectedUser = it },
+                        )
+                    }
+                },
+                contentWindowInsets = AppWindowInsets + contentPadding,
+            ) { contentPadding ->
+                val contentPadding = contentPadding.operate {
+                    top += 16.dp
+                    bottom += 16.dp
+                }
+
+                GroupedLazyColumn(
+                    modifier = Modifier
+                        .contentHazeSource()
+                        .consumeWindowInsets(contentPadding)
+                        .fillMaxSize(),
+                    state = lazyListState,
+                    contentPadding = contentPadding,
                 ) {
-                    TopAppBar(
-                        title = { Text(stringResource(navigationLabel)) },
-                        actions = { AppBarActions() },
-                        windowInsets = AppWindowInsets.only { horizontal + top },
-                        colors = TopAppBarColorsTransparent,
+                    appList(
+                        list = configuredList,
+                        header = R.string.label_list_header_apps_configured,
                     )
-                    FilterBar(
-                        selectedUser,
-                        { selectedUser = it },
+
+                    appList(
+                        list = unconfiguredList,
+                        header = R.string.label_list_header_apps_unconfigured,
                     )
                 }
-            },
-            contentWindowInsets = AppWindowInsets + contentPadding,
-        ) { contentPadding ->
-            val contentPadding = contentPadding.operate {
-                top += 16.dp
-                bottom += 16.dp
-            }
 
-            GroupedLazyColumn(
-                modifier = Modifier
-                    .contentHazeSource()
-                    .consumeWindowInsets(contentPadding)
-                    .fillMaxSize(),
-                state = lazyListState,
-                contentPadding = contentPadding,
-            ) {
-                appList(
-                    list = configuredList,
-                    header = R.string.label_list_header_apps_configured,
+                NoAppsBackground(
+                    status = AppListStatus(
+                        isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
+                        isFiltered = filteredMethods.isNotEmpty(),
+                    ),
                 )
 
-                appList(
-                    list = unconfiguredList,
-                    header = R.string.label_list_header_apps_unconfigured,
+                FilterBottomSheet(
+                    sortMethod,
+                    { sortMethod = it },
+                    filteredMethods,
+                    { filteredMethods = it },
                 )
             }
 
-            NoAppsBackground(
-                status = AppListStatus(
-                    isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
-                    isFiltered = filteredMethods.isNotEmpty(),
-                ),
-            )
-
-            FilterBottomSheet(
-                sortMethod,
-                { sortMethod = it },
-                filteredMethods,
-                { filteredMethods = it },
-            )
+            AnimatedContent(
+                targetState = currentConfiguringPackageInfo,
+            ) { currentConfiguringPackageInfo ->
+                if (currentConfiguringPackageInfo != null) {
+                    AppConfiguration(
+                        packageInfo = currentConfiguringPackageInfo,
+                        dismiss = { Apps.currentConfiguringPackageInfo = null },
+                    )
+                }
+            }
         }
 
         LaunchedEffect(users, selectedUser) {
@@ -248,6 +265,18 @@ object Apps : Main() {
         LaunchedEffect(isAppListError) {
             if (isAppListError) {
                 snackbarHostState.showSnackbar(snackbarMessage)
+            }
+        }
+
+        DisposableEffect(currentConfiguringPackageInfo) {
+            showNavBar = if (currentConfiguringPackageInfo != null) {
+                false
+            } else {
+                true
+            }
+
+            onDispose {
+                showNavBar = true
             }
         }
     }
@@ -631,7 +660,11 @@ object Apps : Main() {
         }
     }
 
-    context(viewModel: AppViewModel)
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    context(
+        viewModel: AppViewModel,
+        sharedTransitionScope: SharedTransitionScope,
+    )
     fun GroupedLazyListScope.appList(
         list: List<PackageInfo>,
         @StringRes header: Int,
@@ -655,8 +688,34 @@ object Apps : Main() {
                         .animateItem()
                         .padding(horizontal = 16.dp)
                 },
-            ) {
-                viewModel.AppListItem(it)
+            ) { info ->
+                AnimatedContent(
+                    targetState = currentConfiguringPackageInfo != info,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                ) { visible ->
+                    if (visible) {
+                        with(sharedTransitionScope) {
+                            viewModel.AppListItem(
+                                packageInfo = info,
+                                modifier = Modifier.sharedBounds(
+                                    sharedContentState = rememberSharedContentState(
+                                        AppConfigurationSharedKey
+                                    ),
+                                    animatedVisibilityScope = this@AnimatedContent,
+                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                                ),
+                                onClick = {
+                                    currentConfiguringPackageInfo = info
+                                },
+                            )
+                        }
+                    } else {
+                        viewModel.AppListItem(
+                            packageInfo = info,
+                            modifier = Modifier.alpha(0f),
+                        )
+                    }
+                }
             }
         }
     }

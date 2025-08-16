@@ -27,6 +27,12 @@ fun Modifier.hazeSource(
     key: Any? = null,
 ) = hazeSource(state, zIndex, key)
 
+context(viewModel: AppViewModel, page: Page)
+fun Modifier.pageHazeSource(
+    state: HazeState = viewModel.hazeState,
+    zIndex: Float = 0f,
+) = hazeSource(state, zIndex, HazeKey(page, zIndex))
+
 context(viewModel: AppViewModel)
 fun Modifier.hazeEffect(
     state: HazeState = viewModel.hazeState,
@@ -91,25 +97,51 @@ fun Modifier.hazeEffectBottom(
 }
 
 context(viewModel: AppViewModel, page: Page)
-fun Modifier.contentHazeSource(state: HazeState = viewModel.hazeState) = hazeSource(
+fun Modifier.contentHazeSource(state: HazeState = viewModel.hazeState) = pageHazeSource(
     state = state,
     zIndex = HazeZIndex.content,
-    key = page,
 )
 
-@OptIn(ExperimentalHazeApi::class)
 @Composable
 context(viewModel: AppViewModel, page: Page)
-fun Modifier.appBarHazeEffect(
+fun Modifier.appBarHaze(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyleAppBar,
     easing: Easing = HazeEasing,
     block: (HazeEffectScope.() -> Unit)? = null,
-) = hazeEffectTop(state, style, easing) {
-    canDrawArea = { area ->
-        area.key == page
+) = this
+    .pageHazeSource(
+        state = state,
+        zIndex = HazeZIndex.topBar,
+    )
+    .hazeEffectTop(state, style, easing) {
+        drawPageArea(HazeZIndex.topBar)
+        block?.invoke(this)
     }
-    block?.invoke(this)
+
+context(viewModel: AppViewModel, page: Page)
+fun Modifier.contentOverlayHaze(
+    state: HazeState = viewModel.hazeState,
+    style: HazeStyle = HazeStyle.Unspecified,
+    block: (HazeEffectScope.() -> Unit)? = null,
+) = this
+    .pageHazeSource(
+        state = state,
+        zIndex = HazeZIndex.contentOverlay,
+    )
+    .hazeEffect(state, style) {
+        drawPageArea(HazeZIndex.contentOverlay)
+        block?.invoke(this)
+    }
+
+@OptIn(ExperimentalHazeApi::class)
+context(page: Page)
+fun HazeEffectScope.drawPageArea(zIndex: Float) {
+    canDrawArea = canDrawArea@ { area ->
+        val key = area.key
+        if (key !is HazeKey) return@canDrawArea false
+        key.zIndex < zIndex && key.page == page
+    }
 }
 
 object HazeZIndex {
@@ -121,7 +153,13 @@ object HazeZIndex {
 
     val content = currentNotNegative
     val topBar = currentNotNegative
+    val contentOverlay = currentNotNegative
     val navDisplay = currentNotNegative
     val bottomBar = currentNotNegative
     val app = currentNotNegative
 }
+
+data class HazeKey(
+    val page: Page,
+    val zIndex: Float,
+)
