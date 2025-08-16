@@ -12,7 +12,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://androidx.dev/snapshots/builds/13931012/artifacts/repository")
+        maven("https://androidx.dev/snapshots/builds/13944877/artifacts/repository")
         maven("https://api.xposed.info/")
         maven("https://maven.kr328.app/releases")
     }
