@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
-import androidx.lifecycle.application
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -21,6 +20,7 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 @Composable
 fun AppViewModel.AppListItem(
     packageInfo: PackageInfo,
+    modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
     val applicationInfo = remember(packageInfo) {
@@ -35,7 +35,7 @@ fun AppViewModel.AppListItem(
         headlineContent = {
             Text(applicationInfo.loadLabel(application.packageManager).toString())
         },
-        modifier = Modifier.run {
+        modifier = modifier.run {
             onClick?.let { clickable(onClick = it) } ?: this
         },
         overlineContent = {
