@@ -67,6 +67,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -114,7 +115,6 @@ import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.mutableProperty
-import top.ltfan.notdeveloper.util.toAndroid
 
 object Apps : Main() {
     override val navigationLabel = R.string.label_nav_apps
@@ -122,8 +122,23 @@ object Apps : Main() {
 
     val lazyListState = LazyListState()
 
-    var configuredList by mutableStateOf(listOf<PackageInfo>())
-    var unconfiguredList by mutableStateOf(listOf<PackageInfo>())
+    @Composable
+    context(viewModel: AppViewModel)
+    fun rememberAppLists() = with(viewModel) {
+        remember(appList, databaseList, appSortMethod, appFilteredMethods.size) {
+            val filters = appFilteredMethods.subtract(AppFilter.groupingEntries)
+            (if (AppFilter.Configured !in appFilteredMethods) {
+                databaseList.asSequence().processed(appSortMethod, filters)
+            } else emptyList()) to (if (AppFilter.Unconfigured !in appFilteredMethods) {
+                val databaseKeys =
+                    databaseList.mapTo(HashSet()) { it.packageName to it.applicationInfo!!.uid }
+                appList.asSequence().filterNot {
+                    val key = it.packageName to it.applicationInfo!!.uid
+                    databaseKeys.contains(key)
+                }.processed(appSortMethod, filters)
+            } else emptyList())
+        }
+    }
 
     var showUserFilter by mutableStateOf(false)
 
@@ -163,6 +178,8 @@ object Apps : Main() {
                     bottom += 16.dp
                 }
 
+                val (configuredList, unconfiguredList) = rememberAppLists()
+
                 GroupedLazyColumn(
                     modifier = Modifier
                         .contentHazeSource()
@@ -194,18 +211,6 @@ object Apps : Main() {
             updateAppList(queryAppList().also {
                 isAppListError = it.second
             }.first)
-        }
-
-        LaunchedEffect(appList, databaseList, appSortMethod, appFilteredMethods.size) {
-            val groupFilters = listOf(AppFilter.Configured, AppFilter.Unconfigured)
-            val filters = appFilteredMethods.subtract(groupFilters)
-            val queriedConfiguredList = service?.queryApps(databaseList) ?: databaseList.toAndroid()
-            configuredList = if (AppFilter.Configured !in appFilteredMethods) {
-                queriedConfiguredList.processed(appSortMethod, filters)
-            } else emptyList()
-            unconfiguredList = if (AppFilter.Unconfigured !in appFilteredMethods) {
-                appList.filter { it !in queriedConfiguredList }.processed(appSortMethod, filters)
-            } else emptyList()
         }
 
         LaunchedEffect(isAppListError) {
@@ -393,6 +398,8 @@ object Apps : Main() {
     context(viewModel: AppViewModel, contentPadding: PaddingValues)
     fun NoAppsBackground() {
         with(viewModel) {
+            val (configuredList, unconfiguredList) = rememberAppLists()
+
             AnimatedContent(
                 targetState = AppListState(
                     isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
@@ -493,7 +500,7 @@ object Apps : Main() {
                             selected = allSelected,
                             onClick = {
                                 appFilteredMethods = if (allSelected) {
-                                    AppFilter.usableEntries
+                                    AppFilter.toggleableEntries
                                 } else {
                                     emptySet()
                                 }
@@ -508,7 +515,7 @@ object Apps : Main() {
                                 }
                             },
                         )
-                        AppFilter.usableEntries.forEach {
+                        AppFilter.toggleableEntries.forEach {
                             val selected = !appFilteredMethods.contains(it)
                             FilterChip(
                                 selected = selected,
@@ -716,18 +723,19 @@ object Apps : Main() {
     val PackageInfo.listKey: String get() = "${packageName}-${applicationInfo?.uid}"
 
     context(viewModel: AppViewModel)
-    fun List<PackageInfo>.filtered(filters: Set<AppFilter>) = filters.fold(this) { acc, filter ->
-        with(filter) {
-            acc.filtered()
-        }
-    }
+    fun Sequence<PackageInfo>.filtered(filters: Set<AppFilter>) =
+        filters.fold(this) { acc, filter ->
+            with(filter) {
+                acc.filtered()
+            }
+        }.toList()
 
     context(viewModel: AppViewModel)
-    fun List<PackageInfo>.sorted(sort: AppSort) = with(sort) {
+    fun Collection<PackageInfo>.sorted(sort: AppSort) = with(sort) {
         sorted()
     }
 
     context(viewModel: AppViewModel)
-    fun List<PackageInfo>.processed(sort: AppSort, filters: Set<AppFilter>) =
+    fun Sequence<PackageInfo>.processed(sort: AppSort, filters: Set<AppFilter>) =
         filtered(filters).sorted(sort)
 }
