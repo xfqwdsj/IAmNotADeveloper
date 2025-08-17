@@ -23,6 +23,7 @@ import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.service.SystemServiceClient
 import top.ltfan.notdeveloper.service.systemService
+import top.ltfan.notdeveloper.ui.page.Apps
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.page.Overview
 import top.ltfan.notdeveloper.ui.page.Page
@@ -35,7 +36,9 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     val snackbarHostState = SnackbarHostState()
 
-    var showNavBar by mutableStateOf(true)
+    val showNavBar: Boolean inline get() {
+        return (currentPage != Apps || currentConfiguringPackageInfo == null)
+    }
     val backStack = mutableStateListOf<Page>(Overview)
     val currentPage inline get() = backStack.last()
     val navBarEntry inline get() = backStack.last { it is Main }
@@ -45,6 +48,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     var service: SystemServiceClient? by mutableStateOf(null)
 
     val myPackageInfo = application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0)!!
+    var currentConfiguringPackageInfo by mutableStateOf<PackageInfo?>(null)
     private var _users by mutableStateOf(queryUsers())
     val users get() = _users
 

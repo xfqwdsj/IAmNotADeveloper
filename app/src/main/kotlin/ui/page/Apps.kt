@@ -65,7 +65,6 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -130,8 +129,6 @@ object Apps : Main() {
 
     var showUserFilter by mutableStateOf(false)
 
-    var currentConfiguringPackageInfo by mutableStateOf<PackageInfo?>(null)
-
     var isAppListError by mutableStateOf(false)
     var showAppListErrorInfoDialog by mutableStateOf(false)
 
@@ -188,11 +185,7 @@ object Apps : Main() {
                 FilterBottomSheet()
             }
 
-            AppConfiguration(
-                packageInfo = currentConfiguringPackageInfo,
-                userInfo = selectedUser,
-                dismiss = { currentConfiguringPackageInfo = null },
-            )
+            AppConfiguration()
         }
 
         LaunchedEffect(Unit) {
@@ -216,14 +209,6 @@ object Apps : Main() {
         LaunchedEffect(isAppListError) {
             if (isAppListError) {
                 snackbarHostState.showSnackbar(snackbarMessage)
-            }
-        }
-
-        DisposableEffect(currentConfiguringPackageInfo) {
-            showNavBar = currentConfiguringPackageInfo == null
-
-            onDispose {
-                showNavBar = true
             }
         }
     }
@@ -642,7 +627,7 @@ object Apps : Main() {
                 },
             ) { info ->
                 AnimatedContent(
-                    targetState = currentConfiguringPackageInfo != info,
+                    targetState = viewModel.currentConfiguringPackageInfo != info,
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                 ) { visible ->
                     val radius by transition.animateDp(
@@ -684,7 +669,7 @@ object Apps : Main() {
                                             contentDescription = headerText
                                         },
                                     onClick = {
-                                        currentConfiguringPackageInfo = info
+                                        viewModel.currentConfiguringPackageInfo = info
                                     },
                                 )
                             }
