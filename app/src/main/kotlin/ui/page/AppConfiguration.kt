@@ -14,12 +14,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
@@ -32,11 +37,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
-val AppConfigurationContainerRadius = 16.dp
+val AppConfigurationContainerRadius = 24.dp
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -58,10 +64,11 @@ fun AppViewModel.AppConfiguration(
         ) { packageInfo ->
             if (packageInfo != null) {
                 Box(
-                    Modifier
+                    modifier = Modifier
                         .fillMaxSize()
                         .background(scrim)
                         .semantics { isTraversalGroup = true },
+                    contentAlignment = Alignment.Center,
                 ) {
                     Spacer(
                         Modifier
@@ -79,23 +86,41 @@ fun AppViewModel.AppConfiguration(
                     Column(
                         modifier = Modifier
                             .padding(AppWindowInsets.asPaddingValues())
-                            .padding(64.dp)
+                            .padding(48.dp)
+                            .widthIn(max = 600.dp)
+                            .fillMaxWidth()
                             .sharedBounds(
                                 sharedContentState = rememberSharedContentState(
-                                    AppConfigurationSharedKey
+                                    AppConfigurationSharedKey.Container
                                 ),
                                 animatedVisibilityScope = this@AnimatedContent,
                                 resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                             )
-                            .size(200.dp)
                             .clip(RoundedCornerShape(AppConfigurationContainerRadius))
                             .contentOverlayHaze()
+                            .verticalScroll(rememberScrollState())
                             .semantics {
                                 paneTitle = title
                                 traversalIndex = 0f
                             },
                     ) {
-                        Text("1")
+                        Spacer(Modifier.height(24.dp))
+                        Text(
+                            text = title,
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            style = MaterialTheme.typography.headlineSmall,
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        AppListItem(
+                            packageInfo = packageInfo,
+                            modifier = Modifier.sharedBounds(
+                                sharedContentState = rememberSharedContentState(
+                                    AppConfigurationSharedKey.ListItem
+                                ),
+                                animatedVisibilityScope = this@AnimatedContent,
+                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                            ),
+                        )
                     }
                 }
             }
@@ -103,4 +128,6 @@ fun AppViewModel.AppConfiguration(
     }
 }
 
-data object AppConfigurationSharedKey
+enum class AppConfigurationSharedKey {
+    Container, ListItem,
+}
