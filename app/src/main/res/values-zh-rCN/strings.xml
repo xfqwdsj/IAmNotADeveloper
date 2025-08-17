@@ -75,6 +75,7 @@
     <string name="item_apps_bottom_sheet_filter_system">系统应用</string>
     <string name="title_apps_modal_configuration">应用配置</string>
     <string name="action_apps_modal_configuration_close">关闭应用配置</string>
+    <string name="action_apps_modal_configuration_clear">清除此应用的配置</string>
     <string name="message_apps_snackbar_query_failed">查询应用列表失败</string>
     <string name="action_apps_query_details_show">查询应用列表失败，点击查看详情</string>
     <string name="title_apps_dialog_query_failed">查询应用列表失败</string>
