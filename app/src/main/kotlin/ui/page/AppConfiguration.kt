@@ -224,5 +224,5 @@ private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
 
 sealed class AppConfigurationSharedKey {
     data object Container : AppConfigurationSharedKey()
-    data class ListItem(val packageInfo: PackageInfo)
+    data class ListItem(val key: Any?)
 }
