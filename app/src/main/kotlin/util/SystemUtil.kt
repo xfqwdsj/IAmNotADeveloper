@@ -8,9 +8,9 @@ import kotlin.reflect.full.staticFunctions
 val isMiui: Boolean
     @SuppressLint("PrivateApi") get() {
         val clazz = Class.forName("android.os.SystemProperties").kotlin
-        val method =
+        val function =
             clazz.declaredFunctions.firstOrNull { it.name == "get" && it.parameters.size == 1 }
-        return method?.call("ro.miui.ui.version.name") != ""
+        return function?.call("ro.miui.ui.version.name") != ""
     }
 
 fun getUserId(uid: Int): Int {
