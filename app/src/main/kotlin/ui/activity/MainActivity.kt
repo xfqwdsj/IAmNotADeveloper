@@ -17,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +51,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         enableEdgeToEdge()
@@ -118,6 +117,7 @@ class MainActivity : ComponentActivity() {
 
                     val snackbarHostPlaceable = subcompose("snackbarHost") {
                         Box(contentAlignment = Alignment.Center) {
+                            // TODO: 横屏异常
                             HazeSnackbarHost(
                                 hostState = snackbarHostState,
                                 modifier = Modifier.fillMaxWidth(),

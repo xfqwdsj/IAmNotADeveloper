@@ -4,6 +4,7 @@ import android.content.pm.PackageInfo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -30,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +45,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import androidx.navigationevent.compose.NavigationEventHandler
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.R
@@ -59,15 +63,17 @@ val AppConfigurationContainerRadius = 24.dp
 @Composable
 context(
     page: Page,
+    transition: Transition<PackageInfo?>,
     sharedTransitionScope: SharedTransitionScope,
 )
 fun AppViewModel.AppConfiguration() {
+    val coroutineScope = rememberCoroutineScope()
+
     val scrim = MaterialTheme.colorScheme.scrim.copy(.2f)
     val title = stringResource(R.string.title_apps_modal_configuration)
     val closeDescription = stringResource(R.string.action_apps_modal_configuration_close)
     with(sharedTransitionScope) {
-        AnimatedContent(
-            targetState = currentConfiguringPackageInfo,
+        transition.AnimatedContent(
             transitionSpec = { fadeIn() togetherWith fadeOut() using null },
         ) { packageInfo ->
             if (packageInfo != null) {
@@ -83,14 +89,18 @@ fun AppViewModel.AppConfiguration() {
                             .matchParentSize()
                             .pointerInput(Unit) {
                                 detectTapGestures {
-                                    currentConfiguringPackageInfo = null
+                                    coroutineScope.launch {
+                                        packageInfoConfiguringTransitionState.animateTo(null)
+                                    }
                                 }
                             }
                             .semantics(mergeDescendants = true) {
                                 traversalIndex = 1f
                                 contentDescription = closeDescription
                                 onClick {
-                                    currentConfiguringPackageInfo = null
+                                    coroutineScope.launch {
+                                        packageInfoConfiguringTransitionState.animateTo(null)
+                                    }
                                     true
                                 }
                             }
@@ -130,6 +140,20 @@ fun AppViewModel.AppConfiguration() {
                             )
                         }
                     }
+                }
+
+                NavigationEventHandler {
+                    try {
+                        it.collect { event ->
+                            packageInfoConfiguringTransitionState.seekTo(event.progress, null)
+                        }
+                    } catch (e: CancellationException) {
+                        packageInfoConfiguringTransitionState.animateTo(
+                            packageInfoConfiguringTransitionState.currentState
+                        )
+                        return@NavigationEventHandler
+                    }
+                    packageInfoConfiguringTransitionState.snapTo(null)
                 }
             }
         }

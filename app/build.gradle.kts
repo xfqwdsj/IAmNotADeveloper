@@ -92,7 +92,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
-    implementation(libs.compose.material3.adaptive)
+//    implementation(libs.compose.material3.adaptive)
     implementation(libs.compose.icons)
     implementation(libs.haze)
     implementation(libs.haze.materials)

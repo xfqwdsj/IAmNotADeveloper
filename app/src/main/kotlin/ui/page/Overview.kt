@@ -1,7 +1,6 @@
 package top.ltfan.notdeveloper.ui.page
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -11,8 +10,6 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,11 +22,9 @@ import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.composable.categoryCards
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.HazeZIndex
 import top.ltfan.notdeveloper.ui.util.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
-import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
@@ -38,9 +33,6 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 object Overview : Main() {
     override val navigationLabel: Int = R.string.label_nav_overview
     override val navigationIcon = Icons.Default.Home
-
-    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-    override val metadata: Map<String, Any> = ListDetailSceneStrategy.listPane(this)
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
