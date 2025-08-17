@@ -144,4 +144,10 @@ interface PackageSettingsDao {
             insertDetection(packageName, userId, method.name, false)
         }
     }
+
+    @Transaction
+    suspend fun initializePackage(packageName: String, userId: Int, appId: Int) {
+        insertPackageInfo(packageName, userId, appId)
+        enableAllDetectionsForPackage(packageName, userId)
+    }
 }
