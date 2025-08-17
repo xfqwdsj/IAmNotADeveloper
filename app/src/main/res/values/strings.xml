@@ -75,6 +75,7 @@
     <string name="item_apps_bottom_sheet_filter_system">System</string>
     <string name="title_apps_modal_configuration">App Configuration</string>
     <string name="action_apps_modal_configuration_close">Close app configuration</string>
+    <string name="action_apps_modal_configuration_clear">Clear configurations for this app</string>
     <string name="message_apps_snackbar_query_failed">Failed to query apps</string>
     <string name="action_apps_query_details_show">Apps query failed. Click to show details</string>
     <string name="title_apps_dialog_query_failed">Failed to query apps</string>
