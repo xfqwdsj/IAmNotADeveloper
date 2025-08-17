@@ -659,7 +659,7 @@ object Apps : Main() {
                                     modifier = Modifier
                                         .sharedBounds(
                                             sharedContentState = rememberSharedContentState(
-                                                AppConfigurationSharedKey.ListItem
+                                                AppConfigurationSharedKey.ListItem(info)
                                             ),
                                             animatedVisibilityScope = this@AnimatedContent,
                                             resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
