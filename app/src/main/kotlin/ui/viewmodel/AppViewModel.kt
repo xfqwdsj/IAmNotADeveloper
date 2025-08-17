@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.application.NotDevApplication
@@ -29,6 +30,7 @@ import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.page.Overview
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.util.getUserId
+import top.ltfan.notdeveloper.util.toAndroid
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
@@ -76,10 +78,10 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         set = { settings, filters -> settings.copy(filtered = filters) },
     )
 
-    private var _appList by mutableStateOf(listOf<PackageInfo>())
+    private var _appList by mutableStateOf(setOf<PackageInfo>())
     val appList get() = _appList
     private var _currentDatabaseListState by mutableStateOf(
-        application.database.dao().getPackageInfoFlow().collectAsState(emptyList())
+        queryDatabaseList().collectAsState(emptySet())
     )
     val databaseList by _currentDatabaseListState
 
@@ -161,20 +163,28 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         selectedUser = users.first()
     }
 
-    fun queryAppList(userInfo: UserInfo = selectedUser): Pair<List<PackageInfo>, Boolean> {
-        val list = service?.queryApps(userInfo.id)?.ifEmpty { null }
-        return (list ?: listOf(myPackageInfo)) to (list == null)
+    fun queryAppList(userInfo: UserInfo = selectedUser): Pair<Set<PackageInfo>, Boolean> {
+        val list = service?.queryApps(userInfo.id)?.ifEmpty { null }?.toSet()
+        return (list ?: setOf(myPackageInfo)) to (list == null)
     }
 
-    fun updateAppList(list: List<PackageInfo>, userInfo: UserInfo = selectedUser) {
+    fun updateAppList(list: Set<PackageInfo>, userInfo: UserInfo = selectedUser) {
         _appList = list
-        _currentDatabaseListState =
-            application.database.dao().getPackageInfoFlow(userInfo.id).collectAsState(databaseList)
+        _currentDatabaseListState = queryDatabaseList(userInfo).collectAsState(databaseList)
     }
 
     fun updateAppList(userInfo: UserInfo = selectedUser) {
         updateAppList(queryAppList(userInfo).first, userInfo)
     }
+
+    fun queryDatabaseList(userInfo: UserInfo? = null) =
+        application.database.dao().let {
+            if (userInfo != null) {
+                it.getPackageInfoFlow(userInfo.id)
+            } else {
+                it.getPackageInfoFlow()
+            }
+        }.map { service?.queryApps(it)?.toSet() ?: it.toAndroid() }
 
     private fun <T> Flow<T>.collectAsState(initial: T): MutableState<T> {
         val delegate = mutableStateOf(initial)
