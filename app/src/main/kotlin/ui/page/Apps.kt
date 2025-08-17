@@ -616,7 +616,11 @@ object Apps : Main() {
         ) {
             header(
                 text = header,
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = {
+                    Modifier
+                        .animateItem()
+                        .padding(horizontal = 16.dp)
+                },
             )
 
             items(
