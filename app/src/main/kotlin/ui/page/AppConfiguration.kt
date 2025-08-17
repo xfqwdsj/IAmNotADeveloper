@@ -122,7 +122,7 @@ fun AppViewModel.AppConfiguration() {
                                 packageInfo = packageInfo,
                                 modifier = Modifier.sharedBounds(
                                     sharedContentState = rememberSharedContentState(
-                                        AppConfigurationSharedKey.ListItem
+                                        AppConfigurationSharedKey.ListItem(packageInfo)
                                     ),
                                     animatedVisibilityScope = this@AnimatedContent,
                                     resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
@@ -167,6 +167,7 @@ private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
     }
 }
 
-enum class AppConfigurationSharedKey {
-    Container, ListItem,
+sealed class AppConfigurationSharedKey {
+    data object Container : AppConfigurationSharedKey()
+    data class ListItem(val packageInfo: PackageInfo)
 }
