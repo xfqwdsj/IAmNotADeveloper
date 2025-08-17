@@ -204,11 +204,12 @@ object Apps : Main() {
         LaunchedEffect(appList, databaseList, appSortMethod, appFilteredMethods.size) {
             val groupFilters = listOf(AppFilter.Configured, AppFilter.Unconfigured)
             val filters = appFilteredMethods.subtract(groupFilters)
+            val queriedConfiguredList = service?.queryApps(databaseList) ?: emptyList()
             configuredList = if (AppFilter.Configured !in appFilteredMethods) {
-                appList.processed(appSortMethod, filters)
+                queriedConfiguredList.processed(appSortMethod, filters)
             } else emptyList()
             unconfiguredList = if (AppFilter.Unconfigured !in appFilteredMethods) {
-                appList.filter { it !in configuredList }.processed(appSortMethod, filters)
+                appList.filter { it !in queriedConfiguredList }.processed(appSortMethod, filters)
             } else emptyList()
         }
 
