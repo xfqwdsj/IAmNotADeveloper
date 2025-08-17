@@ -1,6 +1,5 @@
 package top.ltfan.notdeveloper.ui.page
 
-import android.content.pm.PackageInfo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -46,7 +45,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -61,17 +59,13 @@ context(
     page: Page,
     sharedTransitionScope: SharedTransitionScope,
 )
-fun AppViewModel.AppConfiguration(
-    packageInfo: PackageInfo?,
-    userInfo: UserInfo,
-    dismiss: () -> Unit,
-) {
+fun AppViewModel.AppConfiguration() {
     val scrim = MaterialTheme.colorScheme.scrim.copy(.2f)
     val title = stringResource(R.string.title_apps_modal_configuration)
     val closeDescription = stringResource(R.string.action_apps_modal_configuration_close)
     with(sharedTransitionScope) {
         AnimatedContent(
-            targetState = packageInfo,
+            targetState = currentConfiguringPackageInfo,
             transitionSpec = { fadeIn() togetherWith fadeOut() using null },
         ) { packageInfo ->
             if (packageInfo != null) {
@@ -85,12 +79,16 @@ fun AppViewModel.AppConfiguration(
                     Spacer(
                         Modifier
                             .matchParentSize()
-                            .pointerInput(dismiss) { detectTapGestures { dismiss() } }
+                            .pointerInput(Unit) {
+                                detectTapGestures {
+                                    currentConfiguringPackageInfo = null
+                                }
+                            }
                             .semantics(mergeDescendants = true) {
                                 traversalIndex = 1f
                                 contentDescription = closeDescription
                                 onClick {
-                                    dismiss()
+                                    currentConfiguringPackageInfo = null
                                     true
                                 }
                             }
@@ -117,7 +115,7 @@ fun AppViewModel.AppConfiguration(
                                     traversalIndex = 0f
                                 },
                         ) {
-                            Header(packageInfo, userInfo)
+                            Header()
                             AppListItem(
                                 packageInfo = packageInfo,
                                 modifier = Modifier.sharedBounds(
@@ -138,7 +136,8 @@ fun AppViewModel.AppConfiguration(
 
 @Composable
 context(viewModel: AppViewModel)
-private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
+private fun Header() {
+    val packageInfo = viewModel.currentConfiguringPackageInfo ?: return
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -158,7 +157,7 @@ private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
                 contentDescription = R.string.action_apps_modal_configuration_clear,
             ) {
                 val packageName = packageInfo.packageName
-                val userId = userInfo.id
+                val userId = viewModel.selectedUser.id
                 viewModel.viewModelScope.launch(Dispatchers.IO) {
                     viewModel.application.database.dao().deletePackageInfo(packageName, userId)
                 }
