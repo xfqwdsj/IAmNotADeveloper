@@ -139,7 +139,7 @@ object Apps : Main() {
     @Composable
     context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
-        val snackbarMessage = stringResource(R.string.message_snackbar_apps_query_failed)
+        val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
 
         SharedTransitionLayout {
             Scaffold(
@@ -173,12 +173,12 @@ object Apps : Main() {
                 ) {
                     appList(
                         list = configuredList,
-                        header = R.string.label_list_header_apps_configured,
+                        header = R.string.label_apps_list_header_configured,
                     )
 
                     appList(
                         list = unconfiguredList,
-                        header = R.string.label_list_header_apps_unconfigured,
+                        header = R.string.label_apps_list_header_unconfigured,
                     )
                 }
 
@@ -245,10 +245,10 @@ object Apps : Main() {
                         }
                     },
                     title = {
-                        Text(stringResource(R.string.title_dialog_apps_query_failed))
+                        Text(stringResource(R.string.title_apps_dialog_query_failed))
                     },
                     text = {
-                        Text(stringResource(R.string.message_dialog_apps_query_failed))
+                        Text(stringResource(R.string.message_apps_dialog_query_failed))
                     },
                 )
             }
@@ -294,7 +294,7 @@ object Apps : Main() {
 
         IconButtonWithTooltip(
             imageVector = Icons.Default.FilterList,
-            contentDescription = R.string.action_bottom_sheet_apps_filter_show,
+            contentDescription = R.string.action_apps_bottom_sheet_filter_show,
             onClick = { showFilterBottomSheet = true },
         )
     }
@@ -450,14 +450,14 @@ object Apps : Main() {
                     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                 ) {
                     Text(
-                        text = stringResource(R.string.title_bottom_sheet_apps_filter),
+                        text = stringResource(R.string.title_apps_bottom_sheet_filter),
                         modifier = Modifier.padding(horizontal = 24.dp),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.headlineMedium,
                     )
                     Spacer(Modifier.height(24.dp))
                     Text(
-                        text = stringResource(R.string.label_bottom_sheet_apps_filter_sort),
+                        text = stringResource(R.string.label_apps_bottom_sheet_filter_sort),
                         modifier = Modifier.padding(horizontal = 20.dp),
                         style = MaterialTheme.typography.titleMedium,
                     )
@@ -486,7 +486,7 @@ object Apps : Main() {
                     HorizontalDivider(Modifier.padding(horizontal = 8.dp))
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = stringResource(R.string.label_bottom_sheet_apps_filter),
+                        text = stringResource(R.string.label_apps_bottom_sheet_filter),
                         modifier = Modifier.padding(horizontal = 20.dp),
                         style = MaterialTheme.typography.titleMedium,
                     )

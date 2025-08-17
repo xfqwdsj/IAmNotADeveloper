@@ -47,7 +47,7 @@ sealed class UserInfoName : Parcelable {
     @Serializable
     data object Current : UserInfoName() {
         override fun getNameBase(context: Context): String =
-            context.getString(R.string.label_user_current)
+            context.getString(R.string.label_apps_user_current)
     }
 
     protected abstract fun getNameBase(context: Context): String
