@@ -18,44 +18,47 @@ import top.ltfan.notdeveloper.ui.util.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Composable
-fun AppViewModel.AppListItem(
+context(viewModel: AppViewModel)
+fun AppListItem(
     packageInfo: PackageInfo,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    val applicationInfo = remember(packageInfo) {
-        application.packageManager.getApplicationInfo(packageInfo.packageName, 0)
-    }
+    with(viewModel) {
+        val applicationInfo = remember(packageInfo) {
+            application.packageManager.getApplicationInfo(packageInfo.packageName, 0)
+        }
 
-    val appIcon = remember(packageInfo) {
-        applicationInfo.loadIcon(application.packageManager)
-    }
+        val appIcon = remember(packageInfo) {
+            applicationInfo.loadIcon(application.packageManager)
+        }
 
-    ListItem(
-        headlineContent = {
-            Text(applicationInfo.loadLabel(application.packageManager).toString())
-        },
-        modifier = modifier.run {
-            onClick?.let { clickable(onClick = it) } ?: this
-        },
-        overlineContent = {
-            Text(packageInfo.packageName)
-        },
-        supportingContent = {
-            Text("${packageInfo.versionName} (${PackageInfoCompat.getLongVersionCode(packageInfo)})")
-        },
-        leadingContent = {
-            AsyncImage(
-                model = ImageRequest.Builder(application)
-                    .data(appIcon)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(6.dp)
-                    .size(58.dp),
-            )
-        },
-        colors = ListItemColorsTransparent,
-    )
+        ListItem(
+            headlineContent = {
+                Text(applicationInfo.loadLabel(application.packageManager).toString())
+            },
+            modifier = modifier.run {
+                onClick?.let { clickable(onClick = it) } ?: this
+            },
+            overlineContent = {
+                Text(packageInfo.packageName)
+            },
+            supportingContent = {
+                Text("${packageInfo.versionName} (${PackageInfoCompat.getLongVersionCode(packageInfo)})")
+            },
+            leadingContent = {
+                AsyncImage(
+                    model = ImageRequest.Builder(application)
+                        .data(appIcon)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(58.dp),
+                )
+            },
+            colors = ListItemColorsTransparent,
+        )
+    }
 }
