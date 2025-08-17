@@ -109,7 +109,7 @@ fun AppViewModel.AppConfiguration() {
                         Column(
                             modifier = Modifier
                                 .padding(AppWindowInsets.asPaddingValues())
-                                .padding(48.dp)
+                                .padding(24.dp)
                                 .widthIn(max = 600.dp)
                                 .fillMaxWidth()
                                 .sharedBounds(
