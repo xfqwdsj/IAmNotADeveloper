@@ -13,8 +13,10 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -61,13 +63,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,6 +88,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
+import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.datastore.AppFilter
@@ -119,9 +121,6 @@ object Apps : Main() {
     override val navigationLabel = R.string.label_nav_apps
     override val navigationIcon = Icons.Default.Apps
 
-    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-    override val metadata: Map<String, Any> = ListDetailSceneStrategy.listPane(this)
-
     val lazyListState = LazyListState()
 
     var configuredList by mutableStateOf(listOf<PackageInfo>())
@@ -138,6 +137,8 @@ object Apps : Main() {
     @Composable
     context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
+        val transition = rememberTransition(packageInfoConfiguringTransitionState)
+
         val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
 
         SharedTransitionLayout {
@@ -170,22 +171,24 @@ object Apps : Main() {
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    appListCard(
-                        list = configuredList,
-                        header = R.string.label_apps_list_header_configured,
-                    )
+                    with(transition) {
+                        appListCard(
+                            list = configuredList,
+                            header = R.string.label_apps_list_header_configured,
+                        )
 
-                    appListCard(
-                        list = unconfiguredList,
-                        header = R.string.label_apps_list_header_unconfigured,
-                    )
+                        appListCard(
+                            list = unconfiguredList,
+                            header = R.string.label_apps_list_header_unconfigured,
+                        )
+                    }
                 }
 
                 NoAppsBackground()
                 FilterBottomSheet()
             }
 
-            AppConfiguration()
+            with(transition) { AppConfiguration() }
         }
 
         LaunchedEffect(Unit) {
@@ -600,6 +603,7 @@ object Apps : Main() {
     @OptIn(ExperimentalSharedTransitionApi::class)
     context(
         viewModel: AppViewModel,
+        transition: Transition<PackageInfo?>,
         sharedTransitionScope: SharedTransitionScope,
     )
     fun GroupedLazyListScope.appListCard(
@@ -626,11 +630,12 @@ object Apps : Main() {
                         .padding(horizontal = 16.dp)
                 },
             ) { info ->
-                AnimatedContent(
-                    targetState = viewModel.currentConfiguringPackageInfo != info,
+                val coroutineScope = rememberCoroutineScope()
+
+                transition.AnimatedContent(
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
-                ) { visible ->
-                    val radius by transition.animateDp(
+                ) { currentInfo ->
+                    val radius by this.transition.animateDp(
                         label = "AppListItemRadius",
                     ) {
                         when (it) {
@@ -640,7 +645,7 @@ object Apps : Main() {
                         }
                     }
 
-                    if (visible) {
+                    if (currentInfo != info) {
                         with(sharedTransitionScope) {
                             Box(
                                 Modifier
@@ -669,7 +674,11 @@ object Apps : Main() {
                                             contentDescription = headerText
                                         },
                                     onClick = {
-                                        viewModel.currentConfiguringPackageInfo = info
+                                        coroutineScope.launch {
+                                            viewModel.packageInfoConfiguringTransitionState.animateTo(
+                                                info
+                                            )
+                                        }
                                     },
                                 )
                             }
