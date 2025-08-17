@@ -1,6 +1,7 @@
 package top.ltfan.notdeveloper.ui.viewmodel
 
 import android.content.Context
+import android.content.pm.PackageInfo
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -10,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.application.NotDevApplication
@@ -43,7 +45,33 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     var service: SystemServiceClient? by mutableStateOf(null)
 
     val myPackageInfo = application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0)!!
-    var users by mutableStateOf(queryUsers())
+    private var _users by mutableStateOf(queryUsers())
+    val users get() = _users
+
+    var selectedUser by settingsStore.propertyAsState(
+        get = { it.selectedUser },
+        set = { settings, user ->
+            updateAppList(user)
+            settings.copy(selectedUser = user)
+        },
+    )
+
+    var appSortMethod by settingsStore.propertyAsState(
+        get = { it.sort },
+        set = { settings, sort -> settings.copy(sort = sort) },
+    )
+
+    var appFilteredMethods by settingsStore.propertyAsState(
+        get = { it.filtered },
+        set = { settings, filters -> settings.copy(filtered = filters) },
+    )
+
+    private var _appList by mutableStateOf(listOf<PackageInfo>())
+    val appList get() = _appList
+    private var _currentDatabaseListState by mutableStateOf(
+        application.database.dao().getPackageInfoFlow().collectAsState(emptyList())
+    )
+    val databaseList by _currentDatabaseListState
 
     fun navigateMain(page: Main) {
         if (currentPage == page) return
@@ -116,7 +144,30 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     fun queryUsers() = service?.queryUsers() ?: listOf(UserInfo.current)
 
     fun updateUsers() {
-        users = queryUsers()
+        _users = queryUsers()
+        if (selectedUser in users) return
+        selectedUser = users.first()
+    }
+
+    fun queryAppList(userInfo: UserInfo = selectedUser): Pair<List<PackageInfo>, Boolean> {
+        val list = service?.queryApps(userInfo.id)?.ifEmpty { null }
+        return (list ?: listOf(myPackageInfo)) to (list == null)
+    }
+
+    fun updateAppList(list: List<PackageInfo>, userInfo: UserInfo = selectedUser) {
+        _appList = list
+        _currentDatabaseListState =
+            application.database.dao().getPackageInfoFlow(userInfo.id).collectAsState(databaseList)
+    }
+
+    fun updateAppList(userInfo: UserInfo = selectedUser) {
+        updateAppList(queryAppList(userInfo).first, userInfo)
+    }
+
+    private fun <T> Flow<T>.collectAsState(initial: T): MutableState<T> {
+        val delegate = mutableStateOf(initial)
+        viewModelScope.launch { collect { delegate.value = it } }
+        return delegate
     }
 
     private fun <T, R> AppDataStore<T>.propertyAsState(
@@ -124,8 +175,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         get: (T) -> R,
         set: (T, R) -> T,
     ): MutableState<R> {
-        val delegate = mutableStateOf(defaultValue)
-        viewModelScope.launch { data.collect { delegate.value = it } }
+        val delegate = data.collectAsState(defaultValue)
         return object : MutableState<R> by mutableStateOf(get(delegate.value)) {
             override var value: R
                 get() = get(delegate.value)
