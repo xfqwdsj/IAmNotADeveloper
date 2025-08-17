@@ -144,16 +144,15 @@ private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column {
+        Column(Modifier.padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(24.dp))
             Text(
                 text = stringResource(R.string.title_apps_modal_configuration),
-                modifier = Modifier.padding(horizontal = 24.dp),
                 style = MaterialTheme.typography.headlineSmall,
             )
             Spacer(Modifier.height(24.dp))
         }
-        Row {
+        Row(Modifier.padding(horizontal = 8.dp)) {
             IconButtonWithTooltip(
                 imageVector = Icons.Default.ClearAll,
                 contentDescription = R.string.action_apps_modal_configuration_clear,
