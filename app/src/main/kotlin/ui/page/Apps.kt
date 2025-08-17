@@ -190,6 +190,7 @@ object Apps : Main() {
 
             AppConfiguration(
                 packageInfo = currentConfiguringPackageInfo,
+                userInfo = selectedUser,
                 dismiss = { currentConfiguringPackageInfo = null },
             )
         }
