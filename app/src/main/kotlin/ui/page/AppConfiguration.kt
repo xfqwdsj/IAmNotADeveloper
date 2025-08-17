@@ -9,8 +9,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,9 +23,13 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ClearAll
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,8 +42,13 @@ import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.ui.composable.AppListItem
+import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
@@ -52,6 +63,7 @@ context(
 )
 fun AppViewModel.AppConfiguration(
     packageInfo: PackageInfo?,
+    userInfo: UserInfo,
     dismiss: () -> Unit,
 ) {
     val scrim = MaterialTheme.colorScheme.scrim.copy(.2f)
@@ -83,45 +95,73 @@ fun AppViewModel.AppConfiguration(
                                 }
                             }
                     )
-                    Column(
-                        modifier = Modifier
-                            .padding(AppWindowInsets.asPaddingValues())
-                            .padding(48.dp)
-                            .widthIn(max = 600.dp)
-                            .fillMaxWidth()
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState(
-                                    AppConfigurationSharedKey.Container
+                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                        Column(
+                            modifier = Modifier
+                                .padding(AppWindowInsets.asPaddingValues())
+                                .padding(48.dp)
+                                .widthIn(max = 600.dp)
+                                .fillMaxWidth()
+                                .sharedBounds(
+                                    sharedContentState = rememberSharedContentState(
+                                        AppConfigurationSharedKey.Container
+                                    ),
+                                    animatedVisibilityScope = this@AnimatedContent,
+                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                                )
+                                .clip(RoundedCornerShape(AppConfigurationContainerRadius))
+                                .contentOverlayHaze()
+                                .verticalScroll(rememberScrollState())
+                                .semantics {
+                                    paneTitle = title
+                                    traversalIndex = 0f
+                                },
+                        ) {
+                            Header(packageInfo, userInfo)
+                            AppListItem(
+                                packageInfo = packageInfo,
+                                modifier = Modifier.sharedBounds(
+                                    sharedContentState = rememberSharedContentState(
+                                        AppConfigurationSharedKey.ListItem
+                                    ),
+                                    animatedVisibilityScope = this@AnimatedContent,
+                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                 ),
-                                animatedVisibilityScope = this@AnimatedContent,
-                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                             )
-                            .clip(RoundedCornerShape(AppConfigurationContainerRadius))
-                            .contentOverlayHaze()
-                            .verticalScroll(rememberScrollState())
-                            .semantics {
-                                paneTitle = title
-                                traversalIndex = 0f
-                            },
-                    ) {
-                        Spacer(Modifier.height(24.dp))
-                        Text(
-                            text = title,
-                            modifier = Modifier.padding(horizontal = 24.dp),
-                            style = MaterialTheme.typography.headlineSmall,
-                        )
-                        Spacer(Modifier.height(24.dp))
-                        AppListItem(
-                            packageInfo = packageInfo,
-                            modifier = Modifier.sharedBounds(
-                                sharedContentState = rememberSharedContentState(
-                                    AppConfigurationSharedKey.ListItem
-                                ),
-                                animatedVisibilityScope = this@AnimatedContent,
-                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                            ),
-                        )
+                        }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+context(viewModel: AppViewModel)
+private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = stringResource(R.string.title_apps_modal_configuration),
+                modifier = Modifier.padding(horizontal = 24.dp),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(Modifier.height(24.dp))
+        }
+        Row {
+            IconButtonWithTooltip(
+                imageVector = Icons.Default.ClearAll,
+                contentDescription = R.string.action_apps_modal_configuration_clear,
+            ) {
+                val packageName = packageInfo.packageName
+                val userId = userInfo.id
+                viewModel.viewModelScope.launch(Dispatchers.IO) {
+                    viewModel.application.database.dao().deletePackageInfo(packageName, userId)
                 }
             }
         }
