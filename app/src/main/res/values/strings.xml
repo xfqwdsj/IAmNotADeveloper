@@ -73,6 +73,8 @@
     <string name="item_apps_filter_configured">Configured</string>
     <string name="item_apps_filter_unconfigured">Unconfigured</string>
     <string name="item_apps_filter_system">System</string>
+    <string name="title_apps_configuration_modal">App Configuration</string>
+    <string name="action_apps_configuration_modal_close">Close app configuration</string>
     <string name="message_snackbar_apps_query_failed">Failed to query apps</string>
     <string name="action_apps_query_details_show">Apps query failed. Click to show details</string>
     <string name="title_dialog_apps_query_failed">Failed to query apps</string>

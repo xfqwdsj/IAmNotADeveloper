@@ -73,6 +73,8 @@
     <string name="item_apps_filter_configured">已配置</string>
     <string name="item_apps_filter_unconfigured">未配置</string>
     <string name="item_apps_filter_system">系统应用</string>
+    <string name="title_apps_configuration_modal">应用配置</string>
+    <string name="action_apps_configuration_modal_close">关闭应用配置</string>
     <string name="message_snackbar_apps_query_failed">查询应用列表失败</string>
     <string name="action_apps_query_details_show">查询应用列表失败，点击查看详情</string>
     <string name="title_dialog_apps_query_failed">查询应用列表失败</string>
