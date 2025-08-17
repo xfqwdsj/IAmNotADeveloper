@@ -1,7 +1,6 @@
 package top.ltfan.notdeveloper.ui.page
 
 import android.content.pm.PackageInfo
-import android.os.UserHandle
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -115,7 +114,7 @@ import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.mutableProperty
-import kotlin.reflect.full.staticFunctions
+import top.ltfan.notdeveloper.util.toAndroid
 
 object Apps : Main() {
     override val navigationLabel = R.string.label_nav_apps
@@ -200,7 +199,7 @@ object Apps : Main() {
         LaunchedEffect(appList, databaseList, appSortMethod, appFilteredMethods.size) {
             val groupFilters = listOf(AppFilter.Configured, AppFilter.Unconfigured)
             val filters = appFilteredMethods.subtract(groupFilters)
-            val queriedConfiguredList = service?.queryApps(databaseList) ?: emptyList()
+            val queriedConfiguredList = service?.queryApps(databaseList) ?: databaseList.toAndroid()
             configuredList = if (AppFilter.Configured !in appFilteredMethods) {
                 queriedConfiguredList.processed(appSortMethod, filters)
             } else emptyList()
@@ -727,9 +726,4 @@ object Apps : Main() {
     context(viewModel: AppViewModel)
     fun List<PackageInfo>.processed(sort: AppSort, filters: Set<AppFilter>) =
         filtered(filters).sorted(sort)
-
-    fun getUserId(uid: Int): Int {
-        val function = UserHandle::class.staticFunctions.first { it.name == "getUserId" }
-        return function.call(uid) as Int
-    }
 }
