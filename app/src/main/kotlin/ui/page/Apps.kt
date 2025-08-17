@@ -659,7 +659,7 @@ object Apps : Main() {
                                     .clip(RoundedCornerShape(radius))
                             ) {
                                 val headerText = stringResource(header)
-                                viewModel.AppListItem(
+                                AppListItem(
                                     packageInfo = info,
                                     modifier = Modifier
                                         .sharedBounds(
@@ -684,7 +684,7 @@ object Apps : Main() {
                             }
                         }
                     } else {
-                        viewModel.AppListItem(
+                        AppListItem(
                             packageInfo = info,
                             modifier = Modifier
                                 .alpha(0f)
