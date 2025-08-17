@@ -1,5 +1,6 @@
 package top.ltfan.notdeveloper.ui.page
 
+import android.content.pm.PackageInfo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -45,6 +46,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -115,7 +117,7 @@ fun AppViewModel.AppConfiguration() {
                                     traversalIndex = 0f
                                 },
                         ) {
-                            Header()
+                            Header(packageInfo, selectedUser)
                             AppListItem(
                                 packageInfo = packageInfo,
                                 modifier = Modifier.sharedBounds(
@@ -136,8 +138,7 @@ fun AppViewModel.AppConfiguration() {
 
 @Composable
 context(viewModel: AppViewModel)
-private fun Header() {
-    val packageInfo = viewModel.currentConfiguringPackageInfo ?: return
+private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -157,7 +158,7 @@ private fun Header() {
                 contentDescription = R.string.action_apps_modal_configuration_clear,
             ) {
                 val packageName = packageInfo.packageName
-                val userId = viewModel.selectedUser.id
+                val userId = userInfo.id
                 viewModel.viewModelScope.launch(Dispatchers.IO) {
                     viewModel.application.database.dao().deletePackageInfo(packageName, userId)
                 }
