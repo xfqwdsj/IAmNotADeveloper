@@ -28,6 +28,7 @@ import top.ltfan.notdeveloper.ui.page.Apps
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.page.Overview
 import top.ltfan.notdeveloper.ui.page.Page
+import top.ltfan.notdeveloper.util.getUserId
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
@@ -150,7 +151,9 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         updateUsers()
     }
 
-    fun queryUsers() = service?.queryUsers() ?: listOf(UserInfo.current)
+    fun queryUsers() = service?.queryUsers() ?: listOf(
+        UserInfo.current.copy(id = getUserId(myPackageInfo.applicationInfo!!.uid))
+    )
 
     fun updateUsers() {
         _users = queryUsers()
