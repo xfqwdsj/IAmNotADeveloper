@@ -171,7 +171,7 @@ object Apps : Main() {
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    with(transition) {
+                    context(transition) {
                         appListCard(
                             list = configuredList,
                             header = R.string.label_apps_list_header_configured,
