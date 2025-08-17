@@ -13,6 +13,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
@@ -39,6 +40,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
@@ -71,6 +73,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -83,14 +86,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppSort
-import top.ltfan.notdeveloper.datastore.util.rememberPropertyAsState
 import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
@@ -99,6 +98,7 @@ import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.composable.card
+import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
@@ -123,7 +123,6 @@ object Apps : Main() {
 
     val lazyListState = LazyListState()
 
-    var fullList by mutableStateOf(listOf<PackageInfo>())
     var configuredList by mutableStateOf(listOf<PackageInfo>())
     var unconfiguredList by mutableStateOf(listOf<PackageInfo>())
 
@@ -140,24 +139,6 @@ object Apps : Main() {
     @Composable
     context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
-        var selectedUser by settingsStore.rememberPropertyAsState(
-            get = { it.selectedUser },
-            set = { settings, user -> settings.copy(selectedUser = user) },
-        )
-
-        var sortMethod by settingsStore.rememberPropertyAsState(
-            get = { it.sort },
-            set = { settings, sort -> settings.copy(sort = sort) },
-        )
-
-        var filteredMethods by settingsStore.rememberPropertyAsState(
-            get = { it.filtered },
-            set = { settings, filters -> settings.copy(filtered = filters) },
-        )
-
-        val databaseList by application.database.dao().getPackageInfoFlow()
-            .collectAsStateWithLifecycle(listOf())
-
         val snackbarMessage = stringResource(R.string.message_snackbar_apps_query_failed)
 
         SharedTransitionLayout {
@@ -201,60 +182,31 @@ object Apps : Main() {
                     )
                 }
 
-                NoAppsBackground(
-                    status = AppListStatus(
-                        isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
-                        isFiltered = filteredMethods.isNotEmpty(),
-                    ),
-                )
-
-                FilterBottomSheet(
-                    sortMethod,
-                    { sortMethod = it },
-                    filteredMethods,
-                    { filteredMethods = it },
-                )
+                NoAppsBackground()
+                FilterBottomSheet()
             }
 
-            AnimatedContent(
-                targetState = currentConfiguringPackageInfo,
-            ) { currentConfiguringPackageInfo ->
-                if (currentConfiguringPackageInfo != null) {
-                    AppConfiguration(
-                        packageInfo = currentConfiguringPackageInfo,
-                        dismiss = { Apps.currentConfiguringPackageInfo = null },
-                    )
-                }
-            }
-        }
-
-        LaunchedEffect(users, selectedUser) {
-            if (selectedUser in users) return@LaunchedEffect
-            selectedUser = users.first()
+            AppConfiguration(
+                packageInfo = currentConfiguringPackageInfo,
+                dismiss = { currentConfiguringPackageInfo = null },
+            )
         }
 
         LaunchedEffect(Unit) {
-            withContext(Dispatchers.IO) {
-                fullList = (service?.queryApps()?.ifEmpty { null }?.also {
-                    isAppListError = false
-                } ?: listOf(myPackageInfo).also {
-                    isAppListError = true
-                })
-            }
+            updateAppList(queryAppList().also {
+                isAppListError = it.second
+            }.first)
         }
 
-        LaunchedEffect(fullList, databaseList, sortMethod, filteredMethods.size) {
-            val queriedList = service?.queryApps(databaseList) ?: emptyList()
+        LaunchedEffect(appList, databaseList, appSortMethod, appFilteredMethods.size) {
             val groupFilters = listOf(AppFilter.Configured, AppFilter.Unconfigured)
-            val filters = filteredMethods.subtract(groupFilters)
-            withContext(Dispatchers.IO) {
-                configuredList = if (AppFilter.Configured !in filteredMethods) {
-                    queriedList.processed(sortMethod, filters)
-                } else emptyList()
-                unconfiguredList = if (AppFilter.Unconfigured !in filteredMethods) {
-                    fullList.filter { it !in configuredList }.processed(sortMethod, filters)
-                } else emptyList()
-            }
+            val filters = appFilteredMethods.subtract(groupFilters)
+            configuredList = if (AppFilter.Configured !in appFilteredMethods) {
+                appList.processed(appSortMethod, filters)
+            } else emptyList()
+            unconfiguredList = if (AppFilter.Unconfigured !in appFilteredMethods) {
+                appList.filter { it !in configuredList }.processed(appSortMethod, filters)
+            } else emptyList()
         }
 
         LaunchedEffect(isAppListError) {
@@ -264,11 +216,7 @@ object Apps : Main() {
         }
 
         DisposableEffect(currentConfiguringPackageInfo) {
-            showNavBar = if (currentConfiguringPackageInfo != null) {
-                false
-            } else {
-                true
-            }
+            showNavBar = currentConfiguringPackageInfo == null
 
             onDispose {
                 showNavBar = true
@@ -356,12 +304,15 @@ object Apps : Main() {
     fun ColumnScope.FilterBar(
         selectedUser: UserInfo,
         setSelectedUser: (UserInfo) -> Unit,
+        modifier: Modifier = Modifier,
+        layoutModifier: Modifier = Modifier,
     ) {
         var selectedUser by mutableProperty(selectedUser, setSelectedUser)
 
         with(viewModel) {
-            AnimatedVisibilityWithBlur(showUserFilter) {
+            AnimatedVisibilityWithBlur(showUserFilter, modifier) {
                 FilterBarLayout(
+                    modifier = layoutModifier,
                     leading = {
                         Box(
                             modifier = Modifier
@@ -448,31 +399,39 @@ object Apps : Main() {
     }
 
     @Composable
-    context(contentPadding: PaddingValues)
-    fun NoAppsBackground(status: AppListStatus) {
-        // TODO: 无障碍
-        AnimatedContent(
-            targetState = status,
-        ) { (isEmpty, isAllFiltered) ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+    context(viewModel: AppViewModel, contentPadding: PaddingValues)
+    fun NoAppsBackground() {
+        with(viewModel) {
+            AnimatedContent(
+                targetState = AppListState(
+                    isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
+                    isFiltered = appFilteredMethods.isNotEmpty(),
+                ),
+                transitionSpec = { AnimatedContentDefaultTransform using null },
+                contentKey = { it.isEmpty },
+            ) { (isEmpty, isFiltered) ->
                 if (isEmpty) {
-                    Text(
-                        text = stringResource(R.string.message_apps_empty),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.message_apps_empty),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
 
-                    if (isAllFiltered) {
-                        Spacer(Modifier.height(24.dp))
-                        TextButton(
-                            onClick = { showFilterBottomSheet = true },
-                        ) {
-                            Text(stringResource(R.string.label_apps_empty_filter_show))
+                        AnimatedVisibilityWithBlur(isFiltered) {
+                            Column {
+                                Spacer(Modifier.height(24.dp))
+                                TextButton(
+                                    onClick = { showFilterBottomSheet = true },
+                                ) {
+                                    Text(stringResource(R.string.label_apps_empty_filter_show))
+                                }
+                            }
                         }
                     }
                 }
@@ -482,112 +441,107 @@ object Apps : Main() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun FilterBottomSheet(
-        sortMethod: AppSort,
-        setSortMethod: (AppSort) -> Unit,
-        filteredMethods: Set<AppFilter>,
-        setFilteredMethods: (Set<AppFilter>) -> Unit,
-    ) {
-        var sortMethod by mutableProperty(sortMethod, setSortMethod)
-        var filteredMethods by mutableProperty(filteredMethods, setFilteredMethods)
-
-        if (showFilterBottomSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showFilterBottomSheet = false },
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            ) {
-                Text(
-                    text = stringResource(R.string.title_bottom_sheet_apps_filter),
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-                Spacer(Modifier.height(24.dp))
-                Text(
-                    text = stringResource(R.string.label_bottom_sheet_apps_filter_sort),
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(Modifier.height(8.dp))
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+    context(viewModel: AppViewModel)
+    fun FilterBottomSheet() {
+        with(viewModel) {
+            if (showFilterBottomSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showFilterBottomSheet = false },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
                 ) {
-                    AppSort.entries.forEach {
-                        val selected = sortMethod == it
-                        FilterChip(
-                            selected = selected,
-                            onClick = { sortMethod = it },
-                            label = { Text(stringResource(it.labelRes)) },
-                            leadingIcon = {
-                                AnimatedVisibility(selected) {
-                                    Icon(Icons.Default.Check, contentDescription = null)
-                                }
-                            },
-                        )
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
-                HorizontalDivider(Modifier.padding(horizontal = 8.dp))
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.label_bottom_sheet_apps_filter),
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(Modifier.height(8.dp))
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val allSelected = filteredMethods.isEmpty()
-                    FilterChip(
-                        selected = allSelected,
-                        onClick = {
-                            filteredMethods = if (allSelected) {
-                                AppFilter.usableEntries
-                            } else {
-                                emptySet()
-                            }
-                        },
-                        label = { Text(stringResource(AppFilter.All.labelRes)) },
-                        leadingIcon = {
-                            AnimatedContent(allSelected) { allSelected ->
-                                Icon(
-                                    imageVector = if (allSelected) Icons.Default.Check else Icons.Default.Remove,
-                                    contentDescription = null,
-                                )
-                            }
-                        },
+                    Text(
+                        text = stringResource(R.string.title_bottom_sheet_apps_filter),
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineMedium,
                     )
-                    AppFilter.usableEntries.forEach {
-                        val selected = !filteredMethods.contains(it)
+                    Spacer(Modifier.height(24.dp))
+                    Text(
+                        text = stringResource(R.string.label_bottom_sheet_apps_filter_sort),
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        AppSort.entries.forEach {
+                            val selected = appSortMethod == it
+                            FilterChip(
+                                selected = selected,
+                                onClick = { appSortMethod = it },
+                                label = { Text(stringResource(it.labelRes)) },
+                                leadingIcon = {
+                                    AnimatedVisibility(selected) {
+                                        Icon(Icons.Default.Check, contentDescription = null)
+                                    }
+                                },
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    HorizontalDivider(Modifier.padding(horizontal = 8.dp))
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.label_bottom_sheet_apps_filter),
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val allSelected = appFilteredMethods.isEmpty()
                         FilterChip(
-                            selected = selected,
+                            selected = allSelected,
                             onClick = {
-                                if (filteredMethods.contains(it)) {
-                                    filteredMethods -= it
+                                appFilteredMethods = if (allSelected) {
+                                    AppFilter.usableEntries
                                 } else {
-                                    filteredMethods += it
+                                    emptySet()
                                 }
                             },
-                            label = { Text(stringResource(it.labelRes)) },
+                            label = { Text(stringResource(AppFilter.All.labelRes)) },
                             leadingIcon = {
-                                AnimatedContent(selected) { selected ->
+                                AnimatedContent(allSelected) { allSelected ->
                                     Icon(
-                                        imageVector = if (selected) Icons.Default.Check else Icons.Default.Remove,
+                                        imageVector = if (allSelected) Icons.Default.Check else Icons.Default.Remove,
                                         contentDescription = null,
                                     )
                                 }
                             },
                         )
+                        AppFilter.usableEntries.forEach {
+                            val selected = !appFilteredMethods.contains(it)
+                            FilterChip(
+                                selected = selected,
+                                onClick = {
+                                    if (appFilteredMethods.contains(it)) {
+                                        appFilteredMethods -= it
+                                    } else {
+                                        appFilteredMethods += it
+                                    }
+                                },
+                                label = { Text(stringResource(it.labelRes)) },
+                                leadingIcon = {
+                                    AnimatedContent(selected) { selected ->
+                                        Icon(
+                                            imageVector = if (selected) Icons.Default.Check else Icons.Default.Remove,
+                                            contentDescription = null,
+                                        )
+                                    }
+                                },
+                            )
+                        }
                     }
+                    Spacer(Modifier.height(64.dp))
                 }
-                Spacer(Modifier.height(64.dp))
             }
         }
     }
@@ -652,6 +606,8 @@ object Apps : Main() {
         }
     }
 
+    val AppListContainerRadius = 12.dp
+
     @OptIn(ExperimentalSharedTransitionApi::class)
     context(
         viewModel: AppViewModel,
@@ -685,18 +641,29 @@ object Apps : Main() {
                     targetState = currentConfiguringPackageInfo != info,
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                 ) { visible ->
+                    val radius by transition.animateDp(
+                        label = "AppListItemRadius",
+                    ) {
+                        when (it) {
+                            EnterExitState.PreEnter -> AppConfigurationContainerRadius
+                            EnterExitState.Visible -> AppListContainerRadius
+                            EnterExitState.PostExit -> AppConfigurationContainerRadius
+                        }
+                    }
 
                     if (visible) {
                         with(sharedTransitionScope) {
                             viewModel.AppListItem(
                                 packageInfo = info,
-                                modifier = Modifier.sharedBounds(
-                                    sharedContentState = rememberSharedContentState(
-                                        AppConfigurationSharedKey
-                                    ),
-                                    animatedVisibilityScope = this@AnimatedContent,
-                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                                ),
+                                modifier = Modifier
+                                    .sharedBounds(
+                                        sharedContentState = rememberSharedContentState(
+                                            AppConfigurationSharedKey
+                                        ),
+                                        animatedVisibilityScope = this@AnimatedContent,
+                                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                                    )
+                                    .clip(RoundedCornerShape(radius)),
                                 onClick = {
                                     currentConfiguringPackageInfo = info
                                 },
@@ -724,7 +691,7 @@ object Apps : Main() {
         )
     }
 
-    data class AppListStatus(
+    data class AppListState(
         val isEmpty: Boolean,
         val isFiltered: Boolean,
     )
