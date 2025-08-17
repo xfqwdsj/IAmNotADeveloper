@@ -23,7 +23,6 @@ import top.ltfan.notdeveloper.log.invalidPackage
 import top.ltfan.notdeveloper.provider.SystemServiceProvider
 import top.ltfan.notdeveloper.provider.getInterfaceOrNull
 import top.ltfan.notdeveloper.util.clearBinderCallingIdentity
-import kotlin.reflect.KFunction
 import top.ltfan.notdeveloper.database.PackageInfo as DatabasePackageInfo
 
 const val CallMethodNotify = "NOTIFY"
@@ -108,6 +107,12 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
             )
             @Suppress("UNCHECKED_CAST")
             XposedHelpers.getObjectField(slice, "mList") as List<PackageInfo>
+        }.filter {
+            val result = it.applicationInfo != null
+            if (!result) {
+                Log.w("Application info for package ${it.packageName} is null, skipping")
+            }
+            result
         }
     }
 
@@ -147,6 +152,11 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
                     packageManager, "getPackageInfo",
                     packageName, 0, userId,
                 ) as? PackageInfo? ?: return@forEach
+
+                if (info.applicationInfo == null) {
+                    Log.w("Application info for $packageName is null, skipping")
+                    return@forEach
+                }
 
                 val queriedAppId = XposedHelpers.callStaticMethod(
                     UserHandle::class.java, "getAppId",
@@ -212,6 +222,7 @@ interface SystemServiceClient : SystemServiceInterface {
     fun queryApps(vararg userId: Int) = queryAppsByUserId(userId.toList())
     fun queryApps(databaseList: List<DatabasePackageInfo>) =
         queryAppsByInfo(databaseList.map { ParcelablePackageInfo(it) })
+
     fun notifySettingChange(method: DetectionMethod.SettingsMethod)
 }
 
