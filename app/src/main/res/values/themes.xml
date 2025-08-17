@@ -5,4 +5,8 @@
     <style name="Theme.IAmNotADeveloper" parent="Theme.Base">
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
+
+    <style name="Theme.IAmNotADeveloper.Splash" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/Theme.IAmNotADeveloper</item>
+    </style>
 </resources>
