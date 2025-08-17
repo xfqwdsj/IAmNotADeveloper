@@ -31,6 +31,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,13 +51,17 @@ import androidx.navigationevent.compose.NavigationEventHandler
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.UserInfo
+import top.ltfan.notdeveloper.database.PackageSettingsDao
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
+import top.ltfan.notdeveloper.util.getAppId
+import top.ltfan.notdeveloper.util.getUserId
 
 val AppConfigurationContainerRadius = 24.dp
 
@@ -69,6 +75,14 @@ context(
 fun AppViewModel.AppConfiguration() {
     val coroutineScope = rememberCoroutineScope()
 
+    val dao = remember(application.database) { application.database.dao() }
+
+    fun close() {
+        coroutineScope.launch {
+            packageInfoConfiguringTransitionState.animateTo(null)
+        }
+    }
+
     val scrim = MaterialTheme.colorScheme.scrim.copy(.2f)
     val title = stringResource(R.string.title_apps_modal_configuration)
     val closeDescription = stringResource(R.string.action_apps_modal_configuration_close)
@@ -77,68 +91,76 @@ fun AppViewModel.AppConfiguration() {
             transitionSpec = { fadeIn() togetherWith fadeOut() using null },
         ) { packageInfo ->
             if (packageInfo != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(scrim)
-                        .semantics { isTraversalGroup = true },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Spacer(
-                        Modifier
-                            .matchParentSize()
-                            .pointerInput(Unit) {
-                                detectTapGestures {
-                                    coroutineScope.launch {
-                                        packageInfoConfiguringTransitionState.animateTo(null)
+                context(dao) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(scrim)
+                            .semantics { isTraversalGroup = true },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Spacer(
+                            Modifier
+                                .matchParentSize()
+                                .pointerInput(Unit) {
+                                    detectTapGestures {
+                                        close()
                                     }
                                 }
-                            }
-                            .semantics(mergeDescendants = true) {
-                                traversalIndex = 1f
-                                contentDescription = closeDescription
-                                onClick {
-                                    coroutineScope.launch {
-                                        packageInfoConfiguringTransitionState.animateTo(null)
+                                .semantics(mergeDescendants = true) {
+                                    traversalIndex = 1f
+                                    contentDescription = closeDescription
+                                    onClick {
+                                        close()
+                                        true
                                     }
-                                    true
                                 }
-                            }
-                    )
-                    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-                        Column(
-                            modifier = Modifier
-                                .padding(AppWindowInsets.asPaddingValues())
-                                .padding(24.dp)
-                                .widthIn(max = 600.dp)
-                                .fillMaxWidth()
-                                .sharedBounds(
-                                    sharedContentState = rememberSharedContentState(
-                                        AppConfigurationSharedKey.Container
+                        )
+                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(AppWindowInsets.asPaddingValues())
+                                    .padding(24.dp)
+                                    .widthIn(max = 600.dp)
+                                    .fillMaxWidth()
+                                    .sharedBounds(
+                                        sharedContentState = rememberSharedContentState(
+                                            AppConfigurationSharedKey.Container
+                                        ),
+                                        animatedVisibilityScope = this@AnimatedContent,
+                                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                                    )
+                                    .clip(RoundedCornerShape(AppConfigurationContainerRadius))
+                                    .contentOverlayHaze()
+                                    .verticalScroll(rememberScrollState())
+                                    .semantics {
+                                        paneTitle = title
+                                        traversalIndex = 0f
+                                    },
+                            ) {
+                                Header(packageInfo, selectedUser)
+                                AppListItem(
+                                    packageInfo = packageInfo,
+                                    modifier = Modifier.sharedBounds(
+                                        sharedContentState = rememberSharedContentState(
+                                            AppConfigurationSharedKey.ListItem(packageInfo)
+                                        ),
+                                        animatedVisibilityScope = this@AnimatedContent,
+                                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     ),
-                                    animatedVisibilityScope = this@AnimatedContent,
-                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                 )
-                                .clip(RoundedCornerShape(AppConfigurationContainerRadius))
-                                .contentOverlayHaze()
-                                .verticalScroll(rememberScrollState())
-                                .semantics {
-                                    paneTitle = title
-                                    traversalIndex = 0f
-                                },
-                        ) {
-                            Header(packageInfo, selectedUser)
-                            AppListItem(
-                                packageInfo = packageInfo,
-                                modifier = Modifier.sharedBounds(
-                                    sharedContentState = rememberSharedContentState(
-                                        AppConfigurationSharedKey.ListItem(packageInfo)
-                                    ),
-                                    animatedVisibilityScope = this@AnimatedContent,
-                                    resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                                ),
-                            )
+                            }
                         }
+                    }
+                }
+
+                LaunchedEffect(Unit) {
+                    withContext(Dispatchers.IO) {
+                        val packageName = packageInfo.packageName
+                        val uid = packageInfo.applicationInfo!!.uid
+                        val userId = getUserId(uid)
+                        val appId = getAppId(uid)
+                        dao.initializePackage(packageName, userId, appId)
                     }
                 }
 
@@ -161,8 +183,16 @@ fun AppViewModel.AppConfiguration() {
 }
 
 @Composable
-context(viewModel: AppViewModel)
+context(viewModel: AppViewModel, dao: PackageSettingsDao)
 private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
+    val coroutineScope = rememberCoroutineScope()
+
+    fun close() {
+        coroutineScope.launch {
+            viewModel.packageInfoConfiguringTransitionState.animateTo(null)
+        }
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -184,8 +214,9 @@ private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
                 val packageName = packageInfo.packageName
                 val userId = userInfo.id
                 viewModel.viewModelScope.launch(Dispatchers.IO) {
-                    viewModel.application.database.dao().deletePackageInfo(packageName, userId)
+                    dao.deletePackageInfo(packageName, userId)
                 }
+                close()
             }
         }
     }
