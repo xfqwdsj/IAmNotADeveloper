@@ -97,9 +97,12 @@ fun Modifier.hazeEffectBottom(
 }
 
 context(viewModel: AppViewModel, page: Page)
-fun Modifier.contentHazeSource(state: HazeState = viewModel.hazeState) = pageHazeSource(
+fun Modifier.contentHazeSource(
+    state: HazeState = viewModel.hazeState,
+    zIndexDelta: Float = 0f,
+) = pageHazeSource(
     state = state,
-    zIndex = HazeZIndex.content,
+    zIndex = HazeZIndex.content + zIndexDelta,
 )
 
 @Composable
@@ -108,14 +111,15 @@ fun Modifier.appBarHaze(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyleAppBar,
     easing: Easing = HazeEasing,
+    zIndexDelta: Float = 0f,
     block: (HazeEffectScope.() -> Unit)? = null,
 ) = this
     .pageHazeSource(
         state = state,
-        zIndex = HazeZIndex.topBar,
+        zIndex = HazeZIndex.topBar + zIndexDelta,
     )
     .hazeEffectTop(state, style, easing) {
-        drawPageArea(HazeZIndex.topBar)
+        drawPageArea(HazeZIndex.topBar + zIndexDelta)
         block?.invoke(this)
     }
 
@@ -123,21 +127,22 @@ context(viewModel: AppViewModel, page: Page)
 fun Modifier.contentOverlayHaze(
     state: HazeState = viewModel.hazeState,
     style: HazeStyle = HazeStyle.Unspecified,
+    zIndexDelta: Float = 0f,
     block: (HazeEffectScope.() -> Unit)? = null,
 ) = this
     .pageHazeSource(
         state = state,
-        zIndex = HazeZIndex.contentOverlay,
+        zIndex = HazeZIndex.contentOverlay + zIndexDelta,
     )
     .hazeEffect(state, style) {
-        drawPageArea(HazeZIndex.contentOverlay)
+        drawPageArea(HazeZIndex.contentOverlay + zIndexDelta)
         block?.invoke(this)
     }
 
 @OptIn(ExperimentalHazeApi::class)
 context(page: Page)
 fun HazeEffectScope.drawPageArea(zIndex: Float) {
-    canDrawArea = canDrawArea@ { area ->
+    canDrawArea = canDrawArea@{ area ->
         val key = area.key
         if (key !is HazeKey) return@canDrawArea false
         key.zIndex < zIndex && key.page == page
