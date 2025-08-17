@@ -30,7 +30,7 @@ fun getPackageInfo(databaseInfo: top.ltfan.notdeveloper.database.PackageInfo): P
 
 context(viewModel: AppViewModel)
 fun List<top.ltfan.notdeveloper.database.PackageInfo>.toAndroid() =
-    mapNotNull { getPackageInfo(it) }
+    mapNotNull { getPackageInfo(it) }.toSet()
 
 fun getUserId(uid: Int): Int {
     val function = UserHandle::class.staticFunctions.first { it.name == "getUserId" }
