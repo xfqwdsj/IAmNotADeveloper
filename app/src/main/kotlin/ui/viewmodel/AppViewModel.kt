@@ -2,6 +2,7 @@ package top.ltfan.notdeveloper.ui.viewmodel
 
 import android.content.Context
 import android.content.pm.PackageInfo
+import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -36,9 +37,10 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     val snackbarHostState = SnackbarHostState()
 
-    val showNavBar: Boolean inline get() {
-        return (currentPage != Apps || currentConfiguringPackageInfo == null)
-    }
+    val showNavBar: Boolean
+        inline get() {
+            return (currentPage != Apps || currentConfiguringPackageInfo == null)
+        }
     val backStack = mutableStateListOf<Page>(Overview)
     val currentPage inline get() = backStack.last()
     val navBarEntry inline get() = backStack.last { it is Main }
@@ -48,7 +50,10 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     var service: SystemServiceClient? by mutableStateOf(null)
 
     val myPackageInfo = application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0)!!
-    var currentConfiguringPackageInfo by mutableStateOf<PackageInfo?>(null)
+
+    val packageInfoConfiguringTransitionState = SeekableTransitionState<PackageInfo?>(null)
+    val currentConfiguringPackageInfo inline get() = packageInfoConfiguringTransitionState.targetState
+
     private var _users by mutableStateOf(queryUsers())
     val users get() = _users
 
