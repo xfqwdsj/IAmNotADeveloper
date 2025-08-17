@@ -80,6 +80,8 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -171,12 +173,12 @@ object Apps : Main() {
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    appList(
+                    appListCard(
                         list = configuredList,
                         header = R.string.label_apps_list_header_configured,
                     )
 
-                    appList(
+                    appListCard(
                         list = unconfiguredList,
                         header = R.string.label_apps_list_header_unconfigured,
                     )
@@ -613,7 +615,7 @@ object Apps : Main() {
         viewModel: AppViewModel,
         sharedTransitionScope: SharedTransitionScope,
     )
-    fun GroupedLazyListScope.appList(
+    fun GroupedLazyListScope.appListCard(
         list: List<PackageInfo>,
         @StringRes header: Int,
     ) {
@@ -653,21 +655,37 @@ object Apps : Main() {
 
                     if (visible) {
                         with(sharedTransitionScope) {
-                            viewModel.AppListItem(
-                                packageInfo = info,
-                                modifier = Modifier
+                            Box(
+                                Modifier
                                     .sharedBounds(
                                         sharedContentState = rememberSharedContentState(
-                                            AppConfigurationSharedKey
+                                            AppConfigurationSharedKey.Container
                                         ),
                                         animatedVisibilityScope = this@AnimatedContent,
                                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
-                                    .clip(RoundedCornerShape(radius)),
-                                onClick = {
-                                    currentConfiguringPackageInfo = info
-                                },
-                            )
+                                    .clip(RoundedCornerShape(radius))
+                            ) {
+                                val headerText = stringResource(header)
+                                viewModel.AppListItem(
+                                    packageInfo = info,
+                                    modifier = Modifier
+                                        .sharedBounds(
+                                            sharedContentState = rememberSharedContentState(
+                                                AppConfigurationSharedKey.ListItem
+                                            ),
+                                            animatedVisibilityScope = this@AnimatedContent,
+                                            resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                                        )
+                                        .clip(RoundedCornerShape(radius))
+                                        .semantics {
+                                            contentDescription = headerText
+                                        },
+                                    onClick = {
+                                        currentConfiguringPackageInfo = info
+                                    },
+                                )
+                            }
                         }
                     } else {
                         viewModel.AppListItem(
