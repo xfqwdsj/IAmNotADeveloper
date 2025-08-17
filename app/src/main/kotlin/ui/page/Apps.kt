@@ -204,7 +204,7 @@ object Apps : Main() {
                 FilterBottomSheet()
             }
 
-            with(transition) { AppConfiguration() }
+            context(transition) { AppConfiguration() }
         }
 
         LaunchedEffect(Unit) {
