@@ -49,8 +49,8 @@ fun AppViewModel.AppConfiguration(
     dismiss: () -> Unit,
 ) {
     val scrim = MaterialTheme.colorScheme.scrim.copy(.2f)
-    val title = stringResource(R.string.title_apps_configuration_modal)
-    val closeDescription = stringResource(R.string.action_apps_configuration_modal_close)
+    val title = stringResource(R.string.title_apps_modal_configuration)
+    val closeDescription = stringResource(R.string.action_apps_modal_configuration_close)
     with(sharedTransitionScope) {
         AnimatedContent(
             targetState = packageInfo,
