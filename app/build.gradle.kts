@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.viewmodelNav3)
+    implementation(libs.splashscreen)
     implementation(libs.activity)
     implementation(libs.navigation.runtime)
     implementation(libs.navigation.ui)

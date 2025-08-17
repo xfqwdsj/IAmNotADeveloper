@@ -19,7 +19,7 @@
             android:name=".ui.activity.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen"
             android:exported="true"
-            android:theme="@style/Theme.IAmNotADeveloper">
+            android:theme="@style/Theme.IAmNotADeveloper.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

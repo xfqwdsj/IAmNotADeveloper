@@ -10,6 +10,7 @@ targetSdk = "36"
 minSdk = "27"
 lifecycle = "2.9.2"
 lifecycle-viewmodelNav3 = "1.0.0-alpha04"
+splashscreen = "1.0.1"
 activity = "1.10.1"
 compose = "2025.08.00"
 navigation = "1.0.0-alpha07"
@@ -29,6 +30,7 @@ kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 lifecycle-viewmodelNav3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle-viewmodelNav3" }
+splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 navigation-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation" }
 navigation-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation" }
