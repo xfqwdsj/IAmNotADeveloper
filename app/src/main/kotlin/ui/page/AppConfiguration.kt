@@ -155,6 +155,7 @@ fun AppViewModel.AppConfiguration() {
                 }
 
                 LaunchedEffect(Unit) {
+                    appFilteredMethods -= AppFilter.Configured
                     withContext(Dispatchers.IO) {
                         val packageName = packageInfo.packageName
                         val userId = packageInfo.getUserId()
