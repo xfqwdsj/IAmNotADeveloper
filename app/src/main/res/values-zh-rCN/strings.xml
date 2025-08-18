@@ -50,6 +50,8 @@
 
     <!-- Overview -->
     <string name="label_nav_overview">概览</string>
+    <string name="toggle_overview_use_global_preferences">使用全局偏好设置</string>
+    <string name="description_overview_use_global_preferences">如果启用，模块将对所有应用使用全局偏好设置。如果禁用，每个应用可以有自己的偏好设置。</string>
 
     <!-- Apps -->
     <string name="label_nav_apps">应用</string>
