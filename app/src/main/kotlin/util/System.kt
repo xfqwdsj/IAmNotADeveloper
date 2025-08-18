@@ -32,12 +32,12 @@ context(viewModel: AppViewModel)
 fun List<top.ltfan.notdeveloper.database.PackageInfo>.toAndroid() =
     mapNotNull { getPackageInfo(it) }.toSet()
 
-fun getUserId(uid: Int): Int {
+fun PackageInfo.getUserId(): Int {
     val function = UserHandle::class.staticFunctions.first { it.name == "getUserId" }
-    return function.call(uid) as Int
+    return function.call(applicationInfo?.uid) as Int
 }
 
-fun getAppId(uid: Int): Int {
+fun PackageInfo.getAppId(): Int {
     val function = UserHandle::class.staticFunctions.first { it.name == "getAppId" }
-    return function.call(uid) as Int
+    return function.call(applicationInfo?.uid) as Int
 }

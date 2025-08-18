@@ -154,7 +154,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     }
 
     fun queryUsers() = service?.queryUsers() ?: listOf(
-        UserInfo.current.copy(id = getUserId(myPackageInfo.applicationInfo!!.uid))
+        UserInfo.current.copy(id = myPackageInfo.getUserId())
     )
 
     fun updateUsers() {
