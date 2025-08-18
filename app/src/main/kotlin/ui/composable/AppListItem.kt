@@ -1,6 +1,5 @@
 package top.ltfan.notdeveloper.ui.composable
 
-import android.content.pm.PackageInfo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -14,20 +13,21 @@ import androidx.core.content.pm.PackageInfoCompat
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.ui.util.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Composable
 context(viewModel: AppViewModel)
 fun AppListItem(
-    packageInfo: PackageInfo,
+    packageInfo: PackageInfoWrapper,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
     with(viewModel) {
-        val applicationInfo = remember(packageInfo) {
-            application.packageManager.getApplicationInfo(packageInfo.packageName, 0)
-        }
+        val packageInfo = remember(packageInfo) { packageInfo.info }
+
+        val applicationInfo = remember(packageInfo) { packageInfo.applicationInfo!! }
 
         val appIcon = remember(packageInfo) {
             applicationInfo.loadIcon(application.packageManager)

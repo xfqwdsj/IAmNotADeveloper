@@ -1,6 +1,5 @@
 package top.ltfan.notdeveloper.ui.page
 
-import android.content.pm.PackageInfo
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -90,6 +89,7 @@ import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppSort
@@ -125,19 +125,12 @@ object Apps : Main() {
     @Composable
     context(viewModel: AppViewModel)
     fun rememberAppLists() = with(viewModel) {
-        val databaseKeys = remember(databaseList) {
-            databaseList.mapTo(HashSet()) { it.packageName to it.applicationInfo!!.uid }
-        }
-
         remember(appList, databaseList, appSortMethod, appFilteredMethods) {
             val filters = appFilteredMethods.subtract(AppFilter.groupingEntries)
             (if (AppFilter.Configured !in appFilteredMethods) {
                 databaseList.asSequence().processed(appSortMethod, filters)
             } else emptyList()) to (if (AppFilter.Unconfigured !in appFilteredMethods) {
-                appList.asSequence().filterNot {
-                    val key = it.packageName to it.applicationInfo!!.uid
-                    databaseKeys.contains(key)
-                }.processed(appSortMethod, filters)
+                appList.subtract(databaseList).asSequence().processed(appSortMethod, filters)
             } else emptyList())
         }
     }
@@ -439,7 +432,7 @@ object Apps : Main() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     @Composable
     context(viewModel: AppViewModel)
     fun FilterBottomSheet() {
@@ -611,11 +604,11 @@ object Apps : Main() {
     @OptIn(ExperimentalSharedTransitionApi::class)
     context(
         viewModel: AppViewModel,
-        transition: Transition<PackageInfo?>,
+        transition: Transition<PackageInfoWrapper?>,
         sharedTransitionScope: SharedTransitionScope,
     )
     fun GroupedLazyListScope.appListCard(
-        list: List<PackageInfo>,
+        list: List<PackageInfoWrapper>,
         @StringRes header: Int,
     ) {
         if (list.isEmpty()) return
@@ -722,10 +715,10 @@ object Apps : Main() {
         val isFiltered: Boolean,
     )
 
-    val PackageInfo.listKey: String get() = "${packageName}-${applicationInfo?.uid}"
+    val PackageInfoWrapper.listKey: String get() = "${info.packageName}-${info.applicationInfo?.uid}"
 
     context(viewModel: AppViewModel)
-    fun Sequence<PackageInfo>.filtered(filters: Set<AppFilter>) =
+    fun Sequence<PackageInfoWrapper>.filtered(filters: Set<AppFilter>) =
         filters.fold(this) { acc, filter ->
             with(filter) {
                 acc.filtered()
@@ -733,11 +726,11 @@ object Apps : Main() {
         }.toList()
 
     context(viewModel: AppViewModel)
-    fun Collection<PackageInfo>.sorted(sort: AppSort) = with(sort) {
+    fun Collection<PackageInfoWrapper>.sorted(sort: AppSort) = with(sort) {
         sorted()
     }
 
     context(viewModel: AppViewModel)
-    fun Sequence<PackageInfo>.processed(sort: AppSort, filters: Set<AppFilter>) =
+    fun Sequence<PackageInfoWrapper>.processed(sort: AppSort, filters: Set<AppFilter>) =
         filtered(filters).sorted(sort)
 }

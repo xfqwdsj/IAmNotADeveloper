@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.UserHandle
+import top.ltfan.notdeveloper.data.PackageInfoWrapper
+import top.ltfan.notdeveloper.data.wrapped
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.reflect.full.declaredFunctions
@@ -18,10 +20,10 @@ val isMiui: Boolean
     }
 
 context(viewModel: AppViewModel)
-fun getPackageInfo(databaseInfo: top.ltfan.notdeveloper.database.PackageInfo): PackageInfo? {
+fun getPackageInfo(databaseInfo: top.ltfan.notdeveloper.database.PackageInfo): PackageInfoWrapper? {
     val packageManager = viewModel.application.packageManager
     return try {
-        packageManager.getPackageInfo(databaseInfo.packageName, 0)
+        packageManager.getPackageInfo(databaseInfo.packageName, 0).wrapped()
     } catch (e: PackageManager.NameNotFoundException) {
         Log.Android.w("Package not found: ${databaseInfo.packageName}", e)
         null
