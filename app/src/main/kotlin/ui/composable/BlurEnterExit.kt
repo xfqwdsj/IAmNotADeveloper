@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -26,6 +27,29 @@ fun AnimatedVisibilityScope.BlurEnterExit(
 ) {
     val blurRadius by transition.animateDp { if (it != EnterExitState.Visible) maxRadius else 0.dp }
     Box(modifier.blur(blurRadius), content = content)
+}
+
+@Composable
+context(transition: Transition<Boolean>)
+fun ColumnScope.AnimatedVisibilityWithBlur(
+    modifier: Modifier = Modifier,
+    maxRadius: Dp = 8.dp,
+    enter: EnterTransition = fadeIn() + expandVertically(clip = false),
+    exit: ExitTransition = fadeOut() + shrinkVertically(clip = false),
+    content: @Composable AnimatedVisibilityScope.() -> Unit,
+) {
+    transition.AnimatedVisibility(
+        visible = { it },
+        enter = enter,
+        exit = exit,
+        modifier = modifier,
+    ) {
+        BlurEnterExit(
+            maxRadius = maxRadius,
+        ) {
+            content()
+        }
+    }
 }
 
 @Composable
