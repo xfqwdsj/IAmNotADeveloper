@@ -75,18 +75,15 @@ fun StatusCard(
                 Text(
                     text = status.summary,
                     modifier = Modifier
-                        .padding(start = 16.dp, end = 24.dp)
-                        .run {
-                            if (expanded) {
-                                clearAndSetSemantics {}
-                            } else this
-                        },
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 24.dp),
                     style = MaterialTheme.typography.headlineSmall,
                 )
                 AnimatedVisibilityWithBlur(visible = isPreferencesReady) {
                     Text(
                         text = stringResource(R.string.description_changes_application),
                         modifier = Modifier
+                            .fillMaxWidth()
                             .padding(start = 16.dp, end = 24.dp)
                             .run {
                                 if (expanded) {
@@ -100,6 +97,7 @@ fun StatusCard(
                     Text(
                         text = stringResource(R.string.description_more_info),
                         modifier = Modifier
+                            .fillMaxWidth()
                             .padding(start = 16.dp, end = 24.dp)
                             .run {
                                 if (expanded) {
@@ -162,9 +160,12 @@ private fun ColumnScope.StatusEntry(
         Text(
             text = stringResource(workingText),
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 16.dp, end = 24.dp)
                 .semantics {
-                    focused = true
+                    if (expanded) {
+                        focused = true
+                    }
                 },
             style = MaterialTheme.typography.titleMedium,
         )
@@ -173,9 +174,12 @@ private fun ColumnScope.StatusEntry(
         Text(
             text = stringResource(notWorkingText),
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 16.dp, end = 24.dp)
                 .semantics {
-                    focused = true
+                    if (expanded) {
+                        focused = true
+                    }
                 },
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.titleMedium,
@@ -185,9 +189,12 @@ private fun ColumnScope.StatusEntry(
         Text(
             text = stringResource(descriptionText),
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 16.dp, end = 24.dp)
                 .semantics {
-                    focused = true
+                    if (expanded) {
+                        focused = true
+                    }
                 },
             style = MaterialTheme.typography.bodySmall,
         )

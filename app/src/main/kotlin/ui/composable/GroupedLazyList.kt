@@ -8,7 +8,9 @@ import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyScopeMarker
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberOverscrollEffect
@@ -36,8 +39,12 @@ import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -89,7 +96,7 @@ fun GroupedLazyRow(
     overscrollEffect: OverscrollEffect? = rememberOverscrollEffect(),
     content: GroupedLazyListScope.() -> Unit,
 ) {
-    LazyColumn(
+    LazyRow(
         modifier = modifier,
         state = state,
         contentPadding = contentPadding,
@@ -105,7 +112,7 @@ fun GroupedLazyRow(
                 spacing = spacing,
             ).apply(content)
         ) {
-            this@LazyColumn.build()
+            this@LazyRow.build()
         }
     }
 }
@@ -259,20 +266,82 @@ class CardLazyGroup(
             element = LazyItem(
                 key = key,
                 contentType = CardHeaderContent(contentType ?: "card-header"),
-                modifier = { modifier().fillMaxWidth() },
+                modifier = { modifier() },
                 sticky = sticky,
             ) {
-                Column {
+                val modifier = if (this@CardLazyGroup.isVertical) {
+                    Modifier.fillMaxWidth()
+                } else {
+                    Modifier.fillMaxHeight()
+                }.semantics(mergeDescendants = true) {}
+
+                val content = @Composable {
                     CompositionLocalProvider(
                         LocalTextStyle provides MaterialTheme.typography.titleMedium.merge(
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                         ),
                     ) {
-                        Spacer(Modifier.height(16.dp))
-                        Box(Modifier.padding(horizontal = 16.dp)) { text() }
-                        Spacer(Modifier.height(12.dp))
+                        fun Modifier.size(size: Dp) = if (this@CardLazyGroup.isVertical) {
+                            height(size)
+                        } else {
+                            width(size)
+                        }
+
+                        fun Modifier.padding(padding: Dp) = if (this@CardLazyGroup.isVertical) {
+                            padding(horizontal = padding)
+                        } else {
+                            padding(vertical = padding)
+                        }
+
+                        Spacer(Modifier.size(16.dp))
+                        Box(
+                            Modifier
+                                .padding(16.dp)
+                                .run {
+                                    if (this@CardLazyGroup.isVertical) return@run this
+
+                                    layout { measurable, constraints ->
+                                        val factor = if (!this@CardLazyGroup.reverse) 1f else -1f
+                                        val degrees = when (layoutDirection) {
+                                            LayoutDirection.Ltr -> -90f * factor
+                                            LayoutDirection.Rtl -> 90f * factor
+                                        }
+
+                                        val placeable = measurable.measure(
+                                            Constraints(
+                                                minWidth = constraints.minHeight,
+                                                maxWidth = constraints.maxHeight,
+                                                minHeight = constraints.minWidth,
+                                                maxHeight = constraints.maxWidth,
+                                            )
+                                        )
+
+                                        val width = placeable.width
+                                        val height = placeable.height
+
+                                        val layoutWidth = height
+                                        val layoutHeight = width
+
+                                        layout(layoutWidth, layoutHeight) {
+                                            val x = if (degrees == 90f) height else 0
+                                            val y = if (degrees == -90f) width else 0
+                                            placeable.placeWithLayer(x, y) {
+                                                rotationZ = degrees
+                                                transformOrigin = TransformOrigin(0f, 0f)
+                                            }
+                                        }
+                                    }
+                                }
+                        ) { text() }
+                        Spacer(Modifier.size(12.dp))
                     }
+                }
+
+                if (this@CardLazyGroup.isVertical) {
+                    Column(modifier) { content() }
+                } else {
+                    Row(modifier) { content() }
                 }
             },
         )
