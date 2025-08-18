@@ -42,6 +42,7 @@
     <!-- Descriptions -->
     <string name="description_changes_application">所有更改将即时生效</string>
     <string name="description_more_info">点击查看更多信息</string>
+    <string name="description_more_info_collapse">点击收起</string>
 
     <!-- Test results -->
     <string name="test_result_on">该项测试结果：开启</string>
