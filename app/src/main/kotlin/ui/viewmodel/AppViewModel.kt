@@ -1,7 +1,6 @@
 package top.ltfan.notdeveloper.ui.viewmodel
 
 import android.content.Context
-import android.content.pm.PackageInfo
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
@@ -17,7 +16,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.application.NotDevApplication
+import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
+import top.ltfan.notdeveloper.data.wrapped
 import top.ltfan.notdeveloper.datastore.AppListSettings
 import top.ltfan.notdeveloper.datastore.model.AppDataStore
 import top.ltfan.notdeveloper.detection.DetectionCategory
@@ -52,9 +53,10 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
     var service: SystemServiceClient? by mutableStateOf(null)
 
-    val myPackageInfo = application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0)!!
+    val myPackageInfo =
+        application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0).wrapped()
 
-    val packageInfoConfiguringTransitionState = SeekableTransitionState<PackageInfo?>(null)
+    val packageInfoConfiguringTransitionState = SeekableTransitionState<PackageInfoWrapper?>(null)
     val currentConfiguringPackageInfo inline get() = packageInfoConfiguringTransitionState.targetState
 
     private var _users by mutableStateOf(queryUsers())
@@ -78,7 +80,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         set = { settings, filters -> settings.copy(filtered = filters) },
     )
 
-    private var _appList by mutableStateOf(setOf<PackageInfo>())
+    private var _appList by mutableStateOf(setOf<PackageInfoWrapper>())
     val appList get() = _appList
     private var _currentDatabaseListState by mutableStateOf(
         queryDatabaseList().collectAsState(emptySet())
@@ -154,7 +156,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     }
 
     fun queryUsers() = service?.queryUsers() ?: listOf(
-        UserInfo.current.copy(id = myPackageInfo.getUserId())
+        UserInfo.current.copy(id = myPackageInfo.info.getUserId())
     )
 
     fun updateUsers() {
@@ -163,12 +165,12 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         selectedUser = users.first()
     }
 
-    fun queryAppList(userInfo: UserInfo = selectedUser): Pair<Set<PackageInfo>, Boolean> {
+    fun queryAppList(userInfo: UserInfo = selectedUser): Pair<Set<PackageInfoWrapper>, Boolean> {
         val list = service?.queryApps(userInfo.id)?.ifEmpty { null }?.toSet()
         return (list ?: setOf(myPackageInfo)) to (list == null)
     }
 
-    fun updateAppList(list: Set<PackageInfo>, userInfo: UserInfo = selectedUser) {
+    fun updateAppList(list: Set<PackageInfoWrapper>, userInfo: UserInfo = selectedUser) {
         _appList = list
         _currentDatabaseListState = queryDatabaseList(userInfo).collectAsState(databaseList)
     }
