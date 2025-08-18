@@ -10,6 +10,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
@@ -74,7 +75,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -93,8 +96,10 @@ import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppSort
+import top.ltfan.notdeveloper.ui.composable.AnimatedContentWithBlur
 import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
+import top.ltfan.notdeveloper.ui.composable.EnterExitPredefinedDirection
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyListScope
 import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
@@ -109,6 +114,7 @@ import top.ltfan.notdeveloper.ui.util.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
+import top.ltfan.notdeveloper.ui.util.keepSizeWhenLookingAhead
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
@@ -436,29 +442,31 @@ object Apps : Main() {
     @Composable
     context(viewModel: AppViewModel)
     fun FilterBottomSheet() {
+        if (!showFilterBottomSheet) return
         with(viewModel) {
-            if (showFilterBottomSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = { showFilterBottomSheet = false },
-                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-                ) {
-                    Text(
-                        text = stringResource(R.string.title_apps_bottom_sheet_filter),
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineMedium,
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    Text(
-                        text = stringResource(R.string.label_apps_bottom_sheet_filter_sort),
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Spacer(Modifier.height(8.dp))
+            ModalBottomSheet(
+                onDismissRequest = { showFilterBottomSheet = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            ) {
+                Text(
+                    text = stringResource(R.string.title_apps_bottom_sheet_filter),
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+                Spacer(Modifier.height(24.dp))
+                Text(
+                    text = stringResource(R.string.label_apps_bottom_sheet_filter_sort),
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Spacer(Modifier.height(8.dp))
+                LookaheadScope {
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 16.dp)
+                            .animateBounds(this),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         AppSort.entries.forEach {
@@ -466,28 +474,26 @@ object Apps : Main() {
                             FilterChip(
                                 selected = selected,
                                 onClick = { appSortMethod = it },
-                                label = { Text(stringResource(it.labelRes)) },
-                                leadingIcon = {
-                                    AnimatedVisibility(selected) {
-                                        Icon(Icons.Default.Check, contentDescription = null)
-                                    }
-                                },
+                                text = it.labelRes,
                             )
                         }
                     }
-                    Spacer(Modifier.height(8.dp))
-                    HorizontalDivider(Modifier.padding(horizontal = 8.dp))
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.label_apps_bottom_sheet_filter),
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Spacer(Modifier.height(8.dp))
+                }
+                Spacer(Modifier.height(8.dp))
+                HorizontalDivider(Modifier.padding(horizontal = 8.dp))
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.label_apps_bottom_sheet_filter),
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Spacer(Modifier.height(8.dp))
+                LookaheadScope {
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 16.dp)
+                            .animateBounds(this),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         val allSelected = appFilteredMethods.isEmpty()
@@ -500,15 +506,8 @@ object Apps : Main() {
                                     emptySet()
                                 }
                             },
-                            label = { Text(stringResource(AppFilter.All.labelRes)) },
-                            leadingIcon = {
-                                AnimatedContent(allSelected) { allSelected ->
-                                    Icon(
-                                        imageVector = if (allSelected) Icons.Default.Check else Icons.Default.Remove,
-                                        contentDescription = null,
-                                    )
-                                }
-                            },
+                            text = AppFilter.All.labelRes,
+                            leadingPlaceholderIcon = Icons.Default.Remove,
                         )
                         AppFilter.toggleableEntries.forEach {
                             val selected = !appFilteredMethods.contains(it)
@@ -521,21 +520,57 @@ object Apps : Main() {
                                         appFilteredMethods += it
                                     }
                                 },
-                                label = { Text(stringResource(it.labelRes)) },
-                                leadingIcon = {
-                                    AnimatedContent(selected) { selected ->
-                                        Icon(
-                                            imageVector = if (selected) Icons.Default.Check else Icons.Default.Remove,
-                                            contentDescription = null,
-                                        )
-                                    }
-                                },
+                                text = it.labelRes,
+                                modifier = Modifier.animateBounds(this@LookaheadScope),
+                                leadingPlaceholderIcon = Icons.Default.Remove,
                             )
                         }
                     }
-                    Spacer(Modifier.height(64.dp))
                 }
+                Spacer(Modifier.height(64.dp))
             }
+        }
+    }
+
+    @Composable
+    fun FilterChip(
+        selected: Boolean,
+        onClick: () -> Unit,
+        @StringRes text: Int,
+        modifier: Modifier = Modifier,
+        leadingPlaceholderIcon: ImageVector? = null,
+        trailing: @Composable (() -> Unit)? = null,
+    ) {
+        Box(modifier) {
+            FilterChip(
+                selected = selected,
+                onClick = onClick,
+                label = {
+                    Text(
+                        text = stringResource(text),
+                        modifier = Modifier.keepSizeWhenLookingAhead(),
+                    )
+                },
+                leadingIcon = {
+                    if (leadingPlaceholderIcon != null) {
+                        AnimatedContentWithBlur(selected) { selected ->
+                            if (selected) {
+                                Icon(Icons.Default.Check, contentDescription = null)
+                            } else {
+                                Icon(leadingPlaceholderIcon, contentDescription = null)
+                            }
+                        }
+                    } else {
+                        AnimatedVisibilityWithBlur(
+                            visible = selected,
+                            direction = EnterExitPredefinedDirection.Horizontal,
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = null)
+                        }
+                    }
+                },
+                trailingIcon = trailing,
+            )
         }
     }
 
