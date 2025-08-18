@@ -50,6 +50,8 @@
 
     <!-- Overview -->
     <string name="label_nav_overview">Overview</string>
+    <string name="toggle_overview_use_global_preferences">Use global preferences</string>
+    <string name="description_overview_use_global_preferences">If enabled, the module will use global preferences for all apps. If disabled, each app can have its own preferences.</string>
 
     <!-- Apps -->
     <string name="label_nav_apps">Apps</string>

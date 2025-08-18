@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -19,10 +21,13 @@ import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
+import top.ltfan.notdeveloper.ui.composable.PreferenceItem
 import top.ltfan.notdeveloper.ui.composable.StatusCard
+import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.composable.categoryCards
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.LargeTopAppBarColorsTransparent
+import top.ltfan.notdeveloper.ui.util.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
 import top.ltfan.notdeveloper.ui.util.only
@@ -72,6 +77,32 @@ object Overview : Main() {
                         isPreferencesReady = isPreferencesReady,
                         isServiceConnected = service != null,
                     )
+                }
+
+                card(
+                    colors = {
+                        CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        )
+                    },
+                    elevation = { CardDefaults.elevatedCardElevation() },
+                ) {
+                    item(
+                        key = "global-preferences",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    ) {
+                        PreferenceItem(
+                            value = useGlobalPreferences,
+                            onValueChange = { useGlobalPreferences = it },
+                            headlineContent = {
+                                Text(stringResource(R.string.toggle_overview_use_global_preferences))
+                            },
+                            supportingContent = {
+                                Text(stringResource(R.string.description_overview_use_global_preferences))
+                            },
+                            colors = ListItemColorsTransparent,
+                        )
+                    }
                 }
 
                 categoryCards(
