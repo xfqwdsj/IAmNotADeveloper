@@ -125,45 +125,21 @@ object Apps : Main() {
     @Composable
     context(viewModel: AppViewModel)
     fun rememberAppLists() = with(viewModel) {
-        val filters = remember(appFilteredMethods) {
-            appFilteredMethods.subtract(AppFilter.groupingEntries)
-        }
-
-        val originalConfiguredList =
-            remember(databaseList, AppFilter.Configured !in appFilteredMethods) {
-                if (AppFilter.Configured !in appFilteredMethods) databaseList.asSequence() else emptySequence()
-            }
-
-        val filteredConfiguredList = remember(originalConfiguredList, filters) {
-            originalConfiguredList.filtered(filters)
-        }
-
-        val sortedConfiguredList = remember(filteredConfiguredList, appSortMethod) {
-            filteredConfiguredList.sorted(appSortMethod)
-        }
-
-        val originalUnconfiguredPreList =
-            remember(appList, AppFilter.Unconfigured !in appFilteredMethods) {
-                if (AppFilter.Unconfigured !in appFilteredMethods) appList.asSequence() else emptySequence()
-            }
-
         val databaseKeys = remember(databaseList) {
             databaseList.mapTo(HashSet()) { it.packageName to it.applicationInfo!!.uid }
         }
 
-        val originalUnconfiguredList = remember(originalUnconfiguredPreList, databaseKeys) {
-            originalUnconfiguredPreList.filterNot { it.packageName to it.applicationInfo!!.uid in databaseKeys }
+        remember(appList, databaseList, appSortMethod, appFilteredMethods) {
+            val filters = appFilteredMethods.subtract(AppFilter.groupingEntries)
+            (if (AppFilter.Configured !in appFilteredMethods) {
+                databaseList.asSequence().processed(appSortMethod, filters)
+            } else emptyList()) to (if (AppFilter.Unconfigured !in appFilteredMethods) {
+                appList.asSequence().filterNot {
+                    val key = it.packageName to it.applicationInfo!!.uid
+                    databaseKeys.contains(key)
+                }.processed(appSortMethod, filters)
+            } else emptyList())
         }
-
-        val filteredUnconfiguredList = remember(originalUnconfiguredList, filters) {
-            originalUnconfiguredList.filtered(filters)
-        }
-
-        val sortedUnconfiguredList = remember(filteredUnconfiguredList, appSortMethod) {
-            filteredUnconfiguredList.sorted(appSortMethod)
-        }
-
-        sortedConfiguredList to sortedUnconfiguredList
     }
 
     var showUserFilter by mutableStateOf(false)
@@ -760,4 +736,8 @@ object Apps : Main() {
     fun Collection<PackageInfo>.sorted(sort: AppSort) = with(sort) {
         sorted()
     }
+
+    context(viewModel: AppViewModel)
+    fun Sequence<PackageInfo>.processed(sort: AppSort, filters: Set<AppFilter>) =
+        filtered(filters).sorted(sort)
 }
