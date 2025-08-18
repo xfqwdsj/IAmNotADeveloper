@@ -20,6 +20,7 @@ import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.data.wrapped
 import top.ltfan.notdeveloper.datastore.AppListSettings
+import top.ltfan.notdeveloper.datastore.GlobalPreferences
 import top.ltfan.notdeveloper.datastore.model.AppDataStore
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
@@ -36,6 +37,7 @@ import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
     val settingsStore = AppListSettings.createDataStore()
+    val globalPreferencesStore = GlobalPreferences.createDataStore()
 
     val hazeState = HazeState()
 
@@ -48,6 +50,13 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     val backStack = mutableStateListOf<Page>(Overview)
     val currentPage inline get() = backStack.last()
     val navBarEntry inline get() = backStack.last { it is Main }
+
+    var useGlobalPreferences by globalPreferencesStore.propertyAsState(
+        get = { it.useGlobalPreferences },
+        set = { settings, useGlobalPreferences ->
+            settings.copy(useGlobalPreferences = useGlobalPreferences)
+        },
+    )
 
     var isPreferencesReady by mutableStateOf(false)
     val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
