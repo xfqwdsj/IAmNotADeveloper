@@ -157,9 +157,8 @@ fun AppViewModel.AppConfiguration() {
                 LaunchedEffect(Unit) {
                     withContext(Dispatchers.IO) {
                         val packageName = packageInfo.packageName
-                        val uid = packageInfo.applicationInfo!!.uid
-                        val userId = getUserId(uid)
-                        val appId = getAppId(uid)
+                        val userId = packageInfo.getUserId()
+                        val appId = packageInfo.getAppId()
                         dao.initializePackage(packageName, userId, appId)
                     }
                 }
