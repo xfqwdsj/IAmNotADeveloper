@@ -19,7 +19,7 @@ data class AppListSettings(
     val filtered: Set<AppFilter> = emptySet(),
 ) : Parcelable {
     companion object : DataStoreCompanion<AppListSettings> {
-        override val fileName = "app_list_settings.pb"
+        override val fileName = "app_list_settings"
 
         override val default = AppListSettings(
             selectedUser = UserInfo.current,
