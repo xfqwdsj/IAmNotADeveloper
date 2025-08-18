@@ -14,7 +14,9 @@ import com.github.kr328.kaidl.BinderInterface
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import top.ltfan.notdeveloper.BuildConfig
+import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
+import top.ltfan.notdeveloper.data.wrapped
 import top.ltfan.notdeveloper.database.ParcelablePackageInfo
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -31,8 +33,8 @@ const val BundleExtraType = "type"
 @BinderInterface
 interface SystemServiceInterface {
     fun queryUsers(userIds: List<Int> = emptyList()): List<UserInfo>
-    fun queryAppsByUserId(userIds: List<Int> = emptyList()): List<PackageInfo>
-    fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfo>
+    fun queryAppsByUserId(userIds: List<Int> = emptyList()): List<PackageInfoWrapper>
+    fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfoWrapper>
     fun notifySettingChange(name: String, type: Int)
 }
 
@@ -68,7 +70,7 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
         }
     }
 
-    override fun queryAppsByUserId(userIds: List<Int>): List<PackageInfo> {
+    override fun queryAppsByUserId(userIds: List<Int>): List<PackageInfoWrapper> {
         val identity =
             "${SystemService::class.qualifiedName}.${::queryAppsByUserId.name}(${userIds.joinToString()})"
         val application = AndroidAppHelper.currentApplication()
@@ -100,7 +102,7 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
 
         val requestedIds = userIds.ifEmpty { queryUsers().map { it.id } }
 
-        return requestedIds.flatMap {
+        return requestedIds.asSequence().flatMap {
             val slice = XposedHelpers.callMethod(
                 packageManager, "getInstalledPackages",
                 0, it,
@@ -113,10 +115,10 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
                 Log.w("Application info for package ${it.packageName} is null, skipping")
             }
             result
-        }
+        }.map { it.wrapped() }.toList()
     }
 
-    override fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfo> {
+    override fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfoWrapper> {
         val identity =
             "${SystemService::class.qualifiedName}.${::queryAppsByInfo.name}(${databaseList.joinToString()})"
         val application = AndroidAppHelper.currentApplication()
@@ -168,7 +170,7 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
                     return@forEach
                 }
 
-                add(info)
+                add(info.wrapped())
             }
         }
     }

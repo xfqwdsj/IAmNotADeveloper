@@ -1,6 +1,5 @@
 package top.ltfan.notdeveloper.ui.page
 
-import android.content.pm.PackageInfo
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -53,8 +52,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.database.PackageSettingsDao
+import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -69,7 +70,7 @@ val AppConfigurationContainerRadius = 24.dp
 @Composable
 context(
     page: Page,
-    transition: Transition<PackageInfo?>,
+    transition: Transition<PackageInfoWrapper?>,
     sharedTransitionScope: SharedTransitionScope,
 )
 fun AppViewModel.AppConfiguration() {
@@ -91,6 +92,11 @@ fun AppViewModel.AppConfiguration() {
             transitionSpec = { fadeIn() togetherWith fadeOut() using null },
         ) { packageInfo ->
             if (packageInfo != null) {
+                val info = packageInfo.info
+                val packageName = info.packageName
+                val userId = info.getUserId()
+                val appId = info.getAppId()
+
                 context(dao) {
                     Box(
                         modifier = Modifier
@@ -157,9 +163,6 @@ fun AppViewModel.AppConfiguration() {
                 LaunchedEffect(Unit) {
                     appFilteredMethods -= AppFilter.Configured
                     withContext(Dispatchers.IO) {
-                        val packageName = packageInfo.packageName
-                        val userId = packageInfo.getUserId()
-                        val appId = packageInfo.getAppId()
                         dao.initializePackage(packageName, userId, appId)
                     }
                 }
@@ -184,7 +187,7 @@ fun AppViewModel.AppConfiguration() {
 
 @Composable
 context(viewModel: AppViewModel, dao: PackageSettingsDao)
-private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
+private fun Header(packageInfo: PackageInfoWrapper, userInfo: UserInfo) {
     val coroutineScope = rememberCoroutineScope()
 
     fun close() {
@@ -211,7 +214,7 @@ private fun Header(packageInfo: PackageInfo, userInfo: UserInfo) {
                 imageVector = Icons.Default.ClearAll,
                 contentDescription = R.string.action_apps_modal_configuration_clear,
             ) {
-                val packageName = packageInfo.packageName
+                val packageName = packageInfo.info.packageName
                 val userId = userInfo.id
                 viewModel.viewModelScope.launch(Dispatchers.IO) {
                     dao.deletePackageInfo(packageName, userId)
