@@ -31,6 +31,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.focused
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
@@ -46,26 +50,64 @@ fun StatusCard(
 
     var expanded by remember { mutableStateOf(false) }
 
+    val collapseText = stringResource(R.string.description_more_info_collapse)
+
     ElevatedCard(
         onClick = { expanded = !expanded },
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics {
+                if (expanded) {
+                    contentDescription = collapseText
+                }
+            },
         colors = CardDefaults.cardColors(containerColor = status.containerColor),
     ) {
         Row(
             Modifier
-                .padding(24.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Spacer(Modifier.width(24.dp))
             Icon(status.icon, contentDescription = null, modifier = Modifier.size(32.dp))
-            Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(status.summary, style = MaterialTheme.typography.headlineSmall)
-                AnimatedVisibility(visible = isPreferencesReady) {
-                    Text(stringResource(R.string.description_changes_application))
+                Text(
+                    text = status.summary,
+                    modifier = Modifier
+                        .padding(start = 16.dp, end = 24.dp)
+                        .run {
+                            if (expanded) {
+                                clearAndSetSemantics {}
+                            } else this
+                        },
+                    style = MaterialTheme.typography.headlineSmall,
+                )
+                AnimatedVisibilityWithBlur(visible = isPreferencesReady) {
+                    Text(
+                        text = stringResource(R.string.description_changes_application),
+                        modifier = Modifier
+                            .padding(start = 16.dp, end = 24.dp)
+                            .run {
+                                if (expanded) {
+                                    clearAndSetSemantics {}
+                                } else this
+                            },
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
-                AnimatedVisibility(visible = status != Status.Normal) {
-                    Text(stringResource(R.string.description_more_info))
+                AnimatedVisibilityWithBlur(visible = status != Status.Normal) {
+                    Text(
+                        text = stringResource(R.string.description_more_info),
+                        modifier = Modifier
+                            .padding(start = 16.dp, end = 24.dp)
+                            .run {
+                                if (expanded) {
+                                    clearAndSetSemantics {}
+                                } else this
+                            },
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
 
                 DynamicSpacer(status != Status.Normal || expanded)
@@ -116,27 +158,38 @@ private fun ColumnScope.StatusEntry(
     @StringRes notWorkingText: Int,
     @StringRes descriptionText: Int,
 ) {
-    AnimatedVisibility(
-        visible = expanded,
-        enter = expandVertically(expandFrom = Alignment.CenterVertically),
-        exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
-    ) {
-        Spacer(Modifier.height(8.dp))
-    }
-
-    AnimatedVisibility(visible = expanded && working) {
-        Text(stringResource(workingText))
-    }
-    AnimatedVisibility(visible = !working) {
+    AnimatedVisibilityWithBlur(visible = expanded && working) {
         Text(
-            stringResource(notWorkingText),
-            color = MaterialTheme.colorScheme.error
+            text = stringResource(workingText),
+            modifier = Modifier
+                .padding(start = 16.dp, end = 24.dp)
+                .semantics {
+                    focused = true
+                },
+            style = MaterialTheme.typography.titleMedium,
         )
     }
-    AnimatedVisibility(visible = expanded) {
+    AnimatedVisibilityWithBlur(visible = !working) {
         Text(
-            stringResource(descriptionText),
-            style = MaterialTheme.typography.labelSmall
+            text = stringResource(notWorkingText),
+            modifier = Modifier
+                .padding(start = 16.dp, end = 24.dp)
+                .semantics {
+                    focused = true
+                },
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+    AnimatedVisibilityWithBlur(visible = expanded) {
+        Text(
+            text = stringResource(descriptionText),
+            modifier = Modifier
+                .padding(start = 16.dp, end = 24.dp)
+                .semantics {
+                    focused = true
+                },
+            style = MaterialTheme.typography.bodySmall,
         )
     }
 }

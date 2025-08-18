@@ -42,6 +42,7 @@
     <!-- Descriptions -->
     <string name="description_changes_application">All changes will take effect immediately</string>
     <string name="description_more_info">Click to view more information</string>
+    <string name="description_more_info_collapse">Click to collapse</string>
 
     <!-- Test results -->
     <string name="test_result_on">Test result of this item: On</string>
