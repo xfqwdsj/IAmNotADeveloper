@@ -195,7 +195,7 @@ object Apps : Main() {
                     }
                 }
 
-                NoAppsBackground()
+                NoAppsBackground(contentPadding)
                 FilterBottomSheet()
             }
 
@@ -390,8 +390,8 @@ object Apps : Main() {
     }
 
     @Composable
-    context(viewModel: AppViewModel, contentPadding: PaddingValues)
-    fun NoAppsBackground() {
+    context(viewModel: AppViewModel)
+    fun NoAppsBackground(contentPadding: PaddingValues) {
         with(viewModel) {
             val (configuredList, unconfiguredList) = rememberAppLists()
 
