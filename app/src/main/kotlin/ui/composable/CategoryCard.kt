@@ -57,11 +57,11 @@ fun CardLazyGroup.categoryCard(
 
         val testResult = testResults[method] ?: false
 
-        PreferenceItem(
+        DetectionItem(
             nameId = method.labelResId,
             testResult = testResult,
             checked = pref,
-            onValueChange = { pref = it },
+            onCheckedChange = { pref = it },
             enabled = isPreferencesReady
         )
     }
