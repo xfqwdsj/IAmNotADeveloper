@@ -426,7 +426,7 @@ class CardLazyGroup(
                 }
 
             itemFunction(key, contentType) {
-                val shape = when (index) {
+                val shape = if (items.size == 1) scope.shape() else when (index) {
                     0 -> scope.getShape(false)
                     items.lastIndex -> scope.getShape(true)
                     else -> RectangleShape
