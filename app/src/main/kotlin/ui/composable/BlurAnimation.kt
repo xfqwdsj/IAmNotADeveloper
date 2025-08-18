@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -34,10 +35,13 @@ import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 
 @Composable
 fun AnimatedVisibilityScope.BlurEnterExit(
-    modifier: Modifier = Modifier, maxRadius: Dp = 8.dp, content: @Composable BoxScope.() -> Unit
+    modifier: Modifier = Modifier,
+    maxRadius: Dp = 8.dp,
+    edgeTreatment: BlurredEdgeTreatment = BlurredEdgeTreatment.Unbounded,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     val blurRadius by transition.animateDp { if (it != EnterExitState.Visible) maxRadius else 0.dp }
-    Box(modifier.blur(blurRadius), content = content)
+    Box(modifier.blur(blurRadius, edgeTreatment), content = content)
 }
 
 @Composable
