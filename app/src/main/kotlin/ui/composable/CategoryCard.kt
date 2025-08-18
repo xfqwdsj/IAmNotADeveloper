@@ -1,10 +1,8 @@
 package top.ltfan.notdeveloper.ui.composable
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.ui.util.CardColorsLowest
@@ -63,7 +61,7 @@ fun CardLazyGroup.categoryCard(
             nameId = method.labelResId,
             testResult = testResult,
             checked = pref,
-            onClick = { pref = !pref },
+            onValueChange = { pref = it },
             enabled = isPreferencesReady
         )
     }
