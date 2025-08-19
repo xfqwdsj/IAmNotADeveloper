@@ -1,9 +1,11 @@
 package top.ltfan.notdeveloper.ui.page
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -31,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -58,13 +61,13 @@ import top.ltfan.notdeveloper.database.PackageSettingsDao
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
+import top.ltfan.notdeveloper.ui.theme.AppRadiusModal
+import top.ltfan.notdeveloper.ui.theme.AppRadiusNormal
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.getAppId
 import top.ltfan.notdeveloper.util.getUserId
-
-val AppConfigurationContainerRadius = 24.dp
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -117,6 +120,9 @@ fun AppViewModel.AppConfiguration() {
                                 }
                         )
                         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                            val radius by this@AnimatedContent.transition.animateDp(label = "AppConfigurationModalRadius") {
+                                if (it == EnterExitState.Visible) AppRadiusModal else AppRadiusNormal
+                            }
                             Column(
                                 modifier = Modifier
                                     .padding(AppWindowInsets.asPaddingValues())
@@ -130,7 +136,7 @@ fun AppViewModel.AppConfiguration() {
                                         animatedVisibilityScope = this@AnimatedContent,
                                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
-                                    .clip(RoundedCornerShape(AppConfigurationContainerRadius))
+                                    .clip(RoundedCornerShape(radius))
                                     .contentOverlayHaze()
                                     .verticalScroll(rememberScrollState())
                                     .semantics {
@@ -155,6 +161,7 @@ fun AppViewModel.AppConfiguration() {
                 }
 
                 LaunchedEffect(Unit) {
+                    // TODO: 细化
                     appFilteredMethods -= AppFilter.Configured
                     withContext(Dispatchers.IO) {
                         dao.initializePackage(packageName, userId, appId)
