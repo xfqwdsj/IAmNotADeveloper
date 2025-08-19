@@ -41,6 +41,7 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.ui.theme.AppCardShape
 import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
 
 @Composable
@@ -66,6 +67,7 @@ fun StatusCard(
                     contentDescription = collapseText
                 }
             },
+        shape = AppCardShape,
         colors = CardDefaults.cardColors(containerColor = status.containerColor),
     ) {
         Row(
