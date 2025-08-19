@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -63,9 +62,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -140,22 +141,8 @@ object Apps : Main() {
 
     val lazyListState = LazyListState()
 
-    @Composable
-    context(viewModel: AppViewModel)
-    fun rememberAppLists() = with(viewModel) {
-        remember(appList, databaseList, appSortMethod, appFilteredMethods) {
-            val filters = appFilteredMethods.subtract(AppFilter.groupingEntries)
-            (if (AppFilter.Configured !in appFilteredMethods) {
-                databaseList.asSequence().processed(appSortMethod, filters)
-            } else emptyList()) to (if (AppFilter.Unconfigured !in appFilteredMethods) {
-                appList.subtract(databaseList).asSequence().processed(appSortMethod, filters)
-            } else emptyList())
-        }
-    }
-
     var showUserFilter by mutableStateOf(false)
 
-    var isAppListError by mutableStateOf(false)
     var showAppListErrorInfoDialog by mutableStateOf(false)
 
     var showFilterBottomSheet by mutableStateOf(false)
@@ -191,25 +178,30 @@ object Apps : Main() {
                     bottom += 16.dp
                 }
 
-                val (configuredList, unconfiguredList) = rememberAppLists()
+                val (configuredList, unconfiguredList) = collectAppLists()
 
-                GroupedLazyColumn(
-                    modifier = Modifier
-                        .contentHazeSource()
-                        .fillMaxSize(),
-                    state = lazyListState,
-                    contentPadding = contentPadding,
+                PullToRefreshBox(
+                    isRefreshing = isAppListUpdating,
+                    onRefresh = ::updateAppList,
                 ) {
-                    context(transition) {
-                        appListCard(
-                            list = configuredList,
-                            header = R.string.label_apps_list_header_configured,
-                        )
+                    GroupedLazyColumn(
+                        modifier = Modifier
+                            .contentHazeSource()
+                            .fillMaxSize(),
+                        state = lazyListState,
+                        contentPadding = contentPadding,
+                    ) {
+                        context(transition) {
+                            appListCard(
+                                list = configuredList,
+                                header = R.string.label_apps_list_header_configured,
+                            )
 
-                        appListCard(
-                            list = unconfiguredList,
-                            header = R.string.label_apps_list_header_unconfigured,
-                        )
+                            appListCard(
+                                list = unconfiguredList,
+                                header = R.string.label_apps_list_header_unconfigured,
+                            )
+                        }
                     }
                 }
 
@@ -220,23 +212,20 @@ object Apps : Main() {
             context(transition) { AppConfiguration() }
         }
 
-        LaunchedEffect(Unit) {
-            updateAppList(queryAppList().also {
-                isAppListError = it.second
-            }.first)
-        }
+        val event by appListErrorSnackbarTrigger.collectAsState(null)
 
-        LaunchedEffect(isAppListError) {
-            if (isAppListError) {
+        LaunchedEffect(event) {
+            if (event != null) {
                 snackbarHostState.showSnackbar(snackbarMessage)
+                appListErrorSnackbarTrigger.emit(null)
             }
         }
     }
 
     @Composable
     context(viewModel: AppViewModel)
-    fun RowScope.AppBarActions() {
-        if (isAppListError) {
+    fun AppBarActions() {
+        if (viewModel.isAppListError) {
             IconButtonWithTooltip(
                 imageVector = Icons.Default.Warning,
                 contentDescription = R.string.action_apps_query_details_show,
@@ -452,7 +441,7 @@ object Apps : Main() {
     context(viewModel: AppViewModel)
     fun NoAppsBackground(contentPadding: PaddingValues) {
         with(viewModel) {
-            val (configuredList, unconfiguredList) = rememberAppLists()
+            val (configuredList, unconfiguredList) = collectAppLists()
 
             AnimatedContent(
                 targetState = AppListState(
