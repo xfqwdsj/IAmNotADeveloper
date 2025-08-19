@@ -16,16 +16,11 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 data class AppListSettings(
     val selectedUser: UserInfo = UserInfo.current,
     val sort: AppSort = AppSort.Label,
-    val filtered: Set<AppFilter> = emptySet(),
+    val filtered: Set<AppFilter> = setOf(AppFilter.System),
 ) : Parcelable {
     companion object : DataStoreCompanion<AppListSettings> {
         override val fileName = "app_list_settings"
-
-        override val default = AppListSettings(
-            selectedUser = UserInfo.current,
-            sort = AppSort.Label,
-            filtered = emptySet(),
-        )
+        override val default = AppListSettings()
     }
 }
 
