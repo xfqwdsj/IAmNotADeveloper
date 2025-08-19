@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigationevent.compose.NavigationEventHandler
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -77,12 +78,6 @@ fun AppViewModel.AppConfiguration() {
 
     val dao = remember(application.database) { application.database.dao() }
 
-    fun close() {
-        coroutineScope.launch {
-            packageInfoConfiguringTransitionState.animateTo(null)
-        }
-    }
-
     val scrim = MaterialTheme.colorScheme.scrim.copy(.2f)
     val title = stringResource(R.string.title_apps_modal_configuration)
     val closeDescription = stringResource(R.string.action_apps_modal_configuration_close)
@@ -109,14 +104,14 @@ fun AppViewModel.AppConfiguration() {
                                 .matchParentSize()
                                 .pointerInput(Unit) {
                                     detectTapGestures {
-                                        close()
+                                        coroutineScope.closeModal()
                                     }
                                 }
                                 .semantics(mergeDescendants = true) {
                                     traversalIndex = 1f
                                     contentDescription = closeDescription
                                     onClick {
-                                        close()
+                                        coroutineScope.closeModal()
                                         true
                                     }
                                 }
@@ -189,12 +184,6 @@ context(viewModel: AppViewModel, dao: PackageSettingsDao)
 private fun Header(packageInfo: PackageInfoWrapper) {
     val coroutineScope = rememberCoroutineScope()
 
-    fun close() {
-        coroutineScope.launch {
-            viewModel.packageInfoConfiguringTransitionState.animateTo(null)
-        }
-    }
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -218,9 +207,16 @@ private fun Header(packageInfo: PackageInfoWrapper) {
                 viewModel.viewModelScope.launch(Dispatchers.IO) {
                     dao.deletePackageInfo(packageName, userId)
                 }
-                close()
+                coroutineScope.closeModal()
             }
         }
+    }
+}
+
+context(viewModel: AppViewModel)
+private fun CoroutineScope.closeModal() {
+    launch {
+        viewModel.packageInfoConfiguringTransitionState.animateTo(null)
     }
 }
 
