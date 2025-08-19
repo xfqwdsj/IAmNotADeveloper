@@ -7,10 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +16,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -116,17 +113,11 @@ class MainActivity : ComponentActivity() {
                     val contentPadding = PaddingValues(bottom = paddingBottom.toDp())
 
                     val snackbarHostPlaceable = subcompose("snackbarHost") {
-                        Box(contentAlignment = Alignment.Center) {
-                            // TODO: 横屏异常
-                            HazeSnackbarHost(
-                                hostState = snackbarHostState,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                HazeSnackbar(
-                                    snackbarData = it,
-                                    modifier = Modifier.hazeSource(zIndex = HazeZIndex.bottomBar),
-                                )
-                            }
+                        HazeSnackbarHost(snackbarHostState) {
+                            HazeSnackbar(
+                                snackbarData = it,
+                                modifier = Modifier.hazeSource(zIndex = HazeZIndex.bottomBar),
+                            )
                         }
                     }.first().measure(constraints)
 
