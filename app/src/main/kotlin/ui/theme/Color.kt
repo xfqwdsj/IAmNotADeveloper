@@ -1,4 +1,4 @@
-package top.ltfan.notdeveloper.ui.util
+package top.ltfan.notdeveloper.ui.theme
 
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api

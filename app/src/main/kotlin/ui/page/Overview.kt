@@ -25,9 +25,9 @@ import top.ltfan.notdeveloper.ui.composable.PreferenceItem
 import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.composable.categoryCards
+import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
+import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.LargeTopAppBarColorsTransparent
-import top.ltfan.notdeveloper.ui.util.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
 import top.ltfan.notdeveloper.ui.util.only

@@ -21,7 +21,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
-import top.ltfan.notdeveloper.ui.util.ListItemColorsTransparent
+import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Composable
