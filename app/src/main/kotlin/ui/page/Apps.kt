@@ -22,6 +22,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -40,7 +41,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
@@ -75,14 +75,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CollectionInfo
+import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.collectionInfo
+import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
@@ -309,11 +317,16 @@ object Apps : Main() {
         with(viewModel) {
             AnimatedVisibilityWithBlur(showUserFilter, modifier) {
                 FilterBarLayout(
-                    modifier = layoutModifier,
+                    modifier = layoutModifier.semantics {
+                        isTraversalGroup = true
+                    },
                     leading = {
                         Box(
                             modifier = Modifier
                                 .fillMaxHeight()
+                                .semantics(mergeDescendants = true) {
+                                    heading()
+                                }
                                 .padding(8.dp)
                                 .padding(horizontal = 8.dp),
                             contentAlignment = Alignment.Center,
@@ -351,6 +364,9 @@ object Apps : Main() {
                         }
                     },
                 ) { contentPadding ->
+                    val focusRequester = remember { FocusRequester() }
+                    var isFocused by remember { mutableStateOf(false) }
+
                     LazyRow(
                         modifier = Modifier
                             .horizontalAlphaMaskLinear(
@@ -368,16 +384,38 @@ object Apps : Main() {
                                     reverse = true,
                                 ),
                                 map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
-                            ),
+                            )
+                            .semantics {
+                                collectionInfo = CollectionInfo(
+                                    rowCount = -1,
+                                    columnCount = users.size,
+                                )
+                            },
                         contentPadding = contentPadding,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(users, { it }) {
-                            val selected = selectedUser == it
+                        items(users.size, { it }) { index ->
+                            val user = users[index]
+                            val selected = selectedUser == user
+
                             FilterChip(
                                 selected = selected,
-                                onClick = { selectedUser = it },
-                                label = { Text(it.name.getString()) },
+                                onClick = { selectedUser = user },
+                                label = { Text(user.name.getString()) },
+                                modifier = Modifier
+                                    .run {
+                                        if (index == 0) {
+                                            focusRequester(focusRequester).focusable()
+                                        } else this
+                                    }
+                                    .semantics {
+                                        collectionItemInfo = CollectionItemInfo(
+                                            rowIndex = 0,
+                                            rowSpan = 1,
+                                            columnIndex = index,
+                                            columnSpan = 1,
+                                        )
+                                    },
                                 leadingIcon = {
                                     AnimatedVisibility(
                                         visible = selected,
@@ -388,6 +426,15 @@ object Apps : Main() {
                                     }
                                 },
                             )
+
+                            if (!isFocused && index == 0) {
+                                LaunchedEffect(transition.currentState) {
+                                    if (transition.currentState == EnterExitState.Visible) {
+                                        focusRequester.requestFocus()
+                                        isFocused = true
+                                    }
+                                }
+                            }
                         }
                     }
                 }
