@@ -23,6 +23,11 @@
     <string name="status_normal">正常工作中</string>
     <string name="status_partial">部分功能可用</string>
     <string name="status_error">可能无法工作</string>
+    <plurals name="description_status_potential_issue">
+        <item quantity="other">需要注意。有些条目可能表示模块存在潜在问题。</item>
+    </plurals>
+    <string name="description_status_normal">正常</string>
+    <string name="description_status_abnormal">异常</string>
 
     <!-- Activation status -->
     <string name="status_entry_activation_y">模块已激活</string>
