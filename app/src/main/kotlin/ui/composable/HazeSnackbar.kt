@@ -18,11 +18,6 @@ package top.ltfan.notdeveloper.ui.composable
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -97,22 +92,26 @@ fun HazeSnackbarHost(
             currentSnackbarData.dismiss()
         }
     }
-    AnimatedContent(
-        targetState = currentSnackbarData,
-        modifier = modifier,
-        transitionSpec = { AnimatedContentDefaultTransform using null }
-    ) { currentSnackbarData ->
-        if (currentSnackbarData != null) {
-            Box(
-                Modifier.semantics {
-                    liveRegion = LiveRegionMode.Polite
-                    dismiss {
-                        currentSnackbarData.dismiss()
-                        true
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        AnimatedContent(
+            targetState = currentSnackbarData,
+            transitionSpec = { AnimatedContentDefaultTransform using null }
+        ) { currentSnackbarData ->
+            if (currentSnackbarData != null) {
+                Box(
+                    Modifier.semantics {
+                        liveRegion = LiveRegionMode.Polite
+                        dismiss {
+                            currentSnackbarData.dismiss()
+                            true
+                        }
                     }
+                ) {
+                    snackbar(currentSnackbarData)
                 }
-            ) {
-                snackbar(currentSnackbarData)
             }
         }
     }
