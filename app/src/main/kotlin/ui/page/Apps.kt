@@ -115,11 +115,11 @@ import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.composable.card
+import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
+import top.ltfan.notdeveloper.ui.theme.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.CardColorsLowest
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
-import top.ltfan.notdeveloper.ui.util.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
