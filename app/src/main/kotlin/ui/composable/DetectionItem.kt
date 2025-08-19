@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.ui.util.ListItemColorsTransparent
+import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
 
 @Composable
 fun DetectionItem(
