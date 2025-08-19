@@ -173,7 +173,7 @@ fun AppViewModel.AppConfiguration() {
                         it.collect { event ->
                             packageInfoConfiguringTransitionState.seekTo(event.progress, null)
                         }
-                    } catch (e: CancellationException) {
+                    } catch (_: CancellationException) {
                         packageInfoConfiguringTransitionState.animateTo(
                             packageInfoConfiguringTransitionState.currentState
                         )
