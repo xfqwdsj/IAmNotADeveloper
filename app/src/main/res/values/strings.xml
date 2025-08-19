@@ -59,6 +59,10 @@
     <string name="label_apps_empty_filter_show">Show filter</string>
     <string name="label_apps_list_header_configured">Configured Apps</string>
     <string name="label_apps_list_header_unconfigured">Unconfigured Apps</string>
+    <string name="description_apps_package_name">Package name</string>
+    <string name="description_apps_label">App name</string>
+    <string name="description_apps_version">Version name: %1$s; version code: %2$d</string>
+    <string name="text_apps_version">%1$s (%2$d)</string>
     <string name="action_apps_user_select_show">Show user selection</string>
     <string name="action_apps_user_select_hide">Hide user selection</string>
     <string name="label_apps_user_select">Select user</string>
