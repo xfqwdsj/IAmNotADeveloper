@@ -53,7 +53,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
-import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.database.PackageSettingsDao
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.ui.composable.AppListItem
@@ -144,7 +143,7 @@ fun AppViewModel.AppConfiguration() {
                                         traversalIndex = 0f
                                     },
                             ) {
-                                Header(packageInfo, selectedUser)
+                                Header(packageInfo)
                                 AppListItem(
                                     packageInfo = packageInfo,
                                     modifier = Modifier.sharedBounds(
@@ -187,7 +186,7 @@ fun AppViewModel.AppConfiguration() {
 
 @Composable
 context(viewModel: AppViewModel, dao: PackageSettingsDao)
-private fun Header(packageInfo: PackageInfoWrapper, userInfo: UserInfo) {
+private fun Header(packageInfo: PackageInfoWrapper) {
     val coroutineScope = rememberCoroutineScope()
 
     fun close() {
@@ -215,7 +214,7 @@ private fun Header(packageInfo: PackageInfoWrapper, userInfo: UserInfo) {
                 contentDescription = R.string.action_apps_modal_configuration_clear,
             ) {
                 val packageName = packageInfo.info.packageName
-                val userId = userInfo.id
+                val userId = packageInfo.info.getUserId()
                 viewModel.viewModelScope.launch(Dispatchers.IO) {
                     dao.deletePackageInfo(packageName, userId)
                 }
