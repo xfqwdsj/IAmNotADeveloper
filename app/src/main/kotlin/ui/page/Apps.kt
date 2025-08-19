@@ -43,6 +43,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Done
@@ -327,12 +328,14 @@ object Apps : Main() {
                                 .semantics(mergeDescendants = true) {
                                     heading()
                                 }
-                                .padding(8.dp)
-                                .padding(horizontal = 8.dp),
+                                .padding(8.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             PointerInjector()
-                            Text(stringResource(R.string.label_apps_user_select))
+                            IconButtonSizedIcon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = stringResource(R.string.label_apps_user_select),
+                            )
                         }
                     },
                     trailing = {
