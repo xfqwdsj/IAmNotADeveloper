@@ -115,6 +115,9 @@ import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.composable.card
+import top.ltfan.notdeveloper.ui.theme.AppCardShape
+import top.ltfan.notdeveloper.ui.theme.AppRadiusModal
+import top.ltfan.notdeveloper.ui.theme.AppRadiusNormal
 import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
 import top.ltfan.notdeveloper.ui.theme.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
@@ -684,8 +687,6 @@ object Apps : Main() {
         }
     }
 
-    val AppListContainerRadius = 12.dp
-
     @OptIn(ExperimentalSharedTransitionApi::class)
     context(
         viewModel: AppViewModel,
@@ -699,6 +700,7 @@ object Apps : Main() {
         if (list.isEmpty()) return
 
         card(
+            shape = { AppCardShape },
             colors = { CardColorsLowest },
         ) {
             header(
@@ -725,14 +727,8 @@ object Apps : Main() {
                 transition.AnimatedContent(
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                 ) { currentInfo ->
-                    val radius by this.transition.animateDp(
-                        label = "AppListItemRadius",
-                    ) {
-                        when (it) {
-                            EnterExitState.PreEnter -> AppConfigurationContainerRadius
-                            EnterExitState.Visible -> AppListContainerRadius
-                            EnterExitState.PostExit -> AppConfigurationContainerRadius
-                        }
+                    val radius by this.transition.animateDp(label = "AppListItemRadius") {
+                        if (it == EnterExitState.Visible) AppRadiusNormal else AppRadiusModal
                     }
 
                     if (currentInfo != info) {

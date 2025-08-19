@@ -25,6 +25,7 @@ import top.ltfan.notdeveloper.ui.composable.PreferenceItem
 import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.composable.categoryCards
+import top.ltfan.notdeveloper.ui.theme.AppCardShape
 import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -80,6 +81,7 @@ object Overview : Main() {
                 }
 
                 card(
+                    shape = { AppCardShape },
                     colors = {
                         CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
