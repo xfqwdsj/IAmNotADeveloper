@@ -59,6 +59,10 @@
     <string name="label_apps_empty_filter_show">显示筛选</string>
     <string name="label_apps_list_header_configured">已配置的应用</string>
     <string name="label_apps_list_header_unconfigured">未配置的应用</string>
+    <string name="description_apps_package_name">包名</string>
+    <string name="description_apps_label">应用名</string>
+    <string name="description_apps_version">版本名：%1$s；版本号：%2$d</string>
+    <string name="text_apps_version">%1$s（%2$d）</string>
     <string name="action_apps_user_select_show">显示用户选择</string>
     <string name="action_apps_user_select_hide">隐藏用户选择</string>
     <string name="label_apps_user_select">选择用户</string>
