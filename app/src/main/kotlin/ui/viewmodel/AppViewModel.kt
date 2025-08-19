@@ -306,7 +306,16 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         get: (T) -> R,
         set: (T, R) -> T,
     ): MutableStateFlow<R> {
-        val flow = MutableStateFlow(get(defaultValue))
+        val dataFlow = data.map { get(it) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, get(defaultValue))
+
+        val flow = MutableStateFlow(dataFlow.value)
+
+        viewModelScope.launch {
+            dataFlow.collect { value ->
+                flow.value = value
+            }
+        }
 
         viewModelScope.launch {
             flow.collect { value ->
