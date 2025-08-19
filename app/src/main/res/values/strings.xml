@@ -23,6 +23,12 @@
     <string name="status_normal">Working normally</string>
     <string name="status_partial">Partially working</string>
     <string name="status_error">May not work</string>
+    <plurals name="description_status_potential_issue">
+        <item quantity="one">Needs attention. There is an entry that may indicate a potential issue with the module.</item>
+        <item quantity="other">Needs attention. There are entries that may indicate potential issues with the module.</item>
+    </plurals>
+    <string name="description_status_normal">Normal</string>
+    <string name="description_status_abnormal">Abnormal</string>
 
     <!-- Activation status -->
     <string name="status_entry_activation_y">Module activated</string>

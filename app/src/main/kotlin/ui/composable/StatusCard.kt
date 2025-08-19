@@ -30,11 +30,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.focused
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
@@ -47,6 +51,7 @@ fun StatusCard(
     isServiceConnected: Boolean,
 ) {
     val status = Status.from(isModuleActivated, isPreferencesReady, isServiceConnected)
+    val statusList = listOf(isModuleActivated, isPreferencesReady, isServiceConnected)
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -85,10 +90,10 @@ fun StatusCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 16.dp, end = 24.dp)
-                            .run {
+                            .semantics {
                                 if (expanded) {
-                                    clearAndSetSemantics {}
-                                } else this
+                                    hideFromAccessibility()
+                                }
                             },
                         style = MaterialTheme.typography.labelLarge,
                     )
@@ -99,39 +104,48 @@ fun StatusCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 16.dp, end = 24.dp)
-                            .run {
+                            .semantics {
                                 if (expanded) {
-                                    clearAndSetSemantics {}
-                                } else this
+                                    hideFromAccessibility()
+                                }
                             },
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
 
-                DynamicSpacer(status != Status.Normal || expanded)
-                StatusEntry(
-                    expanded,
-                    working = isModuleActivated,
-                    workingText = R.string.status_entry_activation_y,
-                    notWorkingText = R.string.status_entry_activation_n,
-                    descriptionText = R.string.status_entry_activation_description,
-                )
-                DynamicSpacer(expanded)
-                StatusEntry(
-                    expanded,
-                    working = isServiceConnected,
-                    workingText = R.string.status_entry_service_y,
-                    notWorkingText = R.string.status_entry_service_n,
-                    descriptionText = R.string.status_entry_service_description,
-                )
-                DynamicSpacer(expanded)
-                StatusEntry(
-                    expanded,
-                    working = isPreferencesReady,
-                    workingText = R.string.status_entry_prefs_y,
-                    notWorkingText = R.string.status_entry_prefs_n,
-                    descriptionText = R.string.status_entry_prefs_description,
-                )
+                val issueCount = statusList.count { !it }
+                val description =
+                    pluralStringResource(R.plurals.description_status_potential_issue, issueCount)
+                Column(
+                    Modifier.semantics {
+                        text = AnnotatedString(description)
+                    }
+                ) {
+                    DynamicSpacer(status != Status.Normal || expanded)
+                    StatusEntry(
+                        expanded,
+                        working = isModuleActivated,
+                        workingText = R.string.status_entry_activation_y,
+                        notWorkingText = R.string.status_entry_activation_n,
+                        descriptionText = R.string.status_entry_activation_description,
+                    )
+                    DynamicSpacer(expanded)
+                    StatusEntry(
+                        expanded,
+                        working = isServiceConnected,
+                        workingText = R.string.status_entry_service_y,
+                        notWorkingText = R.string.status_entry_service_n,
+                        descriptionText = R.string.status_entry_service_description,
+                    )
+                    DynamicSpacer(expanded)
+                    StatusEntry(
+                        expanded,
+                        working = isPreferencesReady,
+                        workingText = R.string.status_entry_prefs_y,
+                        notWorkingText = R.string.status_entry_prefs_n,
+                        descriptionText = R.string.status_entry_prefs_description,
+                    )
+                }
             }
         }
     }
@@ -157,12 +171,14 @@ private fun ColumnScope.StatusEntry(
     @StringRes descriptionText: Int,
 ) {
     AnimatedVisibilityWithBlur(visible = expanded && working) {
+        val description = stringResource(R.string.description_status_normal)
         Text(
             text = stringResource(workingText),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 24.dp)
                 .semantics {
+                    stateDescription = description
                     if (expanded) {
                         focused = true
                     }
@@ -171,12 +187,14 @@ private fun ColumnScope.StatusEntry(
         )
     }
     AnimatedVisibilityWithBlur(visible = !working) {
+        val description = stringResource(R.string.description_status_abnormal)
         Text(
             text = stringResource(notWorkingText),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 24.dp)
                 .semantics {
+                    stateDescription = description
                     if (expanded) {
                         focused = true
                     }
