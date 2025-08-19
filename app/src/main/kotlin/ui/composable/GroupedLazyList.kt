@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
@@ -273,7 +274,9 @@ class CardLazyGroup(
                     Modifier.fillMaxWidth()
                 } else {
                     Modifier.fillMaxHeight()
-                }.semantics(mergeDescendants = true) {}
+                }.semantics(mergeDescendants = true) {
+                    heading()
+                }
 
                 val content = @Composable {
                     CompositionLocalProvider(
