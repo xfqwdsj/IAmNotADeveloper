@@ -103,12 +103,14 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
         val requestedIds = userIds.ifEmpty { queryUsers().map { it.id } }
 
         return requestedIds.asSequence().flatMap {
-            val slice = XposedHelpers.callMethod(
-                packageManager, "getInstalledPackages",
-                0, it,
-            )
-            @Suppress("UNCHECKED_CAST")
-            XposedHelpers.getObjectField(slice, "mList") as List<PackageInfo>
+            clearBinderCallingIdentity {
+                val slice = XposedHelpers.callMethod(
+                    packageManager, "getInstalledPackages",
+                    0, it,
+                )
+                @Suppress("UNCHECKED_CAST")
+                XposedHelpers.getObjectField(slice, "mList") as List<PackageInfo>
+            }
         }.filter {
             val result = it.applicationInfo != null
             if (!result) {
@@ -150,10 +152,12 @@ class SystemService(private val lpparam: XC_LoadPackage.LoadPackageParam) : Syst
 
         return buildList {
             databaseList.forEach { (packageName, userId, appId) ->
-                val info = XposedHelpers.callMethod(
-                    packageManager, "getPackageInfo",
-                    packageName, 0, userId,
-                ) as? PackageInfo? ?: return@forEach
+                val info = clearBinderCallingIdentity {
+                    XposedHelpers.callMethod(
+                        packageManager, "getPackageInfo",
+                        packageName, 0, userId,
+                    ) as? PackageInfo? ?: return@forEach
+                }
 
                 if (info.applicationInfo == null) {
                     Log.w("Application info for $packageName is null, skipping")
