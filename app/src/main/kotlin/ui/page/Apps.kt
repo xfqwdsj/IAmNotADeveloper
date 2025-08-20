@@ -41,7 +41,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Apps
@@ -101,6 +100,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
+import com.kyant.capsule.G2RoundedCornerShape
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
@@ -117,9 +117,8 @@ import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.composable.card
-import top.ltfan.notdeveloper.ui.theme.AppCardShape
-import top.ltfan.notdeveloper.ui.theme.AppRadiusModal
-import top.ltfan.notdeveloper.ui.theme.AppRadiusNormal
+import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
+import top.ltfan.notdeveloper.ui.theme.AppRadiusMedium
 import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
 import top.ltfan.notdeveloper.ui.theme.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
@@ -690,7 +689,6 @@ object Apps : Main() {
         if (list.isEmpty()) return
 
         card(
-            shape = { AppCardShape },
             colors = { CardColorsLowest },
         ) {
             header(
@@ -718,7 +716,7 @@ object Apps : Main() {
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                 ) { currentInfo ->
                     val radius by this.transition.animateDp(label = "AppListItemRadius") {
-                        if (it == EnterExitState.Visible) AppRadiusNormal else AppRadiusModal
+                        if (it == EnterExitState.Visible) AppRadiusMedium else AppRadiusExtraLarge
                     }
 
                     if (currentInfo != info) {
@@ -732,7 +730,7 @@ object Apps : Main() {
                                         animatedVisibilityScope = this@AnimatedContent,
                                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
-                                    .clip(RoundedCornerShape(radius))
+                                    .clip(G2RoundedCornerShape(radius))
                             ) {
                                 val headerText = stringResource(header)
                                 AppListItem(
@@ -745,7 +743,7 @@ object Apps : Main() {
                                             animatedVisibilityScope = this@AnimatedContent,
                                             resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                         )
-                                        .clip(RoundedCornerShape(radius))
+                                        .clip(G2RoundedCornerShape(radius))
                                         .semantics {
                                             contentDescription = headerText
                                         },

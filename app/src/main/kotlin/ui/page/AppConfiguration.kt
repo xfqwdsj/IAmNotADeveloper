@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClearAll
@@ -50,6 +49,7 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigationevent.compose.NavigationEventHandler
+import com.kyant.capsule.G2RoundedCornerShape
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,8 +61,8 @@ import top.ltfan.notdeveloper.database.PackageSettingsDao
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
-import top.ltfan.notdeveloper.ui.theme.AppRadiusModal
-import top.ltfan.notdeveloper.ui.theme.AppRadiusNormal
+import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
+import top.ltfan.notdeveloper.ui.theme.AppRadiusMedium
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
@@ -121,7 +121,7 @@ fun AppViewModel.AppConfiguration() {
                         )
                         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
                             val radius by this@AnimatedContent.transition.animateDp(label = "AppConfigurationModalRadius") {
-                                if (it == EnterExitState.Visible) AppRadiusModal else AppRadiusNormal
+                                if (it == EnterExitState.Visible) AppRadiusExtraLarge else AppRadiusMedium
                             }
                             Column(
                                 modifier = Modifier
@@ -136,7 +136,7 @@ fun AppViewModel.AppConfiguration() {
                                         animatedVisibilityScope = this@AnimatedContent,
                                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
-                                    .clip(RoundedCornerShape(radius))
+                                    .clip(G2RoundedCornerShape(radius))
                                     .contentOverlayHaze()
                                     .verticalScroll(rememberScrollState())
                                     .semantics {

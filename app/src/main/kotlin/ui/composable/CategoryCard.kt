@@ -5,7 +5,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
-import top.ltfan.notdeveloper.ui.theme.AppCardShape
 import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
 
 fun GroupedLazyListScope.categoryCards(
@@ -17,7 +16,6 @@ fun GroupedLazyListScope.categoryCards(
 ) {
     cards(
         groups = groups,
-        shape = { AppCardShape },
         colors = { CardColorsLowest },
     ) {
         categoryCard(

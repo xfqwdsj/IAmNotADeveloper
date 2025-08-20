@@ -15,6 +15,7 @@ activity = "1.10.1"
 compose = "2025.08.00"
 navigation = "1.0.0-alpha06"
 compose-adaptive = "1.0.0-SNAPSHOT"
+capsule = "1.0.1"
 haze = "1.6.10"
 coil = "3.3.0"
 room = "2.7.2"
@@ -43,6 +44,7 @@ compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended" }
+capsule = { module = "com.github.Kyant0:Capsule", version.ref = "capsule" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
