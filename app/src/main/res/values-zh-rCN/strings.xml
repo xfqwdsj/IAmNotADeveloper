@@ -53,6 +53,11 @@
     <string name="test_result_on">该项测试结果：开启</string>
     <string name="test_result_off">该项测试结果：关闭</string>
 
+    <!-- Floating action button -->
+    <string name="description_fab_menu">菜单</string>
+    <string name="action_fab_menu_expand">展开菜单</string>
+    <string name="action_fab_menu_collapse">收起菜单</string>
+
     <!-- Overview -->
     <string name="label_nav_overview">概览</string>
     <string name="toggle_overview_use_global_preferences">使用全局偏好设置</string>
@@ -88,6 +93,8 @@
     <string name="title_apps_modal_configuration">应用配置</string>
     <string name="action_apps_modal_configuration_close">关闭应用配置</string>
     <string name="action_apps_modal_configuration_clear">清除此应用的配置</string>
+    <string name="label_apps_item_menu_fab_add_app">手动添加应用</string>
+    <string name="label_apps_item_menu_fab_search">搜索</string>
     <string name="message_apps_snackbar_query_failed">查询应用列表失败</string>
     <string name="action_apps_query_details_show">查询应用列表失败，点击查看详情</string>
     <string name="title_apps_dialog_query_failed">查询应用列表失败</string>

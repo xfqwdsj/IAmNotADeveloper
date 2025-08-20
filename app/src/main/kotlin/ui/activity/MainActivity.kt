@@ -25,8 +25,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.ui.NavDisplay
 import top.ltfan.notdeveloper.application.NotDevApplication
-import top.ltfan.notdeveloper.ui.composable.HazeSnackbar
-import top.ltfan.notdeveloper.ui.composable.HazeSnackbarHost
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -112,18 +110,6 @@ class MainActivity : ComponentActivity() {
                     val paddingBottom = navBarHeight?.let { max(insetsBottom, it) } ?: insetsBottom
                     val contentPadding = PaddingValues(bottom = paddingBottom.toDp())
 
-                    val snackbarHostPlaceable = subcompose("snackbarHost") {
-                        HazeSnackbarHost(snackbarHostState) {
-                            HazeSnackbar(
-                                snackbarData = it,
-                                modifier = Modifier.hazeSource(zIndex = HazeZIndex.bottomBar),
-                            )
-                        }
-                    }.first().measure(constraints)
-
-                    val snackbarHeight = snackbarHostPlaceable.height
-                    val snackbarY = height - paddingBottom - snackbarHeight
-
                     val contentPlaceable = subcompose("content") {
                         NavDisplay(
                             backStack = backStack,
@@ -140,7 +126,6 @@ class MainActivity : ComponentActivity() {
                     layout(width, height) {
                         contentPlaceable.place(0, 0)
                         navBarPlaceable?.place(0, navBarY!!)
-                        snackbarHostPlaceable.place(0, snackbarY)
                     }
                 }
             }
