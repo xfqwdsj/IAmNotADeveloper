@@ -2,7 +2,6 @@ package top.ltfan.notdeveloper.ui.page
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -15,10 +14,8 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +39,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -53,7 +49,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -80,7 +75,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -105,13 +99,11 @@ import com.kyant.capsule.G2RoundedCornerShape
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
-import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppSort
-import top.ltfan.notdeveloper.ui.composable.AnimatedContentWithBlur
 import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
-import top.ltfan.notdeveloper.ui.composable.EnterExitPredefinedDirection
+import top.ltfan.notdeveloper.ui.composable.FilterChip
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyListScope
 import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
@@ -132,13 +124,11 @@ import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
-import top.ltfan.notdeveloper.ui.util.keepSizeWhenLookingAhead
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
-import top.ltfan.notdeveloper.util.mutableProperty
 
 object Apps : Main() {
     override val navigationLabel = R.string.label_nav_apps
@@ -170,10 +160,7 @@ object Apps : Main() {
                             windowInsets = AppWindowInsets.only { horizontal + top },
                             colors = TopAppBarColorsTransparent,
                         )
-                        FilterBar(
-                            selectedUser,
-                            { selectedUser = it },
-                        )
+                        FilterBar()
                     }
                 },
                 snackbarHost = { HazeSnackbarHost(snackbarHostState) },
@@ -301,13 +288,9 @@ object Apps : Main() {
     @Composable
     context(viewModel: AppViewModel)
     fun ColumnScope.FilterBar(
-        selectedUser: UserInfo,
-        setSelectedUser: (UserInfo) -> Unit,
         modifier: Modifier = Modifier,
         layoutModifier: Modifier = Modifier,
     ) {
-        var selectedUser by mutableProperty(selectedUser, setSelectedUser)
-
         with(viewModel) {
             AnimatedVisibilityWithBlur(showUserFilter, modifier) {
                 FilterBarLayout(
@@ -396,7 +379,7 @@ object Apps : Main() {
                             FilterChip(
                                 selected = selected,
                                 onClick = { selectedUser = user },
-                                label = { Text(user.name.getString()) },
+                                text = user.name.getString(),
                                 modifier = Modifier
                                     .run {
                                         if (index == 0) {
@@ -411,15 +394,6 @@ object Apps : Main() {
                                             columnSpan = 1,
                                         )
                                     },
-                                leadingIcon = {
-                                    AnimatedVisibility(
-                                        visible = selected,
-                                        enter = fadeIn() + expandHorizontally(),
-                                        exit = fadeOut() + shrinkHorizontally(),
-                                    ) {
-                                        Icon(Icons.Default.Check, contentDescription = null)
-                                    }
-                                },
                             )
 
                             if (index == 0) {
@@ -586,48 +560,6 @@ object Apps : Main() {
                 }
                 Spacer(Modifier.height(64.dp))
             }
-        }
-    }
-
-    @Composable
-    fun FilterChip(
-        selected: Boolean,
-        onClick: () -> Unit,
-        @StringRes text: Int,
-        modifier: Modifier = Modifier,
-        leadingPlaceholderIcon: ImageVector? = null,
-        trailing: @Composable (() -> Unit)? = null,
-    ) {
-        Box(modifier) {
-            FilterChip(
-                selected = selected,
-                onClick = onClick,
-                label = {
-                    Text(
-                        text = stringResource(text),
-                        modifier = Modifier.keepSizeWhenLookingAhead(),
-                    )
-                },
-                leadingIcon = {
-                    if (leadingPlaceholderIcon != null) {
-                        AnimatedContentWithBlur(selected) { selected ->
-                            if (selected) {
-                                Icon(Icons.Default.Check, contentDescription = null)
-                            } else {
-                                Icon(leadingPlaceholderIcon, contentDescription = null)
-                            }
-                        }
-                    } else {
-                        AnimatedVisibilityWithBlur(
-                            visible = selected,
-                            direction = EnterExitPredefinedDirection.Horizontal,
-                        ) {
-                            Icon(Icons.Default.Check, contentDescription = null)
-                        }
-                    }
-                },
-                trailingIcon = trailing,
-            )
         }
     }
 
