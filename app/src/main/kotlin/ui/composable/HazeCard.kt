@@ -27,6 +27,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import dev.chrisbanes.haze.HazeDefaults
+import dev.chrisbanes.haze.LocalHazeStyle
 import top.ltfan.notdeveloper.ui.util.hazeEffect
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
@@ -48,7 +50,12 @@ fun HazeCard(
         border = border,
     ) {
         Box(
-            Modifier.hazeEffect()
+            Modifier.hazeEffect(
+                style = LocalHazeStyle.current.copy(
+                    backgroundColor = colors.containerColor,
+                    tints = listOf(HazeDefaults.tint(colors.containerColor)),
+                ),
+            )
         ) {
             this@Card.content()
         }
