@@ -42,7 +42,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.DialogProperties
+import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.LocalHazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
@@ -59,7 +61,7 @@ fun HazeAlertDialog(
     title: @Composable (() -> Unit)? = null,
     text: @Composable (() -> Unit)? = null,
     shape: Shape = AlertDialogDefaults.shape,
-    containerColor: Color = Color.Transparent,
+    containerColor: Color = AlertDialogDefaults.containerColor,
     iconContentColor: Color = AlertDialogDefaults.iconContentColor,
     titleContentColor: Color = AlertDialogDefaults.titleContentColor,
     textContentColor: Color = AlertDialogDefaults.textContentColor,
@@ -119,12 +121,18 @@ internal fun HazeAlertDialogContent(
     Surface(
         modifier = modifier,
         shape = shape,
-        color = containerColor,
+        color = Color.Transparent,
         tonalElevation = tonalElevation,
     ) {
         Column(
             modifier = Modifier
-            .hazeEffect(hazeState)
+            .hazeEffect(
+                state = hazeState,
+                style = LocalHazeStyle.current.copy(
+                    backgroundColor = containerColor,
+                    tints = listOf(HazeDefaults.tint(containerColor)),
+                ),
+            )
             .padding(DialogPadding),
         ) {
             icon?.let {
