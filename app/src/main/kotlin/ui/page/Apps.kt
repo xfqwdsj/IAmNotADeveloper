@@ -12,11 +12,12 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -264,7 +265,7 @@ object Apps : Main() {
         ) { showing ->
             val rotation by transition.animateFloat(
                 label = "UserFilterRotation",
-                transitionSpec = { tween(durationMillis = 300) },
+                transitionSpec = { spring(stiffness = Spring.StiffnessMediumLow) },
             ) {
                 val factor = if (showUserFilter) 1f else -1f
                 when (it) {
