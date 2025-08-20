@@ -3,10 +3,7 @@ package top.ltfan.notdeveloper.ui.page
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.EnterExitState
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
@@ -43,6 +40,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Done
@@ -51,7 +49,9 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -59,6 +59,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -114,6 +115,8 @@ import top.ltfan.notdeveloper.ui.composable.EnterExitPredefinedDirection
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.GroupedLazyListScope
 import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
+import top.ltfan.notdeveloper.ui.composable.HazeFloatingActionButtonWithMenu
+import top.ltfan.notdeveloper.ui.composable.HazeSnackbarHost
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.composable.card
@@ -123,6 +126,8 @@ import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
 import top.ltfan.notdeveloper.ui.theme.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.EmptyContentTransform
+import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.appBarHaze
 import top.ltfan.notdeveloper.ui.util.contentHazeSource
@@ -142,9 +147,8 @@ object Apps : Main() {
     val lazyListState = LazyListState()
 
     var showUserFilter by mutableStateOf(false)
-
+    var showFabMenu by mutableStateOf(false)
     var showAppListErrorInfoDialog by mutableStateOf(false)
-
     var showFilterBottomSheet by mutableStateOf(false)
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -153,6 +157,7 @@ object Apps : Main() {
     override fun AppViewModel.Content() {
         val transition = rememberTransition(packageInfoConfiguringTransitionState)
 
+        val snackbarHostState = remember { SnackbarHostState() }
         val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
 
         SharedTransitionLayout {
@@ -171,6 +176,8 @@ object Apps : Main() {
                         )
                     }
                 },
+                snackbarHost = { HazeSnackbarHost(snackbarHostState) },
+                floatingActionButton = { Fab() },
                 contentWindowInsets = AppWindowInsets + contentPadding,
             ) { contentPadding ->
                 val contentPadding = contentPadding.operate {
@@ -254,13 +261,7 @@ object Apps : Main() {
 
         AnimatedContent(
             targetState = showUserFilter,
-            transitionSpec = {
-                ContentTransform(
-                    targetContentEnter = EnterTransition.None,
-                    initialContentExit = ExitTransition.None,
-                    sizeTransform = null,
-                )
-            }
+            transitionSpec = { EmptyContentTransform }
         ) { showing ->
             val rotation by transition.animateFloat(
                 label = "UserFilterRotation",
@@ -360,7 +361,6 @@ object Apps : Main() {
                     },
                 ) { contentPadding ->
                     val focusRequester = remember { FocusRequester() }
-                    var isFocused by remember { mutableStateOf(false) }
 
                     LazyRow(
                         modifier = Modifier
@@ -422,18 +422,33 @@ object Apps : Main() {
                                 },
                             )
 
-                            if (!isFocused && index == 0) {
-                                LaunchedEffect(transition.currentState) {
-                                    if (transition.currentState == EnterExitState.Visible) {
-                                        focusRequester.requestFocus()
-                                        isFocused = true
-                                    }
-                                }
+                            if (index == 0) {
+                                FocusRequestingEffect(focusRequester)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    context(viewModel: AppViewModel)
+    fun Fab() {
+        HazeFloatingActionButtonWithMenu(
+            showMenu = showFabMenu,
+            onClick = { showFabMenu = !showFabMenu },
+        ) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.label_apps_item_menu_fab_add_app)) },
+                onClick = {},
+                leadingIcon = { Icon(Icons.Default.Add, null) }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.label_apps_item_menu_fab_search)) },
+                onClick = {},
+                leadingIcon = { Icon(Icons.Default.Search, null) }
+            )
         }
     }
 
