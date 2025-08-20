@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyScopeMarker
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberOverscrollEffect
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -450,6 +452,35 @@ class CardLazyGroup(
     private fun getShape(footer: Boolean): Shape {
         val reverse = if (footer) !reverse else reverse
         val shape = shape()
+
+        if (shape is CornerBasedShape) {
+            return when (isVertical) {
+                true -> when (reverse) {
+                    false -> shape.copy(
+                        bottomEnd = ZeroCornerSize,
+                        bottomStart = ZeroCornerSize,
+                    )
+
+                    true -> shape.copy(
+                        topStart = ZeroCornerSize,
+                        topEnd = ZeroCornerSize,
+                    )
+                }
+
+                false -> when (reverse) {
+                    false -> shape.copy(
+                        topEnd = ZeroCornerSize,
+                        bottomEnd = ZeroCornerSize,
+                    )
+
+                    true -> shape.copy(
+                        topStart = ZeroCornerSize,
+                        bottomStart = ZeroCornerSize,
+                    )
+                }
+            }
+        }
+
         return object : Shape {
             override fun createOutline(
                 size: Size, layoutDirection: LayoutDirection, density: Density

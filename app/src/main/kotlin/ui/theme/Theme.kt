@@ -41,7 +41,10 @@ fun IAmNotADeveloperTheme(
         else -> lightColorScheme()
     }
 
-    MaterialTheme(colorScheme = colorScheme) {
+    MaterialTheme(
+        colorScheme = colorScheme,
+        shapes = AppShapes,
+    ) {
         CompositionLocalProvider(LocalHazeStyle provides HazeMaterials.regular()) {
             with(viewModel) {
                 Box(Modifier.hazeSource(zIndex = HazeZIndex.app)) {
