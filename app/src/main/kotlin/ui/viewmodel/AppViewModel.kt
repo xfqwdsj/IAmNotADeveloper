@@ -2,7 +2,6 @@ package top.ltfan.notdeveloper.ui.viewmodel
 
 import android.content.Context
 import androidx.compose.animation.core.SeekableTransitionState
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -55,8 +54,6 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     val globalPreferencesStore = GlobalPreferences.createDataStore()
 
     val hazeState = HazeState()
-
-    val snackbarHostState = SnackbarHostState()
 
     val showNavBar: Boolean
         inline get() {

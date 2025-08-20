@@ -54,6 +54,11 @@
     <string name="test_result_on">Test result of this item: On</string>
     <string name="test_result_off">Test result of this item: Off</string>
 
+    <!-- Floating action button -->
+    <string name="description_fab_menu">Menu</string>
+    <string name="action_fab_menu_expand">Expand menu</string>
+    <string name="action_fab_menu_collapse">Collapse menu</string>
+
     <!-- Overview -->
     <string name="label_nav_overview">Overview</string>
     <string name="toggle_overview_use_global_preferences">Use global preferences</string>
@@ -89,6 +94,8 @@
     <string name="title_apps_modal_configuration">App Configuration</string>
     <string name="action_apps_modal_configuration_close">Close app configuration</string>
     <string name="action_apps_modal_configuration_clear">Clear configurations for this app</string>
+    <string name="label_apps_item_menu_fab_add_app">Manually add app</string>
+    <string name="label_apps_item_menu_fab_search">Search</string>
     <string name="message_apps_snackbar_query_failed">Failed to query apps</string>
     <string name="action_apps_query_details_show">Apps query failed. Click to show details</string>
     <string name="title_apps_dialog_query_failed">Failed to query apps</string>

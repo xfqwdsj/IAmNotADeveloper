@@ -66,14 +66,15 @@ import androidx.compose.ui.util.fastFirstOrNull
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.LocalHazeStyle
 import kotlinx.coroutines.delay
+import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
-import top.ltfan.notdeveloper.ui.util.hazeEffect
+import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
 import kotlin.math.min
 
 @Composable
-context(viewModel: AppViewModel)
+context(viewModel: AppViewModel, page: Page)
 fun HazeSnackbarHost(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
@@ -139,7 +140,7 @@ internal fun SnackbarDuration.toMillis(
 }
 
 @Composable
-context(viewModel: AppViewModel)
+context(viewModel: AppViewModel, page: Page)
 fun HazeSnackbar(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier,
@@ -195,7 +196,7 @@ fun HazeSnackbar(
 }
 
 @Composable
-context(viewModel: AppViewModel)
+context(viewModel: AppViewModel, page: Page)
 fun HazeSnackbar(
     modifier: Modifier = Modifier,
     action: @Composable (() -> Unit)? = null,
@@ -215,7 +216,7 @@ fun HazeSnackbar(
         contentColor = contentColor,
     ) {
         Box(
-            Modifier.hazeEffect(
+            Modifier.contentOverlayHaze(
                 style = LocalHazeStyle.current.copy(
                     backgroundColor = containerColor,
                     tints = listOf(HazeDefaults.tint(containerColor)),
