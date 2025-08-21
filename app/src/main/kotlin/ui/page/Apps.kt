@@ -184,6 +184,7 @@ object Apps : Main() {
                             .fillMaxSize(),
                         state = lazyListState,
                         contentPadding = contentPadding,
+                        spacing = 16.dp,
                     ) {
                         context(transition) {
                             appListCard(
