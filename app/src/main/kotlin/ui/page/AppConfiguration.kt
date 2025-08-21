@@ -131,7 +131,7 @@ fun AppViewModel.AppConfiguration() {
                                     .fillMaxWidth()
                                     .sharedBounds(
                                         sharedContentState = rememberSharedContentState(
-                                            AppConfigurationSharedKey.Container
+                                            AppConfigurationSharedKey.Container(packageInfo)
                                         ),
                                         animatedVisibilityScope = this@AnimatedContent,
                                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
@@ -228,6 +228,6 @@ private fun CoroutineScope.closeModal() {
 }
 
 sealed class AppConfigurationSharedKey {
-    data object Container : AppConfigurationSharedKey()
-    data class ListItem(val key: Any?)
+    data class Container(val key: Any?) : AppConfigurationSharedKey()
+    data class ListItem(val key: Any?) : AppConfigurationSharedKey()
 }
