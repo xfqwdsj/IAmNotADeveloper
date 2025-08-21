@@ -3,9 +3,9 @@ package top.ltfan.notdeveloper.ui.viewmodel
 import android.content.Context
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -184,11 +184,17 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     @Composable
     fun collectAppLists(): Pair<List<PackageInfoWrapper>, List<PackageInfoWrapper>> {
-        val configuredInitial = remember { configuredAppList.value }
-        val unconfiguredInitial = remember { unconfiguredAppList.value }
+        var configured by remember { mutableStateOf(configuredAppList.value) }
+        var unconfigured by remember { mutableStateOf(unconfiguredAppList.value) }
 
-        val configured by configuredAppList.collectAsState(configuredInitial)
-        val unconfigured by unconfiguredAppList.collectAsState(unconfiguredInitial)
+        LaunchedEffect(Unit) {
+            configuredAppList.collect { configured = it }
+        }
+
+        LaunchedEffect(Unit) {
+            unconfiguredAppList.collect { unconfigured = it }
+        }
+
         return configured to unconfigured
     }
 
