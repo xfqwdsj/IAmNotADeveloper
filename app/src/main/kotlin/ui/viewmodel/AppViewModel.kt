@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -18,12 +17,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.BuildConfig
@@ -48,6 +46,8 @@ import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.util.getUserId
 import top.ltfan.notdeveloper.util.toAndroid
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
     val settingsStore = AppListSettings.createDataStore()
@@ -63,143 +63,11 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     val currentPage inline get() = backStack.last()
     val navBarEntry inline get() = backStack.last { it is Main }
 
-    var useGlobalPreferences by globalPreferencesStore.propertyAsState(
-        get = { it.useGlobalPreferences },
-        set = { settings, useGlobalPreferences ->
-            settings.copy(useGlobalPreferences = useGlobalPreferences)
-        },
-    )
-
-    var isPreferencesReady by mutableStateOf(false)
-    val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
-    var service: SystemServiceClient? by mutableStateOf(null)
-
-    val myPackageInfo =
-        application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0).wrapped()
-
-    val packageInfoConfiguringTransitionState = SeekableTransitionState<PackageInfoWrapper?>(null)
-    val currentConfiguringPackageInfo inline get() = packageInfoConfiguringTransitionState.targetState
-
-    private var _users by mutableStateOf(queryUsers())
-    val users get() = _users
-
-    val selectedUserFlow = settingsStore.propertyAsFlow(
-        get = { it.selectedUser },
-        set = { settings, user ->
-            settings.copy(selectedUser = user)
-        },
-    )
-
-    var selectedUser by selectedUserFlow.collectAsStateVM()
-
-    val appSortMethodFlow = settingsStore.propertyAsFlow(
-        get = { it.sort },
-        set = { settings, sort -> settings.copy(sort = sort) },
-    )
-
-    var appSortMethod by appSortMethodFlow.collectAsStateVM()
-
-    val appFilteredMethodsFlow = settingsStore.propertyAsFlow(
-        get = { it.filtered },
-        set = { settings, filters -> settings.copy(filtered = filters) },
-    )
-
-    var appFilteredMethods by appFilteredMethodsFlow.collectAsStateVM()
-
-    private var _isAppListError by mutableStateOf(false)
-    val isAppListError get() = _isAppListError
-    val appListErrorSnackbarTrigger = MutableSharedFlow<Unit?>()
-
-    private var _isAppListUpdating by mutableStateOf(false)
-    val isAppListUpdating get() = _isAppListUpdating
-
-    private val appListUpdateTrigger = MutableSharedFlow<Unit>()
-    val appList = combine(selectedUserFlow, appListUpdateTrigger) { userInfo, _ ->
-        queryAppList(userInfo)
-    }.stateIn(
-        viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = queryAppList(selectedUserFlow.value),
-    )
-
-    fun queryAppList(userInfo: UserInfo = selectedUserFlow.value): Set<PackageInfoWrapper> {
-        _isAppListUpdating = true
-        val list = service?.queryApps(userInfo.id)?.ifEmpty { null }?.toSet().also {
-            if (it == null) {
-                _isAppListError = true
-                viewModelScope.launch {
-                    appListErrorSnackbarTrigger.emit(Unit)
-                }
-                Log.Android.w("Failed to query apps for user ${userInfo.id}, service may not be connected")
-            } else {
-                _isAppListError = false
-            }
-        }
-        return (list ?: setOf(myPackageInfo)).also {
-            _isAppListUpdating = false
-        }
-    }
-
-    fun updateAppList() {
-        viewModelScope.launch {
-            appListUpdateTrigger.emit(Unit)
-        }
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val databaseList = selectedUserFlow.flatMapLatest {
-        queryDatabaseList(it)
-    }.stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(), initialValue = emptySet())
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val appLists = combine(
-        appList,
-        databaseList,
-        appSortMethodFlow,
-        appFilteredMethodsFlow,
-    ) { appList, databaseList, sortMethod, filteredMethods ->
-        val filters = filteredMethods.subtract(AppFilter.groupingEntries)
-        (if (AppFilter.Configured !in filteredMethods) {
-            databaseList.asSequence().processed(sortMethod, filters)
-        } else emptyList()) to (if (AppFilter.Unconfigured !in filteredMethods) {
-            appList.subtract(databaseList).asSequence().processed(sortMethod, filters)
-        } else emptyList())
-    }.let { flow ->
-        val configured = flow.mapLatest { it.first }
-        val unconfigured = flow.mapLatest { it.second }
-        configured to unconfigured
-    }
-
-    val configuredAppList = appLists.first.stateIn(
-        viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = emptyList(),
-    )
-
-    val unconfiguredAppList = appLists.second.stateIn(
-        viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = emptyList(),
-    )
-
-    @Composable
-    fun collectAppLists(): Pair<List<PackageInfoWrapper>, List<PackageInfoWrapper>> {
-        var configured by remember { mutableStateOf(configuredAppList.value) }
-        var unconfigured by remember { mutableStateOf(unconfiguredAppList.value) }
-
-        LaunchedEffect(Unit) {
-            configuredAppList.collect { configured = it }
-        }
-
-        LaunchedEffect(Unit) {
-            unconfiguredAppList.collect { unconfigured = it }
-        }
-
-        return configured to unconfigured
-    }
-
     fun navigateMain(page: Main) {
-        if (currentPage == page) return
+        if (currentPage == page) {
+            page.secondClick()
+            return
+        }
         val existingIndex = backStack.indexOfFirst { it == page }
 
         if (existingIndex == -1) {
@@ -219,6 +87,120 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         val pagesToMove = backStack.subList(existingIndex, nextMainIndex)
         backStack.addAll(pagesToMove)
         backStack.removeRange(existingIndex, nextMainIndex)
+    }
+
+    var useGlobalPreferences by globalPreferencesStore.propertyAsMutableState(
+        get = { it.useGlobalPreferences },
+        set = { settings, useGlobalPreferences ->
+            settings.copy(useGlobalPreferences = useGlobalPreferences)
+        },
+    )
+
+    var isPreferencesReady by mutableStateOf(false)
+    val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
+    var service: SystemServiceClient? by mutableStateOf(null)
+
+    val myPackageInfo =
+        application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0).wrapped()
+
+    val packageInfoConfiguringTransitionState = SeekableTransitionState<PackageInfoWrapper?>(null)
+    val currentConfiguringPackageInfo inline get() = packageInfoConfiguringTransitionState.targetState
+
+    private var _users by mutableStateOf(queryUsers())
+    val users get() = _users
+
+    val selectedUserFlow = settingsStore.propertyAsSharedFlow { it.selectedUser }
+    var selectedUser by settingsStore.propertyAsMutableState(
+        defaultValue = settingsStore.defaultValue,
+        get = { it.selectedUser },
+        set = { settings, user -> settings.copy(selectedUser = user) },
+    )
+
+    val appSortMethodFlow = settingsStore.propertyAsSharedFlow { it.sort }
+    var appSortMethod by settingsStore.propertyAsMutableState(
+        defaultValue = settingsStore.defaultValue,
+        get = { it.sort },
+        set = { settings, sort -> settings.copy(sort = sort) },
+    )
+
+    val appFilteredMethodsFlow = settingsStore.propertyAsSharedFlow { it.filtered }
+    var appFilteredMethods by settingsStore.propertyAsMutableState(
+        defaultValue = settingsStore.defaultValue,
+        get = { it.filtered },
+        set = { settings, filtered -> settings.copy(filtered = filtered) },
+    )
+
+    private var _isAppListError by mutableStateOf(false)
+    val isAppListError get() = _isAppListError
+    val appListErrorSnackbarTrigger = MutableSharedFlow<Unit?>()
+
+    private var _isAppListUpdating by mutableStateOf(false)
+    val isAppListUpdating get() = _isAppListUpdating
+
+    private val appListUpdateTrigger = MutableSharedFlow<Unit>()
+    val appListFlow = combine(selectedUserFlow, appListUpdateTrigger) { userInfo, _ ->
+        queryAppList(userInfo)
+    }.shareIn(viewModelScope, started = SharingStarted.Eagerly, replay = 1)
+
+    fun queryAppList(userInfo: UserInfo = selectedUser): Set<PackageInfoWrapper> {
+        _isAppListUpdating = true
+        val list = service?.queryApps(userInfo.id)?.ifEmpty { null }?.toSet().also {
+            if (it == null) {
+                _isAppListError = true
+                viewModelScope.launch { appListErrorSnackbarTrigger.emit(Unit) }
+                Log.Android.w("Failed to query apps for user ${userInfo.id}, service may not be connected")
+            } else {
+                _isAppListError = false
+            }
+        }
+        return list ?: setOf(myPackageInfo)
+    }
+
+    fun updateAppList() {
+        viewModelScope.launch {
+            appListUpdateTrigger.emit(Unit)
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val databaseListFlow = selectedUserFlow.flatMapLatest {
+        queryDatabaseList(it)
+    }.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = emptySet())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val appLists = combine(
+        appListFlow,
+        databaseListFlow,
+        appSortMethodFlow,
+        appFilteredMethodsFlow,
+    ) { appList, databaseList, sortMethod, filteredMethods ->
+        val filters = filteredMethods.subtract(AppFilter.groupingEntries)
+        ((if (AppFilter.Configured !in filteredMethods) {
+            databaseList.asSequence().processed(sortMethod, filters)
+        } else emptyList()) to (if (AppFilter.Unconfigured !in filteredMethods) {
+            appList.subtract(databaseList).asSequence().processed(sortMethod, filters)
+        } else emptyList())).also {
+            _isAppListUpdating = false
+        }
+    }.stateIn(
+        viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList<PackageInfoWrapper>() to emptyList(),
+    )
+
+    @Composable
+    fun collectAppLists(): Pair<List<PackageInfoWrapper>, List<PackageInfoWrapper>> {
+        var configured by remember { mutableStateOf(appLists.value.first) }
+        var unconfigured by remember { mutableStateOf(appLists.value.second) }
+
+        LaunchedEffect(Unit) {
+            appLists.collect { (c, u) ->
+                configured = c
+                unconfigured = u
+            }
+        }
+
+        return configured to unconfigured
     }
 
     fun test() {
@@ -264,6 +246,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
             service = context.systemService
         }
         updateUsers()
+        updateAppList()
     }
 
     fun queryUsers() = service?.queryUsers() ?: listOf(
@@ -272,8 +255,8 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     fun updateUsers() {
         _users = queryUsers()
-        if (selectedUserFlow.value in users) return
-        selectedUserFlow.value = users.first()
+        if (selectedUser in users) return
+        selectedUser = users.first()
     }
 
     fun queryDatabaseList(userInfo: UserInfo? = null) =
@@ -285,18 +268,6 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
             }
         }.map { service?.queryApps(it)?.toSet() ?: it.toAndroid() }
 
-    private fun <T> MutableStateFlow<T>.collectAsStateVM(): MutableState<T> {
-        val delegate = mutableStateOf(value)
-        viewModelScope.launch { collect { delegate.value = it } }
-        return object : MutableState<T> by delegate {
-            override var value: T
-                get() = delegate.value
-                set(newValue) {
-                    this@collectAsStateVM.value = newValue
-                }
-        }
-    }
-
     private fun <T> Flow<T>.collectAsStateVM(initial: T): State<T> {
         val delegate = mutableStateOf(initial)
         viewModelScope.launch { collect { delegate.value = it } }
@@ -304,45 +275,25 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     }
 
     @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
-    private fun <T, R> AppDataStore<T>.propertyAsFlow(
+    private fun <T, R> AppDataStore<T>.propertyAsSharedFlow(
+        transform: (T) -> R,
+    ) = data.map { transform(it) }.shareIn(
+        viewModelScope,
+        started = SharingStarted.Eagerly,
+        replay = 1,
+    )
+
+    private fun <T, R> AppDataStore<T>.propertyAsMutableState(
         defaultValue: T = this.defaultValue,
         get: (T) -> R,
         set: (T, R) -> T,
-    ): MutableStateFlow<R> {
-        val dataFlow = data.map { get(it) }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, get(defaultValue))
-
-        val flow = MutableStateFlow(dataFlow.value)
-
-        viewModelScope.launch {
-            dataFlow.collect { value ->
-                flow.value = value
-            }
-        }
-
-        viewModelScope.launch {
-            flow.collect { value ->
-                updateData { set(it, value) }
-            }
-        }
-
-        return flow
-    }
-
-    private fun <T, R> AppDataStore<T>.propertyAsState(
-        defaultValue: T = this.defaultValue,
-        get: (T) -> R,
-        set: (T, R) -> T,
-    ): MutableState<R> {
+    ): ReadWriteProperty<Any?, R> {
         val delegate = data.collectAsStateVM(defaultValue)
-        return object : MutableState<R> by mutableStateOf(get(delegate.value)) {
-            override var value: R
-                get() = get(delegate.value)
-                set(newValue) {
-                    viewModelScope.launch {
-                        updateData { set(delegate.value, newValue) }
-                    }
-                }
+        return object : ReadWriteProperty<Any?, R> {
+            override fun getValue(thisRef: Any?, property: KProperty<*>) = get(delegate.value)
+            override fun setValue(thisRef: Any?, property: KProperty<*>, value: R) {
+                viewModelScope.launch { updateData { set(it, value) } }
+            }
         }
     }
 }

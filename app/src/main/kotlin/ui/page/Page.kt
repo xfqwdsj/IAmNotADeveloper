@@ -35,4 +35,7 @@ sealed class Main : Page() {
     companion object {
         val pages by lazy { listOf(Overview, Apps) }
     }
+
+    context(viewModel: AppViewModel)
+    open fun secondClick() {}
 }
