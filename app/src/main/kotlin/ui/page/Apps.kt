@@ -2,6 +2,7 @@ package top.ltfan.notdeveloper.ui.page
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -14,8 +15,10 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +54,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -58,7 +62,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -167,37 +170,39 @@ object Apps : Main() {
                 floatingActionButton = { Fab() },
                 contentWindowInsets = AppWindowInsets + contentPadding,
             ) { contentPadding ->
-                val contentPadding = contentPadding.operate {
-                    top += 16.dp
-                    bottom += 16.dp
-                }
-
                 val (configuredList, unconfiguredList) = collectAppLists()
 
-                PullToRefreshBox(
-                    isRefreshing = isAppListUpdating,
-                    onRefresh = ::updateAppList,
+                GroupedLazyColumn(
+                    modifier = Modifier
+                        .contentHazeSource()
+                        .fillMaxSize(),
+                    state = lazyListState,
+                    contentPadding = contentPadding.operate {
+                        top += 16.dp
+                        bottom += 16.dp
+                    },
+                    spacing = 16.dp,
                 ) {
-                    GroupedLazyColumn(
-                        modifier = Modifier
-                            .contentHazeSource()
-                            .fillMaxSize(),
-                        state = lazyListState,
-                        contentPadding = contentPadding,
-                        spacing = 16.dp,
-                    ) {
-                        context(transition) {
-                            appListCard(
-                                list = configuredList,
-                                header = R.string.label_apps_list_header_configured,
-                            )
+                    context(transition) {
+                        appListCard(
+                            list = configuredList,
+                            header = R.string.label_apps_list_header_configured,
+                        )
 
-                            appListCard(
-                                list = unconfiguredList,
-                                header = R.string.label_apps_list_header_unconfigured,
-                            )
-                        }
+                        appListCard(
+                            list = unconfiguredList,
+                            header = R.string.label_apps_list_header_unconfigured,
+                        )
                     }
+                }
+
+                AnimatedVisibility(
+                    visible = isAppListUpdating,
+                    modifier = Modifier.padding(contentPadding),
+                    enter = expandVertically(),
+                    exit = shrinkVertically(),
+                ) {
+                    LinearProgressIndicator()
                 }
 
                 NoAppsBackground(contentPadding)
@@ -716,6 +721,11 @@ object Apps : Main() {
                 }
             }
         }
+    }
+
+    context(viewModel: AppViewModel)
+    override fun secondClick() {
+        viewModel.updateAppList()
     }
 
     @Composable
