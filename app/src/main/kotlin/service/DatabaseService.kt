@@ -51,7 +51,7 @@ interface DatabaseServiceInterface {
         packageName: String, userId: Int, methodName: String, listener: BooleanDatabaseCallback
     ): Unlistener
 
-    fun clearAllData(isSuccess: BooleanDatabaseCallback)
+    fun clearAllPackages(isSuccess: BooleanDatabaseCallback)
     fun toggleDetectionEnabled(
         packageName: String, userId: Int, methodName: String, isSuccess: BooleanDatabaseCallback
     )
@@ -168,9 +168,9 @@ class DatabaseService(
         broadcast = { this(it) },
     )
 
-    override fun clearAllData(isSuccess: BooleanDatabaseCallback) {
+    override fun clearAllPackages(isSuccess: BooleanDatabaseCallback) {
         CoroutineScope(Dispatchers.IO).launch {
-            delegate.clearAllData()
+            delegate.clearAllPackages()
         }.invokeOnCompletion { cause ->
             if (cause == null) {
                 isSuccess(true)
@@ -461,7 +461,7 @@ fun DatabaseServiceClient(service: DatabaseServiceInterface): DatabaseServiceCli
 
         override suspend fun clearAllData() {
             blockWithTimeoutCatching(Unit) { continuation ->
-                clearAllData {
+                clearAllPackages {
                     continuation.resume(Unit)
                 }
             }

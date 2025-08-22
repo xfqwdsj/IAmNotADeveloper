@@ -123,7 +123,7 @@ interface PackageSettingsDao {
     fun isDetectionEnabledFlow(packageName: String, userId: Int, methodName: String): Flow<Boolean>
 
     @Query("DELETE FROM PackageInfo")
-    suspend fun clearAllData()
+    suspend fun clearAllPackages()
 
     @Transaction
     suspend fun toggleDetectionEnabled(packageName: String, userId: Int, methodName: String) {
