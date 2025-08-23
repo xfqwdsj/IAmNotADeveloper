@@ -109,7 +109,6 @@ object Overview : Main() {
                     groups = DetectionCategory.values,
                     afterChange = ::afterGlobalDetectionChange,
                     afterTest = ::afterGlobalDetectionTest,
-                    isPreferencesReady = isPreferencesReady,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
