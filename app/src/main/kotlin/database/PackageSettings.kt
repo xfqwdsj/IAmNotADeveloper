@@ -6,6 +6,7 @@ import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -14,8 +15,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.parcelableCreator
 import top.ltfan.notdeveloper.detection.DetectionCategory
+import top.ltfan.notdeveloper.detection.DetectionMethod
 
-@Database(entities = [PackageInfo::class, Detection::class], version = 1)
+@Database(entities = [PackageInfo::class, Detection::class, GlobalDetection::class], version = 1)
 abstract class PackageSettingsDatabase : RoomDatabase() {
     abstract fun dao(): PackageSettingsDao
 
@@ -79,6 +81,12 @@ data class Detection(
     val enabled: Boolean,
 )
 
+@Entity
+data class GlobalDetection(
+    @PrimaryKey val methodName: String,
+    val enabled: Boolean,
+)
+
 @Dao
 interface PackageSettingsDao {
     @Query("INSERT OR REPLACE INTO PackageInfo (packageName, userId, appId) VALUES (:packageName, :userId, :appId)")
@@ -113,6 +121,13 @@ interface PackageSettingsDao {
         packageName: String, userId: Int, methodName: String, enabled: Boolean
     )
 
+    @Transaction
+    suspend fun insertDetection(
+        packageInfo: PackageInfo, method: DetectionMethod, enabled: Boolean
+    ) {
+        insertDetection(packageInfo.packageName, packageInfo.userId, method.name, enabled)
+    }
+
     @Query("SELECT EXISTS(SELECT 1 FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName)")
     suspend fun isDetectionSet(packageName: String, userId: Int, methodName: String): Boolean
 
@@ -122,8 +137,30 @@ interface PackageSettingsDao {
     @Query("SELECT COALESCE((SELECT enabled FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName), 1)")
     fun isDetectionEnabledFlow(packageName: String, userId: Int, methodName: String): Flow<Boolean>
 
+    fun isDetectionEnabledFlow(packageInfo: PackageInfo, method: DetectionMethod): Flow<Boolean> {
+        return isDetectionEnabledFlow(packageInfo.packageName, packageInfo.userId, method.name)
+    }
+
     @Query("DELETE FROM PackageInfo")
     suspend fun clearAllPackages()
+
+    @Query("INSERT OR REPLACE INTO GlobalDetection (methodName, enabled) VALUES (:methodName, :enabled)")
+    suspend fun insertGlobalDetection(methodName: String, enabled: Boolean)
+
+    @Transaction
+    suspend fun insertGlobalDetection(method: DetectionMethod, enabled: Boolean) {
+        insertGlobalDetection(method.name, enabled)
+    }
+
+    @Query("SELECT COALESCE((SELECT enabled FROM GlobalDetection WHERE methodName = :methodName), 1)")
+    suspend fun isGlobalDetectionEnabled(methodName: String): Boolean
+
+    @Query("SELECT COALESCE((SELECT enabled FROM GlobalDetection WHERE methodName = :methodName), 1)")
+    fun isGlobalDetectionEnabledFlow(methodName: String): Flow<Boolean>
+
+    fun isGlobalDetectionEnabledFlow(method: DetectionMethod): Flow<Boolean> {
+        return isGlobalDetectionEnabledFlow(method.name)
+    }
 
     @Transaction
     suspend fun toggleDetectionEnabled(packageName: String, userId: Int, methodName: String) {
@@ -149,5 +186,15 @@ interface PackageSettingsDao {
     suspend fun initializePackage(packageName: String, userId: Int, appId: Int) {
         insertPackageInfo(packageName, userId, appId)
         enableAllDetectionsForPackage(packageName, userId)
+    }
+
+    @Transaction
+    suspend fun toggleGlobalDetectionEnabled(methodName: String) {
+        val currentEnabled = isGlobalDetectionEnabled(methodName)
+        if (currentEnabled) {
+            insertGlobalDetection(methodName, false)
+        } else {
+            insertGlobalDetection(methodName, true)
+        }
     }
 }

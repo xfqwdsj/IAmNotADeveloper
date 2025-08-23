@@ -1,16 +1,16 @@
 package top.ltfan.notdeveloper.ui.composable
 
-import android.annotation.SuppressLint
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
+import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
+context(viewModel: AppViewModel)
 fun GroupedLazyListScope.categoryCards(
     groups: List<DetectionCategory>,
-    testResults: SnapshotStateMap<DetectionMethod, Boolean>,
     afterChange: (DetectionMethod) -> Unit,
+    afterTest: (DetectionMethod, Boolean) -> Unit,
     isPreferencesReady: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -20,18 +20,19 @@ fun GroupedLazyListScope.categoryCards(
     ) {
         categoryCard(
             category = it,
-            testResults = testResults,
             afterChange = afterChange,
+            afterTest = afterTest,
             isPreferencesReady = isPreferencesReady,
             modifier = modifier,
         )
     }
 }
 
+context(viewModel: AppViewModel)
 fun CardLazyGroup.categoryCard(
     category: DetectionCategory,
-    testResults: SnapshotStateMap<DetectionMethod, Boolean>,
     afterChange: (DetectionMethod) -> Unit,
+    afterTest: (DetectionMethod, Boolean) -> Unit,
     isPreferencesReady: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -46,23 +47,12 @@ fun CardLazyGroup.categoryCard(
         contentType = { "detection-method" },
         modifier = { modifier },
     ) { method ->
-        @Suppress("DEPRECATION")
-        @SuppressLint("WorldReadableFiles")
-        var pref by rememberBooleanSharedPreference(
-            mode = android.content.Context.MODE_WORLD_READABLE,
-            key = method.name,
-            defaultValue = true,
-            afterSet = { afterChange(method) }
-        )
-
-        val testResult = testResults[method] ?: false
-
         DetectionItem(
-            nameId = method.labelResId,
-            testResult = testResult,
-            checked = pref,
-            onCheckedChange = { pref = it },
-            enabled = isPreferencesReady
+            method = method,
+            afterChange = afterChange,
+            afterTest = afterTest,
+            testTrigger = viewModel.globalDetectionTestTrigger,
+            enabled = isPreferencesReady,
         )
     }
 }
