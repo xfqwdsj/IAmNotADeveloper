@@ -34,7 +34,7 @@ fun DetectionItem(
     afterChange: (DetectionMethod) -> Unit = {},
     afterTest: (DetectionMethod, Boolean) -> Unit = { _, _ -> },
     testTrigger: SharedFlow<DetectionMethod>,
-    enabled: Boolean,
+    enabled: Boolean = true,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -70,7 +70,7 @@ fun DetectionItem(
 
     var testResult by remember(method, packageInfo) {
         mutableStateOf(
-            if (packageInfo != null) {
+            if (packageInfo == null) {
                 method.test(viewModel.application)
             } else true
         )
@@ -93,7 +93,7 @@ fun DetectionItem(
         },
         enabled = enabled,
         leadingContent = {
-            if (packageInfo == null) return@PreferenceItem
+            if (packageInfo != null) return@PreferenceItem
             if (testResult) {
                 Icon(
                     Icons.Outlined.Error,
