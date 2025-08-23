@@ -203,15 +203,21 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         return configured to unconfigured
     }
 
-    fun test() {
+    val globalDetectionTestTrigger =
+        MutableSharedFlow<DetectionMethod>(replay = DetectionCategory.allMethods.size)
+
+    fun test(method: DetectionMethod? = null) {
+        if (method != null) {
+            viewModelScope.launch { globalDetectionTestTrigger.emit(method) }
+            return
+        }
+
         DetectionCategory.allMethods.forEach { method ->
-            val result = method.test(application)
-            testResults[method] = result
-            Log.v("${method.name} test result: $result")
+            viewModelScope.launch { globalDetectionTestTrigger.emit(method) }
         }
     }
 
-    fun afterStatusChange(method: DetectionMethod) {
+    fun afterGlobalDetectionChange(method: DetectionMethod) {
         when (method) {
             is DetectionMethod.SettingsMethod -> {
                 val service = service
@@ -225,12 +231,16 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
                 } catch (e: Throwable) {
                     Log.Android.e("Failed to notifySettingChange setting change", e)
                 } finally {
-                    test()
+                    test(method)
                 }
             }
 
-            is DetectionMethod.SystemPropertiesMethod -> test()
+            is DetectionMethod.SystemPropertiesMethod -> test(method)
         }
+    }
+
+    fun afterGlobalDetectionTest(method: DetectionMethod, result: Boolean) {
+        Log.v("Global detection ${method.name} test result: $result")
     }
 
     context(context: Context)
