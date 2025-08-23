@@ -107,8 +107,8 @@ object Overview : Main() {
 
                 categoryCards(
                     groups = DetectionCategory.values,
-                    testResults = testResults,
-                    afterChange = ::afterStatusChange,
+                    afterChange = ::afterGlobalDetectionChange,
+                    afterTest = ::afterGlobalDetectionTest,
                     isPreferencesReady = isPreferencesReady,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )

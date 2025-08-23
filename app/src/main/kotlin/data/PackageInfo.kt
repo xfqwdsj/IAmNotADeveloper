@@ -4,6 +4,9 @@ import android.content.pm.PackageInfo
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.parcelableCreator
+import top.ltfan.notdeveloper.util.getAppId
+import top.ltfan.notdeveloper.util.getUserId
+import top.ltfan.notdeveloper.database.PackageInfo as DatabaseInfo
 
 @Parcelize
 data class PackageInfoWrapper
@@ -11,6 +14,12 @@ data class PackageInfoWrapper
     companion object {
         val CREATOR = parcelableCreator<PackageInfoWrapper>()
     }
+
+    fun toDatabaseInfo() = DatabaseInfo(
+        packageName = info.packageName,
+        userId = info.getUserId(),
+        appId = info.getAppId(),
+    )
 
     override fun equals(other: Any?): Boolean {
         val info = when (other) {
