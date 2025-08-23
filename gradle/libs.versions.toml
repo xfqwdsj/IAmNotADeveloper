@@ -2,21 +2,39 @@
 app-versionName = "1.6.2"
 app-versionCode = "12"
 kotlin = "2.2.10"
-agp = "9.0.0-alpha01"
+kotlinx-serialization = "1.9.0"
+ksp = "2.2.10-2.0.2"
+agp = "9.0.0-alpha02"
 compileSdk = "36"
 targetSdk = "36"
 minSdk = "27"
-compose = "2025.08.00"
 lifecycle = "2.9.2"
+lifecycle-viewmodelNav3 = "1.0.0-alpha04"
+splashscreen = "1.0.1"
 activity = "1.10.1"
+compose = "2025.08.00"
+navigation = "1.0.0-alpha06"
+compose-adaptive = "1.0.0-SNAPSHOT"
+capsule = "1.0.1"
+haze = "1.6.10"
+coil = "3.3.0"
+room = "2.7.2"
+datastore = "1.1.7"
 preference = "1.2.1"
+dsl-utilities = "1.0.0"
+kaidl = "1.15"
 xposed-api = "82"
 
 [libraries]
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinx-serialization-cbor = { module = "org.jetbrains.kotlinx:kotlinx-serialization-cbor", version.ref = "kotlinx-serialization" }
 lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
+lifecycle-viewmodelNav3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle-viewmodelNav3" }
+splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
+activity = { module = "androidx.activity:activity-compose", version.ref = "activity" }
+navigation-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation" }
+navigation-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation" }
 compose = { module = "androidx.compose:compose-bom", version.ref = "compose" }
 compose-runtime = { module = "androidx.compose.runtime:runtime" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
@@ -24,11 +42,26 @@ compose-ui = { module = "androidx.compose.ui:ui" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
+compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
+compose-icons = { module = "androidx.compose.material:material-icons-extended" }
+capsule = { module = "com.github.Kyant0:Capsule", version.ref = "capsule" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
+coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 preference = { module = "androidx.preference:preference-ktx", version.ref = "preference" }
+dslUtilities = { module = "top.ltfan.dslutilities:dsl-utilities", version.ref = "dsl-utilities" }
+kaidl = { module = "com.github.kr328.kaidl:kaidl", version.ref = "kaidl" }
+kaidl-runtime = { module = "com.github.kr328.kaidl:kaidl-runtime", version.ref = "kaidl" }
 xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed-api" }
 
 [plugins]
 kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
-androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+room = { id = "androidx.room", version.ref = "room" }

@@ -5,53 +5,50 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.viewModels
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.detection.DetectionCategory
-import top.ltfan.notdeveloper.detection.DetectionMethod
-import top.ltfan.notdeveloper.ui.composable.CategoryCard
-import top.ltfan.notdeveloper.ui.composable.StatusCard
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation3.ui.NavDisplay
+import top.ltfan.notdeveloper.application.NotDevApplication
+import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
+import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.HazeZIndex
+import top.ltfan.notdeveloper.ui.util.hazeEffectBottom
+import top.ltfan.notdeveloper.ui.util.hazeSource
+import top.ltfan.notdeveloper.ui.util.only
+import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
-import top.ltfan.notdeveloper.xposed.Log
-import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
-    private var isPreferencesReady by mutableStateOf(false)
-    private val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
+    private val viewModel: AppViewModel by viewModels {
+        viewModelFactory {
+            addInitializer(AppViewModel::class) {
+                AppViewModel(this@MainActivity.application as NotDevApplication)
+            }
+        }
+    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         enableEdgeToEdge()
         @Suppress("DEPRECATION") if (isMiui) {
             window.setFlags(
@@ -66,55 +63,69 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            IAmNotADeveloperTheme {
-                val scrollBehavior =
-                    TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+            IAmNotADeveloperTheme(viewModel) {
+                val insets = AppWindowInsets
+                val navBarHeightFactor by animateFloatAsState(if (showNavBar) 1f else 0f)
+                SubcomposeLayout { constraints ->
+                    val width = constraints.maxWidth
+                    val height = constraints.maxHeight
 
-                Scaffold(
-                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                    topBar = {
-                        LargeTopAppBar(
-                            title = {
-                                Text(stringResource(R.string.app_name))
-                            },
-                            windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
-                            scrollBehavior = scrollBehavior
+                    val insetsBottom = insets.getBottom(this)
+
+                    val navBar = subcompose("navBar") {
+                        NavigationBar(
+                            modifier = Modifier
+                                .hazeSource(zIndex = HazeZIndex.bottomBar)
+                                .hazeEffectBottom(),
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            tonalElevation = 0.dp,
+                            windowInsets = insets.only { horizontal + bottom }
+                        ) {
+                            Main.pages.forEach { page ->
+                                NavigationBarItem(
+                                    selected = navBarEntry == page,
+                                    onClick = { navigateMain(page) },
+                                    icon = {
+                                        Icon(page.navigationIcon, contentDescription = null)
+                                    },
+                                    label = {
+                                        Text(stringResource(page.navigationLabel))
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    val navBarPlaceable = if (navBarHeightFactor != 0f) {
+                        navBar.first().measure(constraints)
+                    } else {
+                        null
+                    }
+
+                    val navBarHeight =
+                        navBarPlaceable?.height?.times(navBarHeightFactor)?.roundToInt()
+                    val navBarY = navBarHeight?.let { constraints.maxHeight - it }
+
+                    val paddingBottom = navBarHeight?.let { max(insetsBottom, it) } ?: insetsBottom
+                    val contentPadding = PaddingValues(bottom = paddingBottom.toDp())
+
+                    val contentPlaceable = subcompose("content") {
+                        NavDisplay(
+                            backStack = backStack,
+                            modifier = Modifier
+                                .consumeWindowInsets(insets.only { bottom })
+                                .hazeSource(zIndex = HazeZIndex.navDisplay),
+                            // TODO: Can cause LazyList unscrollable issue when orientated from
+                            // TODO: landscape to portrait. Uncomment when fixed.
+//                            sceneStrategy = rememberListDetailSceneStrategy(),
+                            entryProvider = { it.navEntry(contentPadding) },
                         )
-                    },
-                ) { padding ->
-                    val layoutDirection = LocalLayoutDirection.current
-                    val insets = WindowInsets.displayCutout
-                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-                        .asPaddingValues()
-                    val contentPadding = PaddingValues(
-                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(layoutDirection),
-                        top = padding.calculateTopPadding() + insets.calculateTopPadding() + 16.dp,
-                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(layoutDirection),
-                        bottom = padding.calculateBottomPadding() + insets.calculateBottomPadding() + 16.dp,
-                    )
-                    LazyColumn(
-                        modifier = Modifier.consumeWindowInsets(contentPadding)
-                            .fillMaxSize(),
-                        contentPadding = contentPadding,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        item {
-                            StatusCard(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                isPreferencesReady = isPreferencesReady
-                            )
-                        }
+                    }.first().measure(constraints)
 
-                        items(DetectionCategory.values) { category ->
-                            CategoryCard(
-                                category = category,
-                                testResults = testResults,
-                                afterChange = ::check,
-                                isPreferencesReady = isPreferencesReady,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
-                        }
+                    layout(width, height) {
+                        contentPlaceable.place(0, 0)
+                        navBarPlaceable?.place(0, navBarY!!)
                     }
                 }
             }
@@ -123,15 +134,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        isPreferencesReady = statusIsPreferencesReady
-        check()
-    }
-
-    private fun check() {
-        DetectionCategory.allMethods.forEach { method ->
-            val result = method.test(this)
-            testResults[method] = result
-            Log.v("${method.preferenceKey} test result: $result")
-        }
+        viewModel.onResume()
     }
 }

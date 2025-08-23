@@ -1,9 +1,11 @@
 package top.ltfan.notdeveloper.ui.composable
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,8 +30,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.focused
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
@@ -38,78 +47,103 @@ import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
 fun StatusCard(
     modifier: Modifier = Modifier,
     isModuleActivated: Boolean = statusIsModuleActivated,
-    isPreferencesReady: Boolean
+    isPreferencesReady: Boolean,
+    isServiceConnected: Boolean,
 ) {
-    val status = Status.from(isModuleActivated, isPreferencesReady)
+    val status = Status.from(isModuleActivated, isPreferencesReady, isServiceConnected)
+    val statusList = listOf(isModuleActivated, isPreferencesReady, isServiceConnected)
 
     var expanded by remember { mutableStateOf(false) }
 
+    val collapseText = stringResource(R.string.description_more_info_collapse)
+
     ElevatedCard(
         onClick = { expanded = !expanded },
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics {
+                if (expanded) {
+                    contentDescription = collapseText
+                }
+            },
         colors = CardDefaults.cardColors(containerColor = status.containerColor),
     ) {
         Row(
             Modifier
-                .padding(24.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Spacer(Modifier.width(24.dp))
             Icon(status.icon, contentDescription = null, modifier = Modifier.size(32.dp))
-            Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(status.summary, style = MaterialTheme.typography.headlineSmall)
-                AnimatedVisibility(visible = isPreferencesReady) {
-                    Text(stringResource(R.string.description_changes_application))
+                Text(
+                    text = status.summary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 24.dp),
+                    style = MaterialTheme.typography.headlineSmall,
+                )
+                AnimatedVisibilityWithBlur(visible = isPreferencesReady) {
+                    Text(
+                        text = stringResource(R.string.description_changes_application),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 24.dp)
+                            .semantics {
+                                if (expanded) {
+                                    hideFromAccessibility()
+                                }
+                            },
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
-                AnimatedVisibility(visible = status != Status.Normal) {
-                    Text(stringResource(R.string.description_more_info))
+                AnimatedVisibilityWithBlur(visible = status != Status.Normal) {
+                    Text(
+                        text = stringResource(R.string.description_more_info),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 24.dp)
+                            .semantics {
+                                if (expanded) {
+                                    hideFromAccessibility()
+                                }
+                            },
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
 
-                AnimatedVisibility(
-                    visible = status != Status.Normal || expanded,
-                    enter = expandVertically(expandFrom = Alignment.CenterVertically),
-                    exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+                val issueCount = statusList.count { !it }
+                val description =
+                    pluralStringResource(R.plurals.description_status_potential_issue, issueCount)
+                Column(
+                    Modifier.semantics {
+                        text = AnnotatedString(description)
+                    }
                 ) {
-                    Spacer(Modifier.height(8.dp))
-                }
-                AnimatedVisibility(visible = expanded && isModuleActivated) {
-                    Text(stringResource(R.string.status_entry_activation_y))
-                }
-                AnimatedVisibility(visible = !isModuleActivated) {
-                    Text(
-                        stringResource(R.string.status_entry_activation_n),
-                        color = MaterialTheme.colorScheme.error
+                    DynamicSpacer(status != Status.Normal || expanded)
+                    StatusEntry(
+                        expanded,
+                        working = isModuleActivated,
+                        workingText = R.string.status_entry_activation_y,
+                        notWorkingText = R.string.status_entry_activation_n,
+                        descriptionText = R.string.status_entry_activation_description,
                     )
-                }
-                AnimatedVisibility(visible = expanded) {
-                    Text(
-                        stringResource(R.string.status_entry_activation_description),
-                        style = MaterialTheme.typography.labelSmall
+                    DynamicSpacer(expanded)
+                    StatusEntry(
+                        expanded,
+                        working = isServiceConnected,
+                        workingText = R.string.status_entry_service_y,
+                        notWorkingText = R.string.status_entry_service_n,
+                        descriptionText = R.string.status_entry_service_description,
                     )
-                }
-
-                AnimatedVisibility(
-                    visible = expanded,
-                    enter = expandVertically(expandFrom = Alignment.CenterVertically),
-                    exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
-                ) {
-                    Spacer(Modifier.height(8.dp))
-                }
-
-                AnimatedVisibility(visible = expanded && isPreferencesReady) {
-                    Text(stringResource(R.string.status_entry_prefs_y))
-                }
-                AnimatedVisibility(visible = !isPreferencesReady) {
-                    Text(
-                        stringResource(R.string.status_entry_prefs_n),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                AnimatedVisibility(visible = expanded) {
-                    Text(
-                        stringResource(R.string.status_entry_prefs_description),
-                        style = MaterialTheme.typography.labelSmall
+                    DynamicSpacer(expanded)
+                    StatusEntry(
+                        expanded,
+                        working = isPreferencesReady,
+                        workingText = R.string.status_entry_prefs_y,
+                        notWorkingText = R.string.status_entry_prefs_n,
+                        descriptionText = R.string.status_entry_prefs_description,
                     )
                 }
             }
@@ -117,14 +151,71 @@ fun StatusCard(
     }
 }
 
-@Preview(device = "id:pixel_5", locale = "zh-rCN", showSystemUi = false, showBackground = false)
 @Composable
-fun StatusCardPreview() {
-    Column {
-        StatusCard(isModuleActivated = true, isPreferencesReady = true)
-        StatusCard(isModuleActivated = true, isPreferencesReady = false)
-        StatusCard(isModuleActivated = false, isPreferencesReady = true)
-        StatusCard(isModuleActivated = false, isPreferencesReady = false)
+private fun ColumnScope.DynamicSpacer(expanded: Boolean) {
+    AnimatedVisibility(
+        visible = expanded,
+        enter = expandVertically(expandFrom = Alignment.CenterVertically),
+        exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+    ) {
+        Spacer(Modifier.height(8.dp))
+    }
+}
+
+@Composable
+private fun ColumnScope.StatusEntry(
+    expanded: Boolean,
+    working: Boolean,
+    @StringRes workingText: Int,
+    @StringRes notWorkingText: Int,
+    @StringRes descriptionText: Int,
+) {
+    AnimatedVisibilityWithBlur(visible = expanded && working) {
+        val description = stringResource(R.string.description_status_normal)
+        Text(
+            text = stringResource(workingText),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 24.dp)
+                .semantics {
+                    stateDescription = description
+                    if (expanded) {
+                        focused = true
+                    }
+                },
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+    AnimatedVisibilityWithBlur(visible = !working) {
+        val description = stringResource(R.string.description_status_abnormal)
+        Text(
+            text = stringResource(notWorkingText),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 24.dp)
+                .semantics {
+                    stateDescription = description
+                    if (expanded) {
+                        focused = true
+                    }
+                },
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+    AnimatedVisibilityWithBlur(visible = expanded) {
+        Text(
+            text = stringResource(descriptionText),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 24.dp)
+                .semantics {
+                    if (expanded) {
+                        focused = true
+                    }
+                },
+            style = MaterialTheme.typography.bodySmall,
+        )
     }
 }
 
@@ -132,11 +223,15 @@ enum class Status {
     Normal, Partial, Error;
 
     companion object {
-        fun from(isModuleActivated: Boolean, isPreferencesReady: Boolean): Status {
+        fun from(
+            isModuleActivated: Boolean,
+            isPreferencesReady: Boolean,
+            isServiceConnected: Boolean,
+        ): Status {
             if (!isModuleActivated) return Error
-            return if (isPreferencesReady) {
-                Normal
-            } else Partial
+            if (!isPreferencesReady) return Partial
+            if (!isServiceConnected) return Partial
+            return Normal
         }
     }
 

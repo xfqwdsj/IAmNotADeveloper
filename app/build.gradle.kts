@@ -2,8 +2,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    id("kotlin-parcelize")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -73,19 +77,38 @@ android {
 
 dependencies {
     implementation(libs.kotlin.reflect)
+    implementation(libs.kotlinx.serialization.cbor)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
-    implementation(libs.activity.compose)
-
-    val compose = platform(libs.compose)
-    implementation(compose)
-
+    implementation(libs.lifecycle.viewmodelNav3)
+    implementation(libs.splashscreen)
+    implementation(libs.activity)
+    implementation(libs.navigation.runtime)
+    implementation(libs.navigation.ui)
+    implementation(platform(libs.compose))
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
+//    implementation(libs.compose.material3.adaptive)
+    implementation(libs.compose.icons)
+    implementation(libs.capsule)
+    implementation(libs.haze)
+    implementation(libs.haze.materials)
+    implementation(libs.coil)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.datastore)
+    implementation(libs.room.ktx)
     implementation(libs.preference)
+    implementation(libs.dslUtilities)
+    ksp(libs.kaidl)
+    implementation(libs.kaidl.runtime)
     compileOnly(libs.xposed.api)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }

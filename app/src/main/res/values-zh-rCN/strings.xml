@@ -23,11 +23,21 @@
     <string name="status_normal">正常工作中</string>
     <string name="status_partial">部分功能可用</string>
     <string name="status_error">可能无法工作</string>
+    <plurals name="description_status_potential_issue">
+        <item quantity="other">需要注意。有些条目可能表示模块存在潜在问题。</item>
+    </plurals>
+    <string name="description_status_normal">正常</string>
+    <string name="description_status_abnormal">异常</string>
 
     <!-- Activation status -->
     <string name="status_entry_activation_y">模块已激活</string>
     <string name="status_entry_activation_n">模块未激活</string>
     <string name="status_entry_activation_description">模块的激活状态直接影响其功能。如果模块未被激活，它将完全无法运行。模块通过Hook自身的成员实现报告模块激活状态，如果你认为存在误报，请强行停止应用再重新打开。</string>
+
+    <!-- Service status -->
+    <string name="status_entry_service_y">服务已连接</string>
+    <string name="status_entry_service_n">服务未连接</string>
+    <string name="status_entry_service_description">服务状态决定了系统级隐藏是否可以正常工作。如果服务异常，系统级隐藏将无法工作。勾选LSPosed中的系统框架并重启以启动服务。</string>
 
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">偏好设置正常</string>
@@ -37,8 +47,56 @@
     <!-- Descriptions -->
     <string name="description_changes_application">所有更改将即时生效</string>
     <string name="description_more_info">点击查看更多信息</string>
+    <string name="description_more_info_collapse">点击收起</string>
 
     <!-- Test results -->
     <string name="test_result_on">该项测试结果：开启</string>
     <string name="test_result_off">该项测试结果：关闭</string>
+
+    <!-- Floating action button -->
+    <string name="description_fab_menu">菜单</string>
+    <string name="action_fab_menu_expand">展开菜单</string>
+    <string name="action_fab_menu_collapse">收起菜单</string>
+
+    <!-- Overview -->
+    <string name="label_nav_overview">概览</string>
+    <string name="toggle_overview_use_global_preferences">使用全局偏好设置</string>
+    <string name="description_overview_use_global_preferences">如果启用，模块将对所有应用使用全局偏好设置。如果禁用，每个应用可以有自己的偏好设置。</string>
+
+    <!-- Apps -->
+    <string name="label_nav_apps">应用</string>
+    <string name="message_apps_empty">没有应用可显示</string>
+    <string name="label_apps_empty_filter_show">显示筛选</string>
+    <string name="label_apps_list_header_configured">已配置的应用</string>
+    <string name="label_apps_list_header_unconfigured">未配置的应用</string>
+    <string name="description_apps_package_name">包名</string>
+    <string name="description_apps_label">应用名</string>
+    <string name="description_apps_version">版本名：%1$s；版本号：%2$d</string>
+    <string name="text_apps_version">%1$s（%2$d）</string>
+    <string name="action_apps_user_select_show">显示用户选择</string>
+    <string name="action_apps_user_select_hide">隐藏用户选择</string>
+    <string name="label_apps_user_select">选择用户</string>
+    <string name="label_apps_user_current">当前用户</string>
+    <string name="action_apps_user_list_refresh">刷新用户列表</string>
+    <string name="label_apps_user_list_refresh_done">用户列表已刷新</string>
+    <string name="action_apps_bottom_sheet_filter_show">筛选</string>
+    <string name="title_apps_bottom_sheet_filter">筛选应用</string>
+    <string name="label_apps_bottom_sheet_filter_sort">排序方式</string>
+    <string name="item_apps_bottom_sheet_filter_sort_label">名称</string>
+    <string name="item_apps_bottom_sheet_filter_sort_package">包名</string>
+    <string name="item_apps_bottom_sheet_filter_sort_updated">最近更新</string>
+    <string name="label_apps_bottom_sheet_filter">筛选方式</string>
+    <string name="item_apps_bottom_sheet_filter_all">全部</string>
+    <string name="item_apps_bottom_sheet_filter_configured">已配置</string>
+    <string name="item_apps_bottom_sheet_filter_unconfigured">未配置</string>
+    <string name="item_apps_bottom_sheet_filter_system">系统应用</string>
+    <string name="title_apps_modal_configuration">应用配置</string>
+    <string name="action_apps_modal_configuration_close">关闭应用配置</string>
+    <string name="action_apps_modal_configuration_clear">清除此应用的配置</string>
+    <string name="label_apps_item_menu_fab_add_app">手动添加应用</string>
+    <string name="label_apps_item_menu_fab_search">搜索</string>
+    <string name="message_apps_snackbar_query_failed">查询应用列表失败</string>
+    <string name="action_apps_query_details_show">查询应用列表失败，点击查看详情</string>
+    <string name="title_apps_dialog_query_failed">查询应用列表失败</string>
+    <string name="message_apps_dialog_query_failed">请检查模块是否已激活以及服务是否正在运行。</string>
 </resources>

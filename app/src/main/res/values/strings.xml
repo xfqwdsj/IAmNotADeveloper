@@ -23,11 +23,22 @@
     <string name="status_normal">Working normally</string>
     <string name="status_partial">Partially working</string>
     <string name="status_error">May not work</string>
+    <plurals name="description_status_potential_issue">
+        <item quantity="one">Needs attention. There is an entry that may indicate a potential issue with the module.</item>
+        <item quantity="other">Needs attention. There are entries that may indicate potential issues with the module.</item>
+    </plurals>
+    <string name="description_status_normal">Normal</string>
+    <string name="description_status_abnormal">Abnormal</string>
 
     <!-- Activation status -->
     <string name="status_entry_activation_y">Module activated</string>
     <string name="status_entry_activation_n">Module not activated</string>
     <string name="status_entry_activation_description">The module\'s activation status directly affects its functionality. If the module isn\'t activated, it won\'t work. The module reports its activation status by hooking its own members. If you suspect a false report, force stop the app and reopen it.</string>
+
+    <!-- Service status -->
+    <string name="status_entry_service_y">Service connected</string>
+    <string name="status_entry_service_n">Service not connected</string>
+    <string name="status_entry_service_description">Service status determines whether system-level hiding can function. If the service is abnormal, system-level hiding will not work. Select System Framework in LSPosed and reboot to start the service.</string>
 
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">Preferences ready</string>
@@ -37,8 +48,56 @@
     <!-- Descriptions -->
     <string name="description_changes_application">All changes will take effect immediately</string>
     <string name="description_more_info">Click to view more information</string>
+    <string name="description_more_info_collapse">Click to collapse</string>
 
     <!-- Test results -->
     <string name="test_result_on">Test result of this item: On</string>
     <string name="test_result_off">Test result of this item: Off</string>
+
+    <!-- Floating action button -->
+    <string name="description_fab_menu">Menu</string>
+    <string name="action_fab_menu_expand">Expand menu</string>
+    <string name="action_fab_menu_collapse">Collapse menu</string>
+
+    <!-- Overview -->
+    <string name="label_nav_overview">Overview</string>
+    <string name="toggle_overview_use_global_preferences">Use global preferences</string>
+    <string name="description_overview_use_global_preferences">If enabled, the module will use global preferences for all apps. If disabled, each app can have its own preferences.</string>
+
+    <!-- Apps -->
+    <string name="label_nav_apps">Apps</string>
+    <string name="message_apps_empty">There are no apps to show</string>
+    <string name="label_apps_empty_filter_show">Show filter</string>
+    <string name="label_apps_list_header_configured">Configured Apps</string>
+    <string name="label_apps_list_header_unconfigured">Unconfigured Apps</string>
+    <string name="description_apps_package_name">Package name</string>
+    <string name="description_apps_label">App name</string>
+    <string name="description_apps_version">Version name: %1$s; version code: %2$d</string>
+    <string name="text_apps_version">%1$s (%2$d)</string>
+    <string name="action_apps_user_select_show">Show user selection</string>
+    <string name="action_apps_user_select_hide">Hide user selection</string>
+    <string name="label_apps_user_select">Select user</string>
+    <string name="label_apps_user_current">Current user</string>
+    <string name="action_apps_user_list_refresh">Refresh user list</string>
+    <string name="label_apps_user_list_refresh_done">User list refreshed</string>
+    <string name="action_apps_bottom_sheet_filter_show">Filter</string>
+    <string name="title_apps_bottom_sheet_filter">Filter Apps</string>
+    <string name="label_apps_bottom_sheet_filter_sort">Sort by</string>
+    <string name="item_apps_bottom_sheet_filter_sort_label">Label</string>
+    <string name="item_apps_bottom_sheet_filter_sort_package">Package name</string>
+    <string name="item_apps_bottom_sheet_filter_sort_updated">Last updated</string>
+    <string name="label_apps_bottom_sheet_filter">Filter by</string>
+    <string name="item_apps_bottom_sheet_filter_all">All</string>
+    <string name="item_apps_bottom_sheet_filter_configured">Configured</string>
+    <string name="item_apps_bottom_sheet_filter_unconfigured">Unconfigured</string>
+    <string name="item_apps_bottom_sheet_filter_system">System</string>
+    <string name="title_apps_modal_configuration">App Configuration</string>
+    <string name="action_apps_modal_configuration_close">Close app configuration</string>
+    <string name="action_apps_modal_configuration_clear">Clear configurations for this app</string>
+    <string name="label_apps_item_menu_fab_add_app">Manually add app</string>
+    <string name="label_apps_item_menu_fab_search">Search</string>
+    <string name="message_apps_snackbar_query_failed">Failed to query apps</string>
+    <string name="action_apps_query_details_show">Apps query failed. Click to show details</string>
+    <string name="title_apps_dialog_query_failed">Failed to query apps</string>
+    <string name="message_apps_dialog_query_failed">Please check if the module is activated and the service is running.</string>
 </resources>

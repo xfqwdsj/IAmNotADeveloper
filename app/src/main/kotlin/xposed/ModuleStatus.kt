@@ -2,6 +2,7 @@ package top.ltfan.notdeveloper.xposed
 
 import android.annotation.SuppressLint
 import android.content.Context
+import top.ltfan.notdeveloper.log.Log
 
 @Suppress("MayBeConstant", "RedundantSuppression")
 val statusIsModuleActivated get() = StatusProxy.get()
