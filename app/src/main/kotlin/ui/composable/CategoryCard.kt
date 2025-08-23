@@ -11,7 +11,6 @@ fun GroupedLazyListScope.categoryCards(
     groups: List<DetectionCategory>,
     afterChange: (DetectionMethod) -> Unit,
     afterTest: (DetectionMethod, Boolean) -> Unit,
-    isPreferencesReady: Boolean,
     modifier: Modifier = Modifier,
 ) {
     cards(
@@ -22,7 +21,6 @@ fun GroupedLazyListScope.categoryCards(
             category = it,
             afterChange = afterChange,
             afterTest = afterTest,
-            isPreferencesReady = isPreferencesReady,
             modifier = modifier,
         )
     }
@@ -33,7 +31,6 @@ fun CardLazyGroup.categoryCard(
     category: DetectionCategory,
     afterChange: (DetectionMethod) -> Unit,
     afterTest: (DetectionMethod, Boolean) -> Unit,
-    isPreferencesReady: Boolean,
     modifier: Modifier = Modifier,
 ) {
     header(
@@ -52,7 +49,6 @@ fun CardLazyGroup.categoryCard(
             afterChange = afterChange,
             afterTest = afterTest,
             testTrigger = viewModel.globalDetectionTestTrigger,
-            enabled = isPreferencesReady,
         )
     }
 }
