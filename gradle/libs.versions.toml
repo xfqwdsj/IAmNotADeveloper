@@ -4,7 +4,7 @@ app-versionCode = "12"
 kotlin = "2.2.10"
 kotlinx-serialization = "1.9.0"
 ksp = "2.2.10-2.0.2"
-agp = "9.0.0-alpha02"
+agp = "9.0.0-alpha03"
 compileSdk = "36"
 targetSdk = "36"
 minSdk = "27"
@@ -59,7 +59,6 @@ kaidl-runtime = { module = "com.github.kr328.kaidl:kaidl-runtime", version.ref =
 xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed-api" }
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
