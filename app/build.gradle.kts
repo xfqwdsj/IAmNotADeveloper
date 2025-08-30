@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
@@ -97,6 +96,7 @@ dependencies {
     implementation(libs.capsule)
     implementation(libs.haze)
     implementation(libs.haze.materials)
+    implementation(libs.m3Extended)
     implementation(libs.coil)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
