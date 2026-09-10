@@ -26,10 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -44,10 +41,10 @@ import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.util.isMiui
 import top.ltfan.notdeveloper.xposed.Log
+import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class MainActivity : ComponentActivity() {
-    private var isPreferencesReady by mutableStateOf(false)
     private val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +66,8 @@ class MainActivity : ComponentActivity() {
             IAmNotADeveloperTheme {
                 val scrollBehavior =
                     TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+                val isModuleActivated = statusIsModuleActivated
+                val isPreferencesReady = statusIsPreferencesReady
 
                 Scaffold(
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -87,13 +86,18 @@ class MainActivity : ComponentActivity() {
                         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
                         .asPaddingValues()
                     val contentPadding = PaddingValues(
-                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(layoutDirection),
+                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(
+                            layoutDirection
+                        ),
                         top = padding.calculateTopPadding() + insets.calculateTopPadding() + 16.dp,
-                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(layoutDirection),
+                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(
+                            layoutDirection
+                        ),
                         bottom = padding.calculateBottomPadding() + insets.calculateBottomPadding() + 16.dp,
                     )
                     LazyColumn(
-                        modifier = Modifier.consumeWindowInsets(contentPadding)
+                        modifier = Modifier
+                            .consumeWindowInsets(contentPadding)
                             .fillMaxSize(),
                         contentPadding = contentPadding,
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -102,6 +106,7 @@ class MainActivity : ComponentActivity() {
                         item {
                             StatusCard(
                                 modifier = Modifier.padding(horizontal = 16.dp),
+                                isModuleActivated = isModuleActivated,
                                 isPreferencesReady = isPreferencesReady
                             )
                         }
@@ -123,7 +128,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        isPreferencesReady = statusIsPreferencesReady
         check()
     }
 
@@ -131,7 +135,7 @@ class MainActivity : ComponentActivity() {
         DetectionCategory.allMethods.forEach { method ->
             val result = method.test(this)
             testResults[method] = result
-            Log.v("${method.preferenceKey} test result: $result")
+            Log.Android.v("${method.preferenceKey} test result: $result")
         }
     }
 }

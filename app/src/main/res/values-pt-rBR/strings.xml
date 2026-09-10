@@ -27,7 +27,7 @@
     <!-- Activation status -->
     <string name="status_entry_activation_y">Módulo ativado</string>
     <string name="status_entry_activation_n">Módulo não ativado</string>
-    <string name="status_entry_activation_description">O status de ativação do módulo afeta diretamente sua funcionalidade. Se o módulo não estiver ativado, ele não funcionará. O módulo relata seu status de ativação conectando seus próprios componentes. Se você suspeitar de um relatório falso, force a parada do app e abra-o novamente.</string>
+    <string name="status_entry_activation_description">O status de ativação do módulo afeta diretamente sua funcionalidade. Se o módulo não estiver ativado, ele não funcionará. O módulo descobre seu status de ativação pelo serviço que a estrutura Xposed entrega ao app. Se você suspeitar de um relatório falso, force a parada do app e abra-o novamente.</string>
 
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">Preferências prontas</string>

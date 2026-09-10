@@ -1,6 +1,5 @@
 package top.ltfan.notdeveloper.ui.composable
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,10 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import top.ltfan.notdeveloper.ModuleService
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 
@@ -44,10 +43,8 @@ fun CategoryCard(
             Spacer(Modifier.height(12.dp))
 
             category.methods.forEach { method ->
-                @Suppress("DEPRECATION")
-                @SuppressLint("WorldReadableFiles")
                 var pref by rememberBooleanSharedPreference(
-                    mode = android.content.Context.MODE_WORLD_READABLE,
+                    preferences = ModuleService.preferences,
                     key = method.preferenceKey,
                     defaultValue = true,
                     afterSet = { afterChange() }

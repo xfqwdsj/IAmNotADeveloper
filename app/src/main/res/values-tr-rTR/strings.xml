@@ -27,7 +27,7 @@
     <!-- Activation status -->
     <string name="status_entry_activation_y">Modül etkinleştirildi</string>
     <string name="status_entry_activation_n">Modül etkinleştirilmedi</string>
-    <string name="status_entry_activation_description">Modülün etkinleştirme durumu işlevselliğini doğrudan etkiler. Modül etkinleştirilmemişse çalışmaz. Modül, kendi üyelerini hook’layarak etkinleştirme durumunu raporlar. Yanıltıcı rapor olduğunu düşünüyorsanız uygulamayı zorla durdurup yeniden açın.</string>
+    <string name="status_entry_activation_description">Modülün etkinleştirme durumu işlevselliğini doğrudan etkiler. Modül etkinleştirilmemişse çalışmaz. Modül, etkinleştirme durumunu Xposed çerçevesinin uygulamaya ilettiği servisten öğrenir. Yanıltıcı rapor olduğunu düşünüyorsanız uygulamayı zorla durdurup yeniden açın.</string>
 
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">Tercihler hazır</string>
