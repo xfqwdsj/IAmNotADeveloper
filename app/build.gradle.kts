@@ -1,7 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
 }
@@ -9,7 +8,7 @@ plugins {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
-        freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.add("-Xexplicit-context-arguments")
     }
 }
 
@@ -17,7 +16,11 @@ android {
     val appId = "top.ltfan.notdeveloper"
 
     namespace = appId
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
+    }
 
     signingConfigs {
         create("config") {
@@ -30,10 +33,10 @@ android {
 
     defaultConfig {
         applicationId = appId
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionName = libs.versions.app.versionName.get()
-        versionCode = libs.versions.app.versionCode.get().toInt()
+        minSdk = 27
+        targetSdk = 37
+        versionName = "1.7.0"
+        versionCode = 13
     }
 
     buildTypes {
@@ -77,8 +80,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.activity.compose)
 
-    val compose = platform(libs.compose)
-    implementation(compose)
+    implementation(platform(libs.compose))
 
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)

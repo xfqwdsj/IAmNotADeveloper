@@ -1,14 +1,9 @@
 [versions]
-app-versionName = "1.6.2"
-app-versionCode = "12"
-kotlin = "2.2.10"
-agp = "9.0.0-alpha02"
-compileSdk = "36"
-targetSdk = "36"
-minSdk = "27"
-compose = "2025.08.00"
-lifecycle = "2.9.2"
-activity = "1.10.1"
+kotlin = "2.4.20"
+agp = "9.5.0-alpha04"
+compose = "2026.09.00"
+lifecycle = "2.11.0"
+activity = "1.13.0"
 preference = "1.2.1"
 xposed-api = "82"
 
@@ -28,7 +23,6 @@ preference = { module = "androidx.preference:preference-ktx", version.ref = "pre
 xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed-api" }
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
