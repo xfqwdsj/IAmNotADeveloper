@@ -35,6 +35,7 @@ import top.ltfan.notdeveloper.datastore.model.AppDataStore
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
+import top.ltfan.notdeveloper.service.ScopeController
 import top.ltfan.notdeveloper.service.SystemServiceClient
 import top.ltfan.notdeveloper.service.systemService
 import top.ltfan.notdeveloper.ui.page.Apps
@@ -263,6 +264,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         if (service == null) {
             service = context.systemService
         }
+        ScopeController.sync(setOf("system"))
         updateUsers()
         updateAppList()
     }
