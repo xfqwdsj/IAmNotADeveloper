@@ -4,6 +4,24 @@ import android.content.Context
 import androidx.annotation.StringRes
 import top.ltfan.notdeveloper.xposed.hook.Hook
 
+/**
+ * How a detection method is hidden. It tells the configuration and scope
+ * logic which mechanism a method relies on.
+ */
+enum class HookKind {
+    /** Hides a `Settings` entry through the settings provider. */
+    JvmSettings,
+
+    /** Overrides a `SystemProperties` getter in the target process. */
+    JvmProperty,
+
+    /**
+     * Reads the property's final value through a native interception, which
+     * needs a native module entry and is not available yet.
+     */
+    NativeProperty,
+}
+
 sealed class DetectionMethod(
     val name: String,
     @param:StringRes val labelResId: Int,
@@ -13,6 +31,13 @@ sealed class DetectionMethod(
      * with the hooked packages.
      */
     val preferenceKey: String get() = name
+
+    /** The mechanism used to hide this method. */
+    val hookKind: HookKind
+        get() = when (this) {
+            is SettingsMethod -> HookKind.JvmSettings
+            is SystemPropertiesMethod -> HookKind.JvmProperty
+        }
 
     abstract fun test(context: Context): Boolean
 
