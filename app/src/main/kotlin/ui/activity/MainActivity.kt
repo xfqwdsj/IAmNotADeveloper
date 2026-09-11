@@ -26,7 +26,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
@@ -141,6 +143,10 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .consumeWindowInsets(insets.only { bottom })
                                 .layerBackdrop(backdrop),
+                            entryDecorators = listOf(
+                                rememberSaveableStateHolderNavEntryDecorator(),
+                                rememberViewModelStoreNavEntryDecorator(),
+                            ),
                             // TODO: Can cause LazyList unscrollable issue when orientated from
                             // TODO: landscape to portrait. Uncomment when fixed.
 //                            sceneStrategy = rememberListDetailSceneStrategy(),
