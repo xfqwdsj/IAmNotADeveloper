@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -41,7 +40,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
-import androidx.compose.ui.window.DialogProperties
 import top.ltfan.notdeveloper.ui.util.pageGlass
 import top.ltfan.notdeveloper.ui.util.GlassDialog
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
@@ -64,7 +62,6 @@ fun HazeAlertDialog(
     titleContentColor: Color = AlertDialogDefaults.titleContentColor,
     textContentColor: Color = AlertDialogDefaults.textContentColor,
     tonalElevation: Dp = AlertDialogDefaults.TonalElevation,
-    properties: DialogProperties = DialogProperties(),
 ) {
     GlassDialog(
         onDismissRequest = onDismissRequest,
