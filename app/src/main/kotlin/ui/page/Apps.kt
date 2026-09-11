@@ -102,9 +102,9 @@ import androidx.compose.ui.util.fastMaxBy
 import com.kyant.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.launch
 import top.ltfan.material.m3.card
-import top.ltfan.material.m3.core.GroupedLazyColumn
-import top.ltfan.material.m3.core.GroupedLazyListScope
-import top.ltfan.material.m3.header
+import top.ltfan.material.m3.core.layout.GroupedLazyColumn
+import top.ltfan.material.m3.core.layout.GroupedLazyListScope
+import top.ltfan.material.m3.layout.header
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.datastore.AppFilter
