@@ -10,12 +10,14 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -23,6 +25,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.BuildConfig
+import top.ltfan.notdeveloper.ModuleService
 import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
@@ -67,6 +70,34 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
             settings.copy(smoothRoundedCorners = UiSettings.SmoothRoundedCorners(value))
         },
     )
+
+    /**
+     * Latest global detection states, mirrored into the framework remote
+     * preferences so the hooked packages read the same values.
+     */
+    private val globalDetectionStates = mutableMapOf<String, Boolean>()
+
+    init {
+        val dao = application.database.dao()
+        DetectionCategory.allMethods.forEach { method ->
+            viewModelScope.launch {
+                dao.isGlobalDetectionEnabledFlow(method.name).collect { enabled ->
+                    globalDetectionStates[method.name] = enabled
+                    writeRemotePreferences()
+                }
+            }
+        }
+        viewModelScope.launch {
+            snapshotFlow { ModuleService.preferences }.collect { writeRemotePreferences() }
+        }
+    }
+
+    private fun writeRemotePreferences() {
+        val preferences = ModuleService.preferences ?: return
+        preferences.edit().apply {
+            globalDetectionStates.forEach { (key, value) -> putBoolean(key, value) }
+        }.apply()
+    }
 
     val showNavBar: Boolean
         inline get() {
