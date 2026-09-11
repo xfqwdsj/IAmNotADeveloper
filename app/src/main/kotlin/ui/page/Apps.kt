@@ -130,7 +130,7 @@ import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.capsule.ContinuousCapsule
 import top.ltfan.material.m3.core.visual.BackdropEdge
-import top.ltfan.notdeveloper.ui.util.GlassBottomSheet
+import top.ltfan.material.m3.overlay.GlassBottomSheet
 import top.ltfan.material.m3.core.visual.LocalPageBackdrop
 import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.pageGlass
