@@ -132,6 +132,7 @@ import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.capsule.ContinuousCapsule
 import top.ltfan.notdeveloper.ui.util.BackdropEdge
+import top.ltfan.notdeveloper.ui.util.GlassBottomSheet
 import top.ltfan.notdeveloper.ui.util.LocalPageBackdrop
 import top.ltfan.notdeveloper.ui.util.progressiveBlur
 import top.ltfan.notdeveloper.ui.util.pageGlass
@@ -516,9 +517,8 @@ object Apps : Main() {
     fun FilterBottomSheet() {
         if (!showFilterBottomSheet) return
         with(viewModel) {
-            ModalBottomSheet(
+            GlassBottomSheet(
                 onDismissRequest = { showFilterBottomSheet = false },
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             ) {
                 Text(
                     text = stringResource(R.string.title_apps_bottom_sheet_filter),
