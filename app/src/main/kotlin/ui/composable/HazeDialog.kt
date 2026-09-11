@@ -42,10 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.DialogProperties
-import dev.chrisbanes.haze.HazeDefaults
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.LocalHazeStyle
-import dev.chrisbanes.haze.hazeEffect
+import top.ltfan.notdeveloper.ui.util.pageGlass
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
 
@@ -74,7 +71,6 @@ fun HazeAlertDialog(
         properties = properties
     ) {
         HazeAlertDialogContent(
-            hazeState = viewModel.hazeState,
             buttons = {
                 AlertDialogFlowRow(
                     mainAxisSpacing = ButtonsMainAxisSpacing,
@@ -104,7 +100,6 @@ fun HazeAlertDialog(
 
 @Composable
 internal fun HazeAlertDialogContent(
-    hazeState: HazeState,
     buttons: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)?,
@@ -126,12 +121,9 @@ internal fun HazeAlertDialogContent(
     ) {
         Column(
             modifier = Modifier
-            .hazeEffect(
-                state = hazeState,
-                style = LocalHazeStyle.current.copy(
-                    backgroundColor = containerColor,
-                    tints = listOf(HazeDefaults.tint(containerColor)),
-                ),
+            .pageGlass(
+                shape = shape,
+                containerColor = containerColor,
             )
             .padding(DialogPadding),
         ) {

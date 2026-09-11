@@ -1,23 +1,34 @@
 package top.ltfan.notdeveloper.ui.util
 
+import androidx.compose.foundation.background
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.BackdropEffectScope
+import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.runtimeShaderEffect
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.effects.vibrancy
 
 /**
  * The edges a progressive blur can ramp from.
  */
 enum class BackdropEdge { Top, Bottom, Start, End }
+
+/**
+ * Backdrop captured by the enclosing page; overlay surfaces sample it to
+ * draw their glass.
+ */
+val LocalPageBackdrop = staticCompositionLocalOf<LayerBackdrop?> { null }
 
 /**
  * Chains a blurred backdrop whose strength ramps from full at [edge] to zero
@@ -64,14 +75,13 @@ half4 main(float2 coord) {
 """
 
 @Composable
-fun rememberPageBackdrop(background: Color): com.kyant.backdrop.backdrops.LayerBackdrop =
+fun rememberPageBackdrop(background: Color): LayerBackdrop =
     rememberLayerBackdrop {
         drawRect(background)
         drawContent()
     }
 
-fun Modifier.pageBackdrop(backdrop: com.kyant.backdrop.backdrops.LayerBackdrop): Modifier =
-    layerBackdrop(backdrop)
+fun Modifier.pageBackdrop(backdrop: LayerBackdrop): Modifier = layerBackdrop(backdrop)
 
 fun Modifier.glassSurface(
     backdrop: Backdrop,
@@ -84,3 +94,28 @@ fun Modifier.glassSurface(
     effects = effects,
     onDrawSurface = onDrawSurface,
 )
+
+/**
+ * Draws a glass surface for the enclosing page: it samples
+ * [LocalPageBackdrop] when present and falls back to a flat [containerColor]
+ * fill otherwise.
+ */
+@Composable
+fun Modifier.pageGlass(
+    shape: Shape,
+    containerColor: Color,
+    blurRadius: Dp = 8.dp,
+    surfaceAlpha: Float = 0.6f,
+): Modifier {
+    val backdrop = LocalPageBackdrop.current
+        ?: return background(containerColor)
+    return drawBackdrop(
+        backdrop = backdrop,
+        shape = { shape },
+        effects = {
+            vibrancy()
+            blur(blurRadius.toPx())
+        },
+        onDrawSurface = { drawRect(containerColor.copy(alpha = surfaceAlpha)) },
+    )
+}
