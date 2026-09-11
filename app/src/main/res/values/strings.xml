@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">IAmNotADeveloper</string>
+    <!-- Module description shown by the Xposed manager; libxposed reads it from android:description. -->
+    <string name="module_description" translatable="false">GitHub @xfqwdsj</string>
 
     <!-- Categories -->
     <string name="category_development_mode">Development mode</string>
@@ -27,7 +29,7 @@
     <!-- Activation status -->
     <string name="status_entry_activation_y">Module activated</string>
     <string name="status_entry_activation_n">Module not activated</string>
-    <string name="status_entry_activation_description">The module\'s activation status directly affects its functionality. If the module isn\'t activated, it won\'t work. The module reports its activation status by hooking its own members. If you suspect a false report, force stop the app and reopen it.</string>
+    <string name="status_entry_activation_description">The module\'s activation status directly affects its functionality. If the module isn\'t activated, it won\'t work. The module learns its activation status from the framework service that the Xposed framework delivers to the app. If you suspect a false report, force stop the app and reopen it.</string>
 
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">Preferences ready</string>

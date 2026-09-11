@@ -1,6 +1,6 @@
 package top.ltfan.notdeveloper.ui.composable
 
-import android.content.Context
+import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -8,32 +8,37 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import top.ltfan.notdeveloper.xposed.Log
 import kotlin.reflect.KProperty
 
+/**
+ * Wraps the boolean stored under [key] in [preferences] as Compose state.
+ *
+ * [preferences] is the remote preferences of
+ * [top.ltfan.notdeveloper.ModuleService], which only exist once the
+ * framework has connected, so it may be `null` for a while; the holder
+ * is then recreated as soon as the preferences become available.
+ */
 @Composable
 fun rememberBooleanSharedPreference(
-    preferenceFileKey: String? = null,
-    mode: Int = Context.MODE_PRIVATE,
+    preferences: SharedPreferences?,
     key: String,
     defaultValue: Boolean,
     beforeSet: ((Boolean) -> Boolean)? = null,
     afterSet: ((Boolean) -> Unit)? = null,
 ): BooleanSharedPreference {
-    val context = LocalContext.current
-    val preference = remember(key) {
-        BooleanSharedPreference(
-            context, preferenceFileKey, mode, key, defaultValue, beforeSet, afterSet
-        )
+    val preference = remember(preferences, key) {
+        BooleanSharedPreference(preferences, key, defaultValue, beforeSet, afterSet)
     }
 
     DisposableEffect(preference) {
         onDispose {
-            preference.clean()
+            preference.close()
         }
     }
 
@@ -41,48 +46,71 @@ fun rememberBooleanSharedPreference(
 }
 
 class BooleanSharedPreference(
-    context: Context,
-    preferenceFileKey: String? = null,
-    mode: Int = Context.MODE_PRIVATE,
+    private val preferences: SharedPreferences?,
     private val key: String,
     private val defaultValue: Boolean,
     private val beforeSet: ((Boolean) -> Boolean)? = null,
     private val afterSet: ((Boolean) -> Unit)? = null,
-) {
-    private val sharedPreferences = runCatching {
-        context.getSharedPreferences(
-            preferenceFileKey ?: (context.packageName + "_preferences"), mode
-        )
-    }.getOrNull()
-
-    private val listener = OnSharedPreferenceChangeListener { sharedPreferences, changedKey ->
-        if (changedKey != key) {
-            return@OnSharedPreferenceChangeListener
+) : AutoCloseable {
+    private val listener = OnSharedPreferenceChangeListener { _, changedKey ->
+        if (changedKey == key) {
+            value = prefsValue
         }
-
-        value = sharedPreferences.getBoolean(key, defaultValue)
     }
+
+    /**
+     * Pending writes for [key]; while one write runs, a newer request replaces
+     * the buffered one, so only the latest survives.
+     */
+    private val requests = Channel<Boolean>(Channel.CONFLATED)
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
 
     init {
-        sharedPreferences?.registerOnSharedPreferenceChangeListener(listener)
+        preferences?.registerOnSharedPreferenceChangeListener(listener)
+        scope.launch {
+            for (requested in requests) {
+                persist(requested)
+            }
+        }
     }
 
-    private val prefsValue get() = sharedPreferences?.getBoolean(key, defaultValue) ?: defaultValue
+    private val prefsValue get() = preferences?.getBoolean(key, defaultValue) ?: defaultValue
 
     private var value by mutableStateOf(prefsValue)
 
     operator fun getValue(thisObj: Any?, property: KProperty<*>) = value
 
     operator fun setValue(thisObj: Any?, property: KProperty<*>, value: Boolean) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val prefsValue = beforeSet?.invoke(value) ?: value
-            sharedPreferences?.edit(commit = true) { putBoolean(key, prefsValue) }
-            this@BooleanSharedPreference.value = prefsValue
-            afterSet?.invoke(prefsValue)
+        requests.trySend(value)
+    }
+
+    private fun persist(value: Boolean) {
+        try {
+            val newValue = beforeSet?.invoke(value) ?: value
+            val previousValue = prefsValue
+            val editor = preferences?.edit()
+            if (editor != null) {
+                editor.putBoolean(key, newValue)
+                // The framework write follows the local update, so a failed
+                // commit leaves the displayed value ahead of the stored one.
+                if (!editor.commit()) {
+                    Log.Android.e("failed to save $key to the framework")
+                    this@BooleanSharedPreference.value = previousValue
+                    return
+                }
+            }
+            this@BooleanSharedPreference.value = newValue
+            afterSet?.invoke(newValue)
+        } catch (e: Exception) {
+            Log.Android.e("failed to save $key to the framework", e)
         }
     }
 
-    fun clean() {
-        sharedPreferences?.unregisterOnSharedPreferenceChangeListener(listener)
+    override fun close() {
+        // The consumer drains the buffered request before the job completes.
+        requests.close()
+        job.complete()
+        preferences?.unregisterOnSharedPreferenceChangeListener(listener)
     }
 }

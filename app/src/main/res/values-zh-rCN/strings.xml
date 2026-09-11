@@ -27,7 +27,7 @@
     <!-- Activation status -->
     <string name="status_entry_activation_y">模块已激活</string>
     <string name="status_entry_activation_n">模块未激活</string>
-    <string name="status_entry_activation_description">模块的激活状态直接影响其功能。如果模块未被激活，它将完全无法运行。模块通过Hook自身的成员实现报告模块激活状态，如果你认为存在误报，请强行停止应用再重新打开。</string>
+    <string name="status_entry_activation_description">模块的激活状态直接影响其功能。如果模块未被激活，它将完全无法运行。模块通过Xposed框架传送给应用的服务来获知激活状态。如果你认为存在误报，请强行停止应用再重新打开。</string>
 
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">偏好设置正常</string>
