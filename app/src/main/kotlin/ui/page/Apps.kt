@@ -129,11 +129,11 @@ import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.capsule.ContinuousCapsule
-import top.ltfan.notdeveloper.ui.util.BackdropEdge
+import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.notdeveloper.ui.util.GlassBottomSheet
-import top.ltfan.notdeveloper.ui.util.LocalPageBackdrop
-import top.ltfan.notdeveloper.ui.util.progressiveBlur
-import top.ltfan.notdeveloper.ui.util.pageGlass
+import top.ltfan.material.m3.core.visual.LocalPageBackdrop
+import top.ltfan.material.m3.core.visual.progressiveBlur
+import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
