@@ -1,28 +1,38 @@
 package top.ltfan.notdeveloper.ui.composable
 
 import androidx.annotation.StringRes
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.unit.roundToIntRect
+import top.ltfan.notdeveloper.ui.util.LocalOverlayHost
+import top.ltfan.notdeveloper.ui.util.OverlayEntry
+import top.ltfan.notdeveloper.ui.util.pageGlass
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IconButtonWithTooltip(
     imageVector: ImageVector,
@@ -32,49 +42,85 @@ fun IconButtonWithTooltip(
     tooltipSpacing: Dp = 8.dp,
     onClick: () -> Unit,
 ) {
-    val tooltipSpacing = with(LocalDensity.current) { tooltipSpacing.roundToPx() }
-    TooltipBox(
-        positionProvider = remember(preferredTooltipPosition, tooltipSpacing) {
-            object : PopupPositionProvider {
-                override fun calculatePosition(
-                    anchorBounds: IntRect,
-                    windowSize: IntSize,
-                    layoutDirection: LayoutDirection,
-                    popupContentSize: IntSize
-                ): IntOffset {
-                    val x = anchorBounds.left + (anchorBounds.width - popupContentSize.width) / 2
+    val host = LocalOverlayHost.current
+    val spacing = with(LocalDensity.current) { tooltipSpacing.roundToPx() }
+    var anchor by remember { mutableStateOf(IntRect.Zero) }
+    var shown by remember { mutableStateOf(false) }
+    val entry = remember { OverlayEntry() }
 
-                    val yTop = anchorBounds.top - popupContentSize.height - tooltipSpacing
-                    val yBottom = anchorBounds.bottom + tooltipSpacing
-
-                    val y = when (preferredTooltipPosition) {
-                        TooltipPosition.Top -> yTop
-                        TooltipPosition.Bottom -> yBottom
-                    }.takeIf { it >= 0 && it <= windowSize.height - popupContentSize.height }
-                        ?: when (preferredTooltipPosition) {
-                            TooltipPosition.Top -> yBottom
-                            TooltipPosition.Bottom -> yTop
-                        }
-                    return IntOffset(x, y)
-                }
+    if (host != null && contentDescription != null) {
+        entry.content = {
+            if (shown) {
+                InWindowTooltip(
+                    anchor = anchor,
+                    position = preferredTooltipPosition,
+                    spacing = spacing,
+                    text = stringResource(contentDescription),
+                )
             }
-        },
-        tooltip = {
-            contentDescription?.let { PlainTooltip { Text(stringResource(it)) } }
-        },
-        state = rememberTooltipState(),
-        modifier = modifier,
-        focusable = contentDescription != null,
-        enableUserInput = contentDescription != null,
+        }
+        DisposableEffect(host, contentDescription) {
+            host.add(entry)
+            onDispose {
+                host.remove(entry)
+                shown = false
+            }
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .onGloballyPositioned { anchor = it.boundsInWindow().roundToIntRect() }
+            .pointerInput(host, contentDescription) {
+                if (host == null || contentDescription == null) return@pointerInput
+                detectTapGestures(
+                    onLongPress = { shown = true },
+                    onPress = {
+                        tryAwaitRelease()
+                        shown = false
+                    },
+                )
+            },
     ) {
-        IconButton(
-            onClick = onClick,
-        ) {
+        IconButton(onClick = onClick) {
             Icon(
                 imageVector = imageVector,
                 contentDescription = contentDescription?.let { stringResource(it) },
             )
         }
+    }
+}
+
+@Composable
+private fun InWindowTooltip(
+    anchor: IntRect,
+    position: TooltipPosition,
+    spacing: Int,
+    text: String,
+) {
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val x = anchor.left + (anchor.width - size.width) / 2
+    val y = when (position) {
+        TooltipPosition.Top -> anchor.top - size.height - spacing
+        TooltipPosition.Bottom -> anchor.bottom + spacing
+    }
+
+    Box(
+        modifier = Modifier
+            .offset { IntOffset(x, y) }
+            .onSizeChanged { size = it }
+            .pageGlass(
+                shape = MaterialTheme.shapes.small,
+                containerColor = MaterialTheme.colorScheme.surface,
+                blurRadius = 4.dp,
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
