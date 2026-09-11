@@ -99,8 +99,6 @@ dependencies {
     implementation(libs.compose.icons)
     implementation(libs.capsule)
     implementation(libs.backdrop)
-    implementation(libs.haze)
-    implementation(libs.haze.materials)
     implementation(libs.m3Extended)
     implementation(libs.coil)
     implementation(libs.room.runtime)
