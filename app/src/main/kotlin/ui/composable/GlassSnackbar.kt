@@ -73,10 +73,10 @@ import kotlin.math.min
 
 @Composable
 context(viewModel: AppViewModel, page: Page)
-fun HazeSnackbarHost(
+fun GlassSnackbarHost(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
-    snackbar: @Composable (SnackbarData) -> Unit = { HazeSnackbar(it) }
+    snackbar: @Composable (SnackbarData) -> Unit = { GlassSnackbar(it) }
 ) {
     val currentSnackbarData = hostState.currentSnackbarData
     val accessibilityManager = LocalAccessibilityManager.current
@@ -139,7 +139,7 @@ internal fun SnackbarDuration.toMillis(
 
 @Composable
 context(viewModel: AppViewModel, page: Page)
-fun HazeSnackbar(
+fun GlassSnackbar(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier,
     actionOnNewLine: Boolean = false,
@@ -179,7 +179,7 @@ fun HazeSnackbar(
         } else {
             null
         }
-    HazeSnackbar(
+    GlassSnackbar(
         modifier = modifier.padding(12.dp),
         action = actionComposable,
         dismissAction = dismissActionComposable,
@@ -195,7 +195,7 @@ fun HazeSnackbar(
 
 @Composable
 context(viewModel: AppViewModel, page: Page)
-fun HazeSnackbar(
+fun GlassSnackbar(
     modifier: Modifier = Modifier,
     action: @Composable (() -> Unit)? = null,
     dismissAction: @Composable (() -> Unit)? = null,
