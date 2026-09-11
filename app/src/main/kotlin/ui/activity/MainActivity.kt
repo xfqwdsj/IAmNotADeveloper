@@ -17,6 +17,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -40,6 +41,7 @@ import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.LocalPageBackdrop
 import top.ltfan.notdeveloper.ui.util.OverlayHost
 import top.ltfan.notdeveloper.ui.util.OverlayHostState
 import top.ltfan.notdeveloper.ui.util.only
@@ -84,6 +86,7 @@ class MainActivity : ComponentActivity() {
                     drawContent()
                 }
                 val overlayHost = remember { OverlayHostState() }
+                CompositionLocalProvider(LocalPageBackdrop provides backdrop) {
                 OverlayHost(overlayHost) {
                 SubcomposeLayout { constraints ->
                     val width = constraints.maxWidth
@@ -158,6 +161,7 @@ class MainActivity : ComponentActivity() {
                         contentPlaceable.place(0, 0)
                         navBarPlaceable?.place(0, navBarY!!)
                     }
+                }
                 }
                 }
             }
