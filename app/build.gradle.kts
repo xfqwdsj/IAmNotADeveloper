@@ -98,6 +98,7 @@ dependencies {
 //    implementation(libs.compose.material3.adaptive)
     implementation(libs.compose.icons)
     implementation(libs.capsule)
+    implementation(libs.backdrop)
     implementation(libs.haze)
     implementation(libs.haze.materials)
     implementation(libs.m3Extended)
