@@ -18,12 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import top.ltfan.material.m3.card
+import top.ltfan.material.m3.core.GroupedLazyColumn
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.detection.DetectionCategory
-import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
 import top.ltfan.notdeveloper.ui.composable.PreferenceItem
 import top.ltfan.notdeveloper.ui.composable.StatusCard
-import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.composable.categoryCards
 import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent

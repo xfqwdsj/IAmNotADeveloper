@@ -1,7 +1,6 @@
 package top.ltfan.notdeveloper.log
 
 import android.util.Log
-import de.robv.android.xposed.XposedBridge
 import top.ltfan.notdeveloper.BuildConfig
 
 const val LogTag = "NotDeveloper"
@@ -31,24 +30,7 @@ interface Logger {
         get() = DebugLogger(this)
 }
 
-interface XposedLogger : Logger {
-    override fun w(message: String?, throwable: Throwable?) {
-        bridgeLog("WARN", message, throwable)
-    }
-
-    override fun e(message: String?, throwable: Throwable?) {
-        bridgeLog("ERROR", message, throwable)
-    }
-
-    private fun bridgeLog(level: String, message: String?, throwable: Throwable? = null) {
-        XposedBridge.log("[$level] $LogTag: $message")
-        if (throwable != null) {
-            XposedBridge.log(throwable)
-        }
-    }
-}
-
-object Log : XposedLogger {
+object Log : Logger {
     object Android : Logger
 }
 

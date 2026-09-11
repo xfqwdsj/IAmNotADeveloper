@@ -29,8 +29,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.LocalHazeStyle
+import dev.chrisbanes.haze.hazeEffect
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 
 @Composable
@@ -41,7 +46,13 @@ fun AnimatedVisibilityScope.BlurEnterExit(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val blurRadius by transition.animateDp { if (it != EnterExitState.Visible) maxRadius else 0.dp }
-    Box(modifier.blur(blurRadius, edgeTreatment), content = content)
+    Box(modifier.hazeEffect(
+        HazeStyle(
+            backgroundColor = Color.Transparent,
+            tint = HazeTint(Color.Transparent),
+            blurRadius = blurRadius,
+        )
+    )/*.blur(blurRadius, edgeTreatment)*/, content = content)
 }
 
 @Composable

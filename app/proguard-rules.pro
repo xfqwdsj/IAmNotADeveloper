@@ -24,6 +24,10 @@
     *;
 }
 
+-keep,allowobfuscation class top.ltfan.notdeveloper.datastore.** {
+    *;
+}
+
 -keepclassmembers class top.ltfan.notdeveloper.detection.** {
     public static top.ltfan.notdeveloper.detection.** INSTANCE;
 }

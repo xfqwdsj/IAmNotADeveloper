@@ -1,29 +1,25 @@
 [versions]
-app-versionName = "1.6.2"
-app-versionCode = "12"
-kotlin = "2.2.10"
+kotlin = "2.4.20"
 kotlinx-serialization = "1.9.0"
-ksp = "2.2.10-2.0.2"
-agp = "9.0.0-alpha03"
-compileSdk = "36"
-targetSdk = "36"
-minSdk = "27"
-lifecycle = "2.9.2"
+ksp = "2.3.12"
+agp = "9.5.0-alpha04"
+lifecycle = "2.11.0"
 lifecycle-viewmodelNav3 = "1.0.0-alpha04"
 splashscreen = "1.0.1"
-activity = "1.10.1"
-compose = "2025.08.00"
+activity = "1.13.0"
+compose = "2026.09.00"
 navigation = "1.0.0-alpha06"
 compose-adaptive = "1.0.0-SNAPSHOT"
-capsule = "1.0.1"
+capsule = "0.1.0"
 haze = "1.6.10"
+m3-extended = "0.1.0"
 coil = "3.3.0"
 room = "2.7.2"
 datastore = "1.1.7"
 preference = "1.2.1"
 dsl-utilities = "1.0.0"
 kaidl = "1.15"
-xposed-api = "82"
+libxposed = "102.0.0"
 
 [libraries]
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
@@ -44,9 +40,10 @@ compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended" }
-capsule = { module = "com.github.Kyant0:Capsule", version.ref = "capsule" }
+capsule = { module = "top.ltfan.capsule:capsule", version.ref = "capsule" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
+m3Extended = { module = "top.ltfan.material:m3-extended", version.ref = "m3-extended" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
@@ -56,11 +53,14 @@ preference = { module = "androidx.preference:preference-ktx", version.ref = "pre
 dslUtilities = { module = "top.ltfan.dslutilities:dsl-utilities", version.ref = "dsl-utilities" }
 kaidl = { module = "com.github.kr328.kaidl:kaidl", version.ref = "kaidl" }
 kaidl-runtime = { module = "com.github.kr328.kaidl:kaidl-runtime", version.ref = "kaidl" }
-xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed-api" }
+libxposed-api = { module = "io.github.libxposed:api", version.ref = "libxposed" }
+libxposed-service = { module = "io.github.libxposed:service", version.ref = "libxposed" }
 
 [plugins]
+kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
