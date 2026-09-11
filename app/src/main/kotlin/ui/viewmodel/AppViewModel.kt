@@ -60,6 +60,13 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         },
     )
 
+    var smoothRoundedCorners by uiSettingsStore.propertyAsMutableState(
+        get = { it.smoothRoundedCorners.value },
+        set = { settings, value ->
+            settings.copy(smoothRoundedCorners = UiSettings.SmoothRoundedCorners(value))
+        },
+    )
+
     val showNavBar: Boolean
         inline get() {
             return (currentPage != Apps || currentConfiguringPackageInfo == null)
