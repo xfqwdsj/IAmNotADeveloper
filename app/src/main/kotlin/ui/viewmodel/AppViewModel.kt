@@ -77,6 +77,12 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
      */
     private val globalDetectionStates = mutableMapOf<String, Boolean>()
 
+    /**
+     * Latest per-package detection states, keyed by `"package|method"`, also
+     * mirrored into the remote preferences.
+     */
+    private val perAppDetectionStates = mutableMapOf<String, Boolean>()
+
     init {
         val dao = application.database.dao()
         DetectionCategory.allMethods.forEach { method ->
@@ -88,6 +94,16 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
             }
         }
         viewModelScope.launch {
+            dao.getAllDetectionsFlow().collect { detections ->
+                perAppDetectionStates.clear()
+                detections.forEach { detection ->
+                    perAppDetectionStates["${detection.packageName}|${detection.methodName}"] =
+                        detection.enabled
+                }
+                writeRemotePreferences()
+            }
+        }
+        viewModelScope.launch {
             snapshotFlow { ModuleService.preferences }.collect { writeRemotePreferences() }
         }
     }
@@ -96,6 +112,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         val preferences = ModuleService.preferences ?: return
         preferences.edit().apply {
             globalDetectionStates.forEach { (key, value) -> putBoolean(key, value) }
+            perAppDetectionStates.forEach { (key, value) -> putBoolean(key, value) }
         }.apply()
     }
 

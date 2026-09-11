@@ -131,6 +131,9 @@ interface PackageSettingsDao {
     @Query("SELECT EXISTS(SELECT 1 FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName)")
     suspend fun isDetectionSet(packageName: String, userId: Int, methodName: String): Boolean
 
+    @Query("SELECT * FROM Detection")
+    fun getAllDetectionsFlow(): Flow<List<Detection>>
+
     @Query("SELECT COALESCE((SELECT enabled FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName), 1)")
     suspend fun isDetectionEnabled(packageName: String, userId: Int, methodName: String): Boolean
 
