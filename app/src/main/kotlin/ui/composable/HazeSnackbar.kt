@@ -63,12 +63,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
-import dev.chrisbanes.haze.HazeDefaults
-import dev.chrisbanes.haze.LocalHazeStyle
+import top.ltfan.notdeveloper.ui.util.pageGlass
 import kotlinx.coroutines.delay
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
-import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
 import kotlin.math.min
@@ -216,11 +214,9 @@ fun HazeSnackbar(
         contentColor = contentColor,
     ) {
         Box(
-            Modifier.contentOverlayHaze(
-                style = LocalHazeStyle.current.copy(
-                    backgroundColor = containerColor,
-                    tints = listOf(HazeDefaults.tint(containerColor)),
-                )
+            Modifier.pageGlass(
+                shape = shape,
+                containerColor = containerColor,
             )
         ) {
             val textStyle = MaterialTheme.typography.bodyMedium

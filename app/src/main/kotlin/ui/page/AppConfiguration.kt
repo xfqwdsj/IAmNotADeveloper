@@ -64,7 +64,7 @@ import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
 import top.ltfan.notdeveloper.ui.theme.AppRadiusMedium
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
+import top.ltfan.notdeveloper.ui.util.pageGlass
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.getAppId
 import top.ltfan.notdeveloper.util.getUserId
@@ -137,7 +137,10 @@ fun AppViewModel.AppConfiguration() {
                                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
                                     .clip(ContinuousRoundedRectangle(radius))
-                                    .contentOverlayHaze()
+                                    .pageGlass(
+                                        shape = ContinuousRoundedRectangle(radius),
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                    )
                                     .verticalScroll(rememberScrollState())
                                     .semantics {
                                         paneTitle = title

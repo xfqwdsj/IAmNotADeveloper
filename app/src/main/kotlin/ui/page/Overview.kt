@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -33,6 +34,7 @@ import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.BackdropEdge
+import top.ltfan.notdeveloper.ui.util.LocalPageBackdrop
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
@@ -53,6 +55,7 @@ object Overview : Main() {
             drawRect(background)
             drawContent()
         }
+        CompositionLocalProvider(LocalPageBackdrop provides backdrop) {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
@@ -127,6 +130,7 @@ object Overview : Main() {
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
+        }
         }
     }
 }
