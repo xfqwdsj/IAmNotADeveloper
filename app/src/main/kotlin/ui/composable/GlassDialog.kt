@@ -48,7 +48,7 @@ import kotlin.math.max
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 context(viewModel: AppViewModel)
-fun HazeAlertDialog(
+fun GlassAlertDialog(
     onDismissRequest: () -> Unit,
     confirmButton: @Composable () -> Unit,
     modifier: Modifier = Modifier,
@@ -67,7 +67,7 @@ fun HazeAlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
     ) {
-        HazeAlertDialogContent(            buttons = {
+        GlassAlertDialogContent(            buttons = {
                 AlertDialogFlowRow(
                     mainAxisSpacing = ButtonsMainAxisSpacing,
                     crossAxisSpacing = ButtonsCrossAxisSpacing
@@ -95,7 +95,7 @@ fun HazeAlertDialog(
 }
 
 @Composable
-internal fun HazeAlertDialogContent(
+internal fun GlassAlertDialogContent(
     buttons: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     icon: (@Composable () -> Unit)?,
