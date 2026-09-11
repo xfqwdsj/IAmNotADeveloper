@@ -31,6 +31,7 @@ import top.ltfan.notdeveloper.data.wrapped
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppListSettings
 import top.ltfan.notdeveloper.datastore.GlobalPreferences
+import top.ltfan.notdeveloper.datastore.UiSettings
 import top.ltfan.notdeveloper.datastore.model.AppDataStore
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
@@ -49,10 +50,23 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
-    val settingsStore = AppListSettings.createDataStore()
+    val appListSettingsStore = AppListSettings.createDataStore()
+    val uiSettingsStore = UiSettings.createDataStore()
     val globalPreferencesStore = GlobalPreferences.createDataStore()
 
-    val hazeState = HazeState()
+    var blurSettings: UiSettings.BlurSettings.Value by uiSettingsStore.propertyAsMutableState(
+        get = { it.blurSettings.value },
+        set = { settings, blurSettings ->
+            settings.copy(
+                blurSettings = UiSettings.BlurSettings(blurSettings.also {
+                    hazeState.blurEnabled = it is UiSettings.BlurSettings.Value.Enabled
+                }),
+            )
+        },
+    )
+
+    val hazeState =
+        HazeState(initialBlurEnabled = blurSettings is UiSettings.BlurSettings.Value.Enabled)
 
     val showNavBar: Boolean
         inline get() {
@@ -107,23 +121,20 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     private var _users by mutableStateOf(queryUsers())
     val users get() = _users
 
-    val selectedUserFlow = settingsStore.propertyAsSharedFlow { it.selectedUser }
-    var selectedUser by settingsStore.propertyAsMutableState(
-        defaultValue = settingsStore.defaultValue,
+    val selectedUserFlow = appListSettingsStore.propertyAsSharedFlow { it.selectedUser }
+    var selectedUser by appListSettingsStore.propertyAsMutableState(
         get = { it.selectedUser },
         set = { settings, user -> settings.copy(selectedUser = user) },
     )
 
-    val appSortMethodFlow = settingsStore.propertyAsSharedFlow { it.sort }
-    var appSortMethod by settingsStore.propertyAsMutableState(
-        defaultValue = settingsStore.defaultValue,
+    val appSortMethodFlow = appListSettingsStore.propertyAsSharedFlow { it.sort }
+    var appSortMethod by appListSettingsStore.propertyAsMutableState(
         get = { it.sort },
         set = { settings, sort -> settings.copy(sort = sort) },
     )
 
-    val appFilteredMethodsFlow = settingsStore.propertyAsSharedFlow { it.filtered }
-    var appFilteredMethods by settingsStore.propertyAsMutableState(
-        defaultValue = settingsStore.defaultValue,
+    val appFilteredMethodsFlow = appListSettingsStore.propertyAsSharedFlow { it.filtered }
+    var appFilteredMethods by appListSettingsStore.propertyAsMutableState(
         get = { it.filtered },
         set = { settings, filtered -> settings.copy(filtered = filtered) },
     )

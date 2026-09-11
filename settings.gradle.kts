@@ -7,13 +7,17 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        maven("https://androidx.dev/snapshots/builds/13945475/artifacts/repository")
-        maven("https://api.xposed.info/")
+        mavenLocal()
         maven("https://jitpack.io")
         maven("https://maven.kr328.app/releases")
     }

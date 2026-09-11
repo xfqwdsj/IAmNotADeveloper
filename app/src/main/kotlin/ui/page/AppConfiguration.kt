@@ -49,7 +49,7 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigationevent.compose.NavigationEventHandler
-import com.kyant.capsule.G2RoundedCornerShape
+import com.kyant.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -136,7 +136,7 @@ fun AppViewModel.AppConfiguration() {
                                         animatedVisibilityScope = this@AnimatedContent,
                                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
-                                    .clip(G2RoundedCornerShape(radius))
+                                    .clip(ContinuousRoundedRectangle(radius))
                                     .contentOverlayHaze()
                                     .verticalScroll(rememberScrollState())
                                     .semantics {
@@ -166,20 +166,6 @@ fun AppViewModel.AppConfiguration() {
                     withContext(Dispatchers.IO) {
                         dao.initializePackage(packageName, userId, appId)
                     }
-                }
-
-                NavigationEventHandler {
-                    try {
-                        it.collect { event ->
-                            packageInfoConfiguringTransitionState.seekTo(event.progress, null)
-                        }
-                    } catch (_: CancellationException) {
-                        packageInfoConfiguringTransitionState.animateTo(
-                            packageInfoConfiguringTransitionState.currentState
-                        )
-                        return@NavigationEventHandler
-                    }
-                    packageInfoConfiguringTransitionState.snapTo(null)
                 }
             }
         }
