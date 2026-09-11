@@ -31,12 +31,12 @@ import top.ltfan.notdeveloper.datastore.UiSettings
 import top.ltfan.notdeveloper.ui.composable.PreferenceItem
 import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.BackdropEdge
-import top.ltfan.notdeveloper.ui.util.LocalPageBackdrop
+import top.ltfan.material.m3.core.visual.BackdropEdge
+import top.ltfan.material.m3.core.visual.LocalPageBackdrop
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
-import top.ltfan.notdeveloper.ui.util.progressiveBlur
+import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Settings : Main() {

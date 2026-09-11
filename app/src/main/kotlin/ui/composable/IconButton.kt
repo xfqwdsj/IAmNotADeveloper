@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.roundToIntRect
 import top.ltfan.notdeveloper.ui.util.LocalOverlayHost
 import top.ltfan.notdeveloper.ui.util.OverlayEntry
-import top.ltfan.notdeveloper.ui.util.pageGlass
+import top.ltfan.material.m3.core.visual.pageGlass
 
 @Composable
 fun IconButtonWithTooltip(

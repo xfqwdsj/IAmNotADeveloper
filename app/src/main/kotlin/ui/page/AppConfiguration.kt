@@ -64,7 +64,7 @@ import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
 import top.ltfan.notdeveloper.ui.theme.AppRadiusMedium
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.pageGlass
+import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.getAppId
 import top.ltfan.notdeveloper.util.getUserId

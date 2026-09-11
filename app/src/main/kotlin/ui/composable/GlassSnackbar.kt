@@ -63,7 +63,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
-import top.ltfan.notdeveloper.ui.util.pageGlass
+import top.ltfan.material.m3.core.visual.pageGlass
 import kotlinx.coroutines.delay
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
