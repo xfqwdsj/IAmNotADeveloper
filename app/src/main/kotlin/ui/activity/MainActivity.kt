@@ -9,13 +9,16 @@ import androidx.activity.viewModels
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -24,13 +27,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.ui.NavDisplay
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
+import com.kyant.capsule.ContinuousCapsule
 import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.HazeZIndex
-import top.ltfan.notdeveloper.ui.util.hazeEffectBottom
-import top.ltfan.notdeveloper.ui.util.hazeSource
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
@@ -66,6 +73,12 @@ class MainActivity : ComponentActivity() {
             IAmNotADeveloperTheme(viewModel) {
                 val insets = AppWindowInsets
                 val navBarHeightFactor by animateFloatAsState(if (showNavBar) 1f else 0f)
+                val background = MaterialTheme.colorScheme.background
+                val surface = MaterialTheme.colorScheme.surface
+                val backdrop = rememberLayerBackdrop {
+                    drawRect(background)
+                    drawContent()
+                }
                 SubcomposeLayout { constraints ->
                     val width = constraints.maxWidth
                     val height = constraints.maxHeight
@@ -75,8 +88,16 @@ class MainActivity : ComponentActivity() {
                     val navBar = subcompose("navBar") {
                         NavigationBar(
                             modifier = Modifier
-                                .hazeSource(zIndex = HazeZIndex.bottomBar)
-                                .hazeEffectBottom(),
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .drawBackdrop(
+                                    backdrop = backdrop,
+                                    shape = { ContinuousCapsule },
+                                    effects = {
+                                        vibrancy()
+                                        blur(8.dp.toPx())
+                                    },
+                                    onDrawSurface = { drawRect(surface.copy(alpha = 0.6f)) },
+                                ),
                             containerColor = Color.Transparent,
                             contentColor = MaterialTheme.colorScheme.onSurface,
                             tonalElevation = 0.dp,
@@ -115,7 +136,7 @@ class MainActivity : ComponentActivity() {
                             backStack = backStack,
                             modifier = Modifier
                                 .consumeWindowInsets(insets.only { bottom })
-                                .hazeSource(zIndex = HazeZIndex.navDisplay),
+                                .layerBackdrop(backdrop),
                             // TODO: Can cause LazyList unscrollable issue when orientated from
                             // TODO: landscape to portrait. Uncomment when fixed.
 //                            sceneStrategy = rememberListDetailSceneStrategy(),
