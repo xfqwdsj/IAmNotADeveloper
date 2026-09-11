@@ -11,7 +11,6 @@ compose = "2026.09.00"
 navigation = "1.0.0-alpha06"
 compose-adaptive = "1.0.0-SNAPSHOT"
 capsule = "0.1.0"
-haze = "1.6.10"
 backdrop = "2.0.1"
 m3-extended = "0.1.0"
 coil = "3.3.0"
@@ -42,8 +41,6 @@ compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
 compose-icons = { module = "androidx.compose.material:material-icons-extended" }
 capsule = { module = "top.ltfan.capsule:capsule", version.ref = "capsule" }
-haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
-haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 m3Extended = { module = "top.ltfan.material:m3-extended", version.ref = "m3-extended" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
