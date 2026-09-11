@@ -10,7 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import top.ltfan.notdeveloper.xposed.Log
@@ -63,7 +63,8 @@ class BooleanSharedPreference(
      * the buffered one, so only the latest survives.
      */
     private val requests = Channel<Boolean>(Channel.CONFLATED)
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
 
     init {
         preferences?.registerOnSharedPreferenceChangeListener(listener)
@@ -107,8 +108,9 @@ class BooleanSharedPreference(
     }
 
     override fun close() {
+        // The consumer drains the buffered request before the job completes.
         requests.close()
-        scope.cancel()
+        job.complete()
         preferences?.unregisterOnSharedPreferenceChangeListener(listener)
     }
 }
