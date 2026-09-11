@@ -43,6 +43,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.window.DialogProperties
 import top.ltfan.notdeveloper.ui.util.pageGlass
+import top.ltfan.notdeveloper.ui.util.GlassDialog
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
 
@@ -65,13 +66,11 @@ fun HazeAlertDialog(
     tonalElevation: Dp = AlertDialogDefaults.TonalElevation,
     properties: DialogProperties = DialogProperties(),
 ) {
-    BasicAlertDialog(
+    GlassDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
-        properties = properties
     ) {
-        HazeAlertDialogContent(
-            buttons = {
+        HazeAlertDialogContent(            buttons = {
                 AlertDialogFlowRow(
                     mainAxisSpacing = ButtonsMainAxisSpacing,
                     crossAxisSpacing = ButtonsCrossAxisSpacing
