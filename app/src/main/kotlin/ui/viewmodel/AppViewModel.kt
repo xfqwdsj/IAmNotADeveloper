@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
-import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -57,16 +56,9 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     var blurSettings: UiSettings.BlurSettings.Value by uiSettingsStore.propertyAsMutableState(
         get = { it.blurSettings.value },
         set = { settings, blurSettings ->
-            settings.copy(
-                blurSettings = UiSettings.BlurSettings(blurSettings.also {
-                    hazeState.blurEnabled = it is UiSettings.BlurSettings.Value.Enabled
-                }),
-            )
+            settings.copy(blurSettings = UiSettings.BlurSettings(blurSettings))
         },
     )
-
-    val hazeState =
-        HazeState(initialBlurEnabled = blurSettings is UiSettings.BlurSettings.Value.Enabled)
 
     val showNavBar: Boolean
         inline get() {
