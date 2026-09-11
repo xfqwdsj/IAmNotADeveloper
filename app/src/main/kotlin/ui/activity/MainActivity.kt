@@ -30,9 +30,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
@@ -41,7 +38,10 @@ import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.material.m3.core.visual.LocalPageBackdrop
+import top.ltfan.material.m3.core.visual.LocalBackdrop
+import top.ltfan.material.m3.core.visual.backdropSurface
+import top.ltfan.material.m3.core.visual.captureBackdrop
+import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.material.m3.overlay.OverlayHost
 import top.ltfan.material.m3.overlay.OverlayHostState
 import top.ltfan.notdeveloper.ui.util.only
@@ -81,12 +81,9 @@ class MainActivity : ComponentActivity() {
                 val navBarHeightFactor by animateFloatAsState(if (showNavBar) 1f else 0f)
                 val background = MaterialTheme.colorScheme.background
                 val surface = MaterialTheme.colorScheme.surface
-                val backdrop = rememberLayerBackdrop {
-                    drawRect(background)
-                    drawContent()
-                }
+                val backdrop = rememberBackdropLayer(background)
                 val overlayHost = remember { OverlayHostState() }
-                CompositionLocalProvider(LocalPageBackdrop provides backdrop) {
+                CompositionLocalProvider(LocalBackdrop provides backdrop) {
                 OverlayHost(overlayHost) {
                 SubcomposeLayout { constraints ->
                     val width = constraints.maxWidth
@@ -98,9 +95,9 @@ class MainActivity : ComponentActivity() {
                         NavigationBar(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .drawBackdrop(
-                                    backdrop = backdrop,
-                                    shape = { ContinuousCapsule },
+                                .backdropSurface(
+                                    handle = backdrop,
+                                    shape = ContinuousCapsule,
                                     effects = {
                                         vibrancy()
                                         blur(8.dp.toPx())
@@ -145,7 +142,7 @@ class MainActivity : ComponentActivity() {
                             backStack = backStack,
                             modifier = Modifier
                                 .consumeWindowInsets(insets.only { bottom })
-                                .layerBackdrop(backdrop),
+                                .captureBackdrop(backdrop),
                             entryDecorators = listOf(
                                 rememberSaveableStateHolderNavEntryDecorator(),
                                 rememberViewModelStoreNavEntryDecorator(),
