@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -62,7 +63,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -129,9 +130,11 @@ import androidx.compose.ui.graphics.RectangleShape
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
+import com.kyant.capsule.ContinuousCapsule
 import top.ltfan.notdeveloper.ui.util.BackdropEdge
 import top.ltfan.notdeveloper.ui.util.LocalPageBackdrop
 import top.ltfan.notdeveloper.ui.util.progressiveBlur
+import top.ltfan.notdeveloper.ui.util.pageGlass
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
@@ -177,9 +180,20 @@ object Apps : Main() {
                             shadow = null,
                         )
                     ) {
-                        TopAppBar(
+                        CenterAlignedTopAppBar(
                             title = { Text(stringResource(navigationLabel)) },
-                            actions = { AppBarActions() },
+                            actions = {
+                                Row(
+                                    modifier = Modifier.pageGlass(
+                                        shape = ContinuousCapsule,
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        blurRadius = 4.dp,
+                                    ),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    AppBarActions()
+                                }
+                            },
                             windowInsets = AppWindowInsets.only { horizontal + top },
                             colors = TopAppBarColorsTransparent,
                         )
