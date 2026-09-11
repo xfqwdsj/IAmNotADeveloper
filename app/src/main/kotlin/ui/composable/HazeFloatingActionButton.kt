@@ -58,13 +58,11 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.haze.HazeDefaults
-import dev.chrisbanes.haze.LocalHazeStyle
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
-import top.ltfan.notdeveloper.ui.util.contentOverlayHaze
 import top.ltfan.notdeveloper.ui.util.keepSizeWhenLookingAhead
+import top.ltfan.notdeveloper.ui.util.pageGlass
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Composable
@@ -98,11 +96,9 @@ fun HazeFloatingActionButton(
                             minWidth = 56.dp,
                             minHeight = 56.dp,
                         )
-                        .contentOverlayHaze(
-                            style = LocalHazeStyle.current.copy(
-                                backgroundColor = containerColor,
-                                tints = listOf(HazeDefaults.tint(containerColor)),
-                            )
+                        .pageGlass(
+                            shape = shape,
+                            containerColor = containerColor,
                         ),
                 contentAlignment = Alignment.Center,
             ) {
@@ -192,12 +188,9 @@ fun HazeFloatingActionButtonWithMenu(
                                     resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                 )
                                 .clip(shape)
-                                .contentOverlayHaze(
-                                    style = LocalHazeStyle.current.copy(
-                                        backgroundColor = containerColor,
-                                        tints = listOf(HazeDefaults.tint(containerColor)),
-                                    ),
-                                    zIndexDelta = -.5f,
+                                .pageGlass(
+                                    shape = shape,
+                                    containerColor = containerColor,
                                 ),
                         ) {
                             val description = stringResource(R.string.description_fab_menu)
@@ -228,12 +221,9 @@ fun HazeFloatingActionButtonWithMenu(
                                     resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                 )
                                 .clip(shape)
-                                .contentOverlayHaze(
-                                    style = LocalHazeStyle.current.copy(
-                                        backgroundColor = containerColor,
-                                        tints = listOf(HazeDefaults.tint(containerColor)),
-                                    ),
-                                    zIndexDelta = -.5f,
+                                .pageGlass(
+                                    shape = shape,
+                                    containerColor = containerColor,
                                 ),
                         )
                     } else {
@@ -252,7 +242,7 @@ fun HazeFloatingActionButtonWithMenu(
                 Modifier
                     .size(size)
                     .clip(shape)
-                    .contentOverlayHaze(),
+                    .pageGlass(shape = shape, containerColor = containerColor),
             )
         }
 

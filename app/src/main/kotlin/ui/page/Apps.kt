@@ -55,6 +55,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -129,6 +130,7 @@ import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import top.ltfan.notdeveloper.ui.util.BackdropEdge
+import top.ltfan.notdeveloper.ui.util.LocalPageBackdrop
 import top.ltfan.notdeveloper.ui.util.progressiveBlur
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
@@ -162,6 +164,7 @@ object Apps : Main() {
         val snackbarHostState = remember { SnackbarHostState() }
         val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
 
+        CompositionLocalProvider(LocalPageBackdrop provides backdrop) {
         SharedTransitionLayout {
             Scaffold(
                 topBar = {
@@ -227,6 +230,7 @@ object Apps : Main() {
             }
 
             context(transition) { AppConfiguration() }
+        }
         }
 
         val event by appListErrorSnackbarTrigger.collectAsState(null)
