@@ -38,6 +38,8 @@ import top.ltfan.notdeveloper.application.NotDevApplication
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.OverlayHost
+import top.ltfan.notdeveloper.ui.util.OverlayHostState
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
@@ -79,6 +81,8 @@ class MainActivity : ComponentActivity() {
                     drawRect(background)
                     drawContent()
                 }
+                val overlayHost = remember { OverlayHostState() }
+                OverlayHost(overlayHost) {
                 SubcomposeLayout { constraints ->
                     val width = constraints.maxWidth
                     val height = constraints.maxHeight
@@ -148,6 +152,7 @@ class MainActivity : ComponentActivity() {
                         contentPlaceable.place(0, 0)
                         navBarPlaceable?.place(0, navBarY!!)
                     }
+                }
                 }
             }
         }
