@@ -5,6 +5,7 @@ import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.xposed.hook.hook
+import top.ltfan.notdeveloper.xposed.hook.installSystemHooks
 
 /**
  * Entry point of the module; the framework instantiates it for each module
@@ -32,6 +33,15 @@ class Module : XposedModule() {
 
     override fun onModuleLoaded(param: XposedModuleInterface.ModuleLoadedParam) {
         Log.d("loaded into ${param.processName} by $frameworkName $frameworkVersion (API $apiVersion)")
+    }
+
+    override fun onSystemServerStarting(param: XposedModuleInterface.SystemServerStartingParam) {
+        Log.d("installing system server hooks")
+        try {
+            installSystemHooks(param.classLoader)
+        } catch (e: Throwable) {
+            Log.e("failed to install system server hooks: ${e.message}", e)
+        }
     }
 
     override fun onPackageReady(param: XposedModuleInterface.PackageReadyParam) {

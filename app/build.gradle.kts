@@ -107,6 +107,8 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.preference)
     implementation(libs.dslUtilities)
+    ksp(libs.kaidl.compiler)
+    implementation(libs.kaidl.runtime)
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)
 }
