@@ -24,7 +24,7 @@ import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import top.ltfan.material.m3.card
-import top.ltfan.material.m3.core.GroupedLazyColumn
+import top.ltfan.material.m3.core.layout.GroupedLazyColumn
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.ui.composable.PreferenceItem

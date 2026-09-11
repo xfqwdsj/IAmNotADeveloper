@@ -15,9 +15,9 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
-        mavenLocal()
         maven("https://jitpack.io")
         maven("https://maven.kr328.app/releases")
     }
