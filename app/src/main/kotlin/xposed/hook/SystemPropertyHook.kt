@@ -23,15 +23,15 @@ class SystemPropertyHook(
     override fun install(param: PackageReadyParam): Int {
         val prefs = module.preferences
         return PropertyBackends.backend.install(param, propertyKey, overrides) {
-            prefs.isEnabled(preferenceKey)
+            prefs.isEnabled(param.packageName, preferenceKey)
         }
     }
 
     context(module: Module)
-    override fun interceptor(executable: Executable): Hooker {
+    override fun interceptor(executable: Executable, packageName: String): Hooker {
         val prefs = module.preferences
         return PropertyBackends.backend.interceptor(executable, propertyKey, overrides) {
-            prefs.isEnabled(preferenceKey)
+            prefs.isEnabled(packageName, preferenceKey)
         }
     }
 
