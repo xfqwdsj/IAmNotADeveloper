@@ -124,8 +124,12 @@ import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.EmptyContentTransform
 import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
-import top.ltfan.notdeveloper.ui.util.appBarHaze
-import top.ltfan.notdeveloper.ui.util.contentHazeSource
+import androidx.compose.ui.graphics.RectangleShape
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.drawBackdrop
+import top.ltfan.notdeveloper.ui.util.BackdropEdge
+import top.ltfan.notdeveloper.ui.util.progressiveBlur
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
@@ -149,6 +153,11 @@ object Apps : Main() {
     context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
         val transition = rememberTransition(packageInfoConfiguringTransitionState)
+        val background = MaterialTheme.colorScheme.background
+        val backdrop = rememberLayerBackdrop {
+            drawRect(background)
+            drawContent()
+        }
 
         val snackbarHostState = remember { SnackbarHostState() }
         val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
@@ -156,7 +165,15 @@ object Apps : Main() {
         SharedTransitionLayout {
             Scaffold(
                 topBar = {
-                    Column(Modifier.appBarHaze()) {
+                    Column(
+                        Modifier.drawBackdrop(
+                            backdrop = backdrop,
+                            shape = { RectangleShape },
+                            effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
+                            highlight = null,
+                            shadow = null,
+                        )
+                    ) {
                         TopAppBar(
                             title = { Text(stringResource(navigationLabel)) },
                             actions = { AppBarActions() },
@@ -174,7 +191,7 @@ object Apps : Main() {
 
                 GroupedLazyColumn(
                     modifier = Modifier
-                        .contentHazeSource()
+                        .layerBackdrop(backdrop)
                         .fillMaxSize(),
                     state = lazyListState,
                     contentPadding = contentPadding.operate {
