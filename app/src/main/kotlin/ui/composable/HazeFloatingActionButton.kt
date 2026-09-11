@@ -65,49 +65,6 @@ import top.ltfan.notdeveloper.ui.util.keepSizeWhenLookingAhead
 import top.ltfan.notdeveloper.ui.util.pageGlass
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
-@Composable
-context(viewModel: AppViewModel, page: Page)
-fun HazeFloatingActionButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    shape: Shape = FloatingActionButtonDefaults.shape,
-    containerColor: Color = FloatingActionButtonDefaults.containerColor,
-    contentColor: Color = contentColorFor(containerColor),
-    interactionSource: MutableInteractionSource? = null,
-    content: @Composable BoxScope.() -> Unit,
-) {
-    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
-    Surface(
-        onClick = onClick,
-        modifier = modifier.semantics { role = Role.Button },
-        shape = shape,
-        color = Color.Transparent,
-        contentColor = contentColor,
-        interactionSource = interactionSource,
-    ) {
-        ProvideContentColorTextStyle(
-            contentColor = contentColor,
-            textStyle = MaterialTheme.typography.labelLarge,
-        ) {
-            Box(
-                modifier =
-                    Modifier
-                        .defaultMinSize(
-                            minWidth = 56.dp,
-                            minHeight = 56.dp,
-                        )
-                        .pageGlass(
-                            shape = shape,
-                            containerColor = containerColor,
-                        ),
-                contentAlignment = Alignment.Center,
-            ) {
-                content()
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 context(viewModel: AppViewModel, page: Page)
