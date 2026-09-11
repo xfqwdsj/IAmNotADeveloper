@@ -42,8 +42,8 @@ import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.material.m3.core.visual.LocalPageBackdrop
-import top.ltfan.notdeveloper.ui.util.OverlayHost
-import top.ltfan.notdeveloper.ui.util.OverlayHostState
+import top.ltfan.material.m3.overlay.OverlayHost
+import top.ltfan.material.m3.overlay.OverlayHostState
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
