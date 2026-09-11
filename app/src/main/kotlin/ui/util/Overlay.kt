@@ -32,7 +32,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import top.ltfan.notdeveloper.ui.util.pageGlass
+import top.ltfan.material.m3.core.visual.pageGlass
 
 /**
  * A single overlay hosted by an [OverlayHostState]; [content] is read on every

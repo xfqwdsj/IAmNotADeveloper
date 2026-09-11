@@ -56,7 +56,7 @@ import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.keepSizeWhenLookingAhead
-import top.ltfan.notdeveloper.ui.util.pageGlass
+import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)

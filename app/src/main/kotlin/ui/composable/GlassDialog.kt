@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
-import top.ltfan.notdeveloper.ui.util.pageGlass
+import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.ui.util.GlassDialog
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
