@@ -1,0 +1,121 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "d42933c50c355f3b85e338281903fd06",
+    "entities": [
+      {
+        "tableName": "PackageInfo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`packageName` TEXT NOT NULL, `userId` INTEGER NOT NULL, `appId` INTEGER NOT NULL, PRIMARY KEY(`packageName`, `userId`))",
+        "fields": [
+          {
+            "fieldPath": "packageName",
+            "columnName": "packageName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appId",
+            "columnName": "appId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "packageName",
+            "userId"
+          ]
+        }
+      },
+      {
+        "tableName": "Detection",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`packageName` TEXT NOT NULL, `userId` INTEGER NOT NULL, `methodName` TEXT NOT NULL, `enabled` INTEGER NOT NULL, PRIMARY KEY(`packageName`, `userId`, `methodName`), FOREIGN KEY(`packageName`, `userId`) REFERENCES `PackageInfo`(`packageName`, `userId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "packageName",
+            "columnName": "packageName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "methodName",
+            "columnName": "methodName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enabled",
+            "columnName": "enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "packageName",
+            "userId",
+            "methodName"
+          ]
+        },
+        "foreignKeys": [
+          {
+            "table": "PackageInfo",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "packageName",
+              "userId"
+            ],
+            "referencedColumns": [
+              "packageName",
+              "userId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "GlobalDetection",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`methodName` TEXT NOT NULL, `enabled` INTEGER NOT NULL, PRIMARY KEY(`methodName`))",
+        "fields": [
+          {
+            "fieldPath": "methodName",
+            "columnName": "methodName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enabled",
+            "columnName": "enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "methodName"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd42933c50c355f3b85e338281903fd06')"
+    ]
+  }
+}

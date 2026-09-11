@@ -79,7 +79,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -98,8 +97,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
-import com.kyant.capsule.G2RoundedCornerShape
+import com.kyant.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.launch
+import top.ltfan.material.m3.card
+import top.ltfan.material.m3.core.GroupedLazyColumn
+import top.ltfan.material.m3.core.GroupedLazyListScope
+import top.ltfan.material.m3.header
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.datastore.AppFilter
@@ -107,14 +110,11 @@ import top.ltfan.notdeveloper.datastore.AppSort
 import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.FilterChip
-import top.ltfan.notdeveloper.ui.composable.GroupedLazyColumn
-import top.ltfan.notdeveloper.ui.composable.GroupedLazyListScope
 import top.ltfan.notdeveloper.ui.composable.HazeAlertDialog
 import top.ltfan.notdeveloper.ui.composable.HazeFloatingActionButtonWithMenu
 import top.ltfan.notdeveloper.ui.composable.HazeSnackbarHost
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
-import top.ltfan.notdeveloper.ui.composable.card
 import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
 import top.ltfan.notdeveloper.ui.theme.AppRadiusMedium
 import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
@@ -498,7 +498,7 @@ object Apps : Main() {
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(8.dp))
-                LookaheadScope {
+                SharedTransitionLayout {
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -512,6 +512,7 @@ object Apps : Main() {
                                 selected = selected,
                                 onClick = { appSortMethod = it },
                                 text = it.labelRes,
+                                modifier = Modifier.skipToLookaheadSize(),
                             )
                         }
                     }
@@ -525,7 +526,7 @@ object Apps : Main() {
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(8.dp))
-                LookaheadScope {
+                SharedTransitionLayout {
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -558,7 +559,9 @@ object Apps : Main() {
                                     }
                                 },
                                 text = it.labelRes,
-                                modifier = Modifier.animateBounds(this@LookaheadScope),
+                                modifier = Modifier
+                                    .animateBounds(this@SharedTransitionLayout)
+                                    .skipToLookaheadSize(),
                                 leadingPlaceholderIcon = Icons.Default.Remove,
                             )
                         }
@@ -645,7 +648,7 @@ object Apps : Main() {
             colors = { CardColorsLowest },
         ) {
             header(
-                text = header,
+                textRes = header,
                 modifier = {
                     Modifier
                         .animateItem()
@@ -683,7 +686,7 @@ object Apps : Main() {
                                         animatedVisibilityScope = this@AnimatedContent,
                                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
-                                    .clip(G2RoundedCornerShape(radius))
+                                    .clip(ContinuousRoundedRectangle(radius))
                             ) {
                                 val headerText = stringResource(header)
                                 AppListItem(
@@ -696,7 +699,7 @@ object Apps : Main() {
                                             animatedVisibilityScope = this@AnimatedContent,
                                             resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                         )
-                                        .clip(G2RoundedCornerShape(radius))
+                                        .clip(ContinuousRoundedRectangle(radius))
                                         .semantics {
                                             contentDescription = headerText
                                         },

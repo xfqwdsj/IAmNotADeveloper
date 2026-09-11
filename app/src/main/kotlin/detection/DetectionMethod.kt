@@ -7,9 +7,15 @@ sealed class DetectionMethod(
     val name: String,
     @param:StringRes val labelResId: Int,
 ) {
+    /**
+     * Key under which the framework shares this detection's enabled state
+     * with the hooked packages.
+     */
+    val preferenceKey: String get() = name
+
     abstract fun test(context: Context): Boolean
 
-    abstract class SettingsMethod(
+    sealed class SettingsMethod(
         name: String,
         @StringRes labelResId: Int,
         val settingsClass: Class<*>,
@@ -21,7 +27,7 @@ sealed class DetectionMethod(
         }
     }
 
-    abstract class SystemPropertiesMethod(
+    sealed class SystemPropertiesMethod(
         name: String,
         @StringRes labelResId: Int,
         val propertyKey: String,

@@ -33,7 +33,7 @@ sealed class Main : Page() {
     abstract val navigationIcon: ImageVector
 
     companion object {
-        val pages by lazy { listOf(Overview, Apps) }
+        val pages by lazy { listOf(Overview, Apps, Settings) }
     }
 
     context(viewModel: AppViewModel)

@@ -12,7 +12,7 @@ plugins {
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
-        freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.add("-Xexplicit-context-arguments")
     }
 }
 
@@ -20,7 +20,11 @@ android {
     val appId = "top.ltfan.notdeveloper"
 
     namespace = appId
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
+    }
 
     signingConfigs {
         create("config") {
@@ -33,10 +37,10 @@ android {
 
     defaultConfig {
         applicationId = appId
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionName = libs.versions.app.versionName.get()
-        versionCode = libs.versions.app.versionCode.get().toInt()
+        minSdk = 27
+        targetSdk = 37
+        versionName = "1.7.0"
+        versionCode = 13
     }
 
     buildTypes {
@@ -104,9 +108,8 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.preference)
     implementation(libs.dslUtilities)
-    ksp(libs.kaidl)
-    implementation(libs.kaidl.runtime)
-    compileOnly(libs.xposed.api)
+    compileOnly(libs.libxposed.api)
+    implementation(libs.libxposed.service)
 }
 
 room {

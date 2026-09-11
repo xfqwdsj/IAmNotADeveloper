@@ -102,4 +102,23 @@
     <string name="action_apps_query_details_show">Apps query failed. Click to show details</string>
     <string name="title_apps_dialog_query_failed">Failed to query apps</string>
     <string name="message_apps_dialog_query_failed">Please check if the module is activated and the service is running.</string>
+
+    <!-- Settings -->
+    <string name="label_nav_settings">Settings</string>
+    <string name="label_settings_category_ui">User Interface</string>
+    <string name="label_settings_ui_blur">Blur effect</string>
+    <string name="label_settings_ui_blur_disabled">Disabled</string>
+    <string name="label_settings_ui_blur_enabled">Enabled</string>
+    <string name="label_settings_ui_blur_enabled_progressive">Progressive blur</string>
+    <string name="label_settings_ui_blur_enabled_progressive_disabled">Disabled</string>
+    <string name="label_settings_ui_blur_enabled_progressive_mask">Mask</string>
+    <string name="description_settings_ui_blur_enabled_progressive_mask">Use a mask effect instead of the expensive progressive blur effect.</string>
+    <string name="label_settings_ui_blur_enabled_progressive_scaled">Scaled</string>
+    <string name="description_settings_ui_blur_enabled_progressive_scaled">Scale down the content before applying the blur effect to improve performance.</string>
+    <string name="label_settings_ui_blur_enabled_progressive_scaled_auto">Auto scale</string>
+    <string name="label_settings_ui_blur_enabled_progressive_scaled_custom">Custom scale</string>
+    <string name="label_settings_ui_blur_enabled_progressive_scaled_custom_factor">Scale factor</string>
+    <string name="label_settings_ui_blur_enabled_progressive_full">Full</string>
+    <string name="label_settings_ui_smooth_corner">Smooth rounded corners</string>
+    <string name="description_settings_ui_smooth_corner">Enable smooth rounded corners across the app. May cause performance issues on some devices.</string>
 </resources>
