@@ -20,9 +20,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
 import top.ltfan.material.m3.card
 import top.ltfan.material.m3.core.layout.GroupedLazyColumn
 import top.ltfan.notdeveloper.R
@@ -34,7 +31,10 @@ import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.material.m3.core.visual.BackdropEdge
-import top.ltfan.material.m3.core.visual.LocalPageBackdrop
+import top.ltfan.material.m3.core.visual.LocalBackdrop
+import top.ltfan.material.m3.core.visual.backdropSurface
+import top.ltfan.material.m3.core.visual.captureBackdrop
+import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
@@ -51,11 +51,8 @@ object Overview : Main() {
     override fun AppViewModel.Content() {
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
         val background = MaterialTheme.colorScheme.background
-        val backdrop = rememberLayerBackdrop {
-            drawRect(background)
-            drawContent()
-        }
-        CompositionLocalProvider(LocalPageBackdrop provides backdrop) {
+        val backdrop = rememberBackdropLayer(background)
+        CompositionLocalProvider(LocalBackdrop provides backdrop) {
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
@@ -63,9 +60,9 @@ object Overview : Main() {
                     title = {
                         Text(stringResource(R.string.app_name))
                     },
-                    modifier = Modifier.drawBackdrop(
-                        backdrop = backdrop,
-                        shape = { RectangleShape },
+                    modifier = Modifier.backdropSurface(
+                        handle = backdrop,
+                        shape = RectangleShape,
                         effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
                         highlight = null,
                         shadow = null,
@@ -84,7 +81,7 @@ object Overview : Main() {
 
             GroupedLazyColumn(
                 modifier = Modifier
-                    .layerBackdrop(backdrop)
+                    .captureBackdrop(backdrop)
                     .fillMaxSize(),
                 contentPadding = contentPadding,
                 spacing = 16.dp,

@@ -125,13 +125,13 @@ import top.ltfan.notdeveloper.ui.util.EmptyContentTransform
 import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import androidx.compose.ui.graphics.RectangleShape
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
 import com.kyant.capsule.ContinuousCapsule
 import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.material.m3.overlay.GlassBottomSheet
-import top.ltfan.material.m3.core.visual.LocalPageBackdrop
+import top.ltfan.material.m3.core.visual.LocalBackdrop
+import top.ltfan.material.m3.core.visual.backdropSurface
+import top.ltfan.material.m3.core.visual.captureBackdrop
+import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
@@ -158,22 +158,19 @@ object Apps : Main() {
     override fun AppViewModel.Content() {
         val transition = rememberTransition(packageInfoConfiguringTransitionState)
         val background = MaterialTheme.colorScheme.background
-        val backdrop = rememberLayerBackdrop {
-            drawRect(background)
-            drawContent()
-        }
+        val backdrop = rememberBackdropLayer(background)
 
         val snackbarHostState = remember { SnackbarHostState() }
         val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
 
-        CompositionLocalProvider(LocalPageBackdrop provides backdrop) {
+        CompositionLocalProvider(LocalBackdrop provides backdrop) {
         SharedTransitionLayout {
             Scaffold(
                 topBar = {
                     Column(
-                        Modifier.drawBackdrop(
-                            backdrop = backdrop,
-                            shape = { RectangleShape },
+                        Modifier.backdropSurface(
+                            handle = backdrop,
+                            shape = RectangleShape,
                             effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
                             highlight = null,
                             shadow = null,
@@ -207,7 +204,7 @@ object Apps : Main() {
 
                 GroupedLazyColumn(
                     modifier = Modifier
-                        .layerBackdrop(backdrop)
+                        .captureBackdrop(backdrop)
                         .fillMaxSize(),
                     state = lazyListState,
                     contentPadding = contentPadding.operate {
