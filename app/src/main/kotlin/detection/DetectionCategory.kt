@@ -42,6 +42,17 @@ sealed class DetectionCategory(
                 ) == 1
             }
         }
+
+        data object Debuggable : DetectionMethod.SystemPropertiesMethod(
+            name = "ro_debuggable",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode_debuggable,
+            propertyKey = "ro.debuggable",
+            overrideValue = "0",
+        ) {
+            override fun test(context: Context): Boolean {
+                return SystemPropsUtil.equalsValue("ro.debuggable", "1")
+            }
+        }
     }
 
     data object UsbDebugging : DetectionCategory(
@@ -74,6 +85,28 @@ sealed class DetectionCategory(
                     "adb_enabled",
                     0
                 ) == 1
+            }
+        }
+
+        data object AdbSecure : DetectionMethod.SystemPropertiesMethod(
+            name = "ro_adb_secure",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_secure,
+            propertyKey = "ro.adb.secure",
+            overrideValue = "1",
+        ) {
+            override fun test(context: Context): Boolean {
+                return SystemPropsUtil.equalsValue("ro.adb.secure", "0")
+            }
+        }
+
+        data object ServiceAdbRoot : DetectionMethod.SystemPropertiesMethod(
+            name = "service_adb_root",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_root,
+            propertyKey = "service.adb.root",
+            overrideValue = "0",
+        ) {
+            override fun test(context: Context): Boolean {
+                return SystemPropsUtil.equalsValue("service.adb.root", "1")
             }
         }
 

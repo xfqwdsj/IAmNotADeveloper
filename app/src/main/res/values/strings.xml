@@ -12,9 +12,12 @@
     <!-- Detection methods -->
     <string name="toggle_hide_development_mode">Hide development mode</string>
     <string name="toggle_hide_development_mode_legacy">Hide development mode (legacy)</string>
+    <string name="toggle_hide_development_mode_debuggable">Hide debuggable build (prop)</string>
     <string name="toggle_hide_usb_debugging">Hide USB debugging</string>
     <string name="toggle_hide_usb_debugging_legacy">Hide USB debugging (legacy)</string>
     <string name="toggle_hide_adb_usb_state">Hide ADB USB state (prop)</string>
+    <string name="toggle_hide_adb_secure">Hide ADB authentication state (prop)</string>
+    <string name="toggle_hide_adb_root">Hide ADB root state (prop)</string>
     <string name="toggle_hide_adb_usb_config">Hide ADB USB config (prop)</string>
     <string name="toggle_hide_adb_reboot_func">Hide ADB reboot function (prop)</string>
     <string name="toggle_hide_adb_svc_adbd">Hide ADB service daemon (prop)</string>

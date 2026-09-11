@@ -18,11 +18,20 @@ val DetectionMethod.hook: Hook
         is DetectionCategory.DevelopmentMode.DevelopmentLegacy ->
             SettingsHook(Settings.Secure::class, "development_settings_enabled", preferenceKey)
 
+        is DetectionCategory.DevelopmentMode.Debuggable ->
+            SystemPropertyHook.of("ro.debuggable", "0", preferenceKey)
+
         is DetectionCategory.UsbDebugging.Adb ->
             SettingsHook(Settings.Global::class, "adb_enabled", preferenceKey)
 
         is DetectionCategory.UsbDebugging.AdbLegacy ->
             SettingsHook(Settings.Secure::class, "adb_enabled", preferenceKey)
+
+        is DetectionCategory.UsbDebugging.AdbSecure ->
+            SystemPropertyHook.of("ro.adb.secure", "1", preferenceKey)
+
+        is DetectionCategory.UsbDebugging.ServiceAdbRoot ->
+            SystemPropertyHook.of("service.adb.root", "0", preferenceKey)
 
         is DetectionCategory.UsbDebugging.AdbSystemPropsUsbState ->
             SystemPropertyHook.of("sys.usb.state", "mtp", preferenceKey)
