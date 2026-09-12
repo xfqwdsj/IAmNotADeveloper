@@ -1,7 +1,7 @@
 package top.ltfan.notdeveloper.ui.page
 
+import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavEntry
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -26,7 +26,8 @@ sealed class Page {
 
 sealed class Main : Page() {
     abstract val navigationLabel: Int
-    abstract val navigationIcon: ImageVector
+    @get:DrawableRes
+    abstract val navigationIcon: Int
 
     companion object {
         val pages by lazy { listOf(Overview, Apps, Settings) }

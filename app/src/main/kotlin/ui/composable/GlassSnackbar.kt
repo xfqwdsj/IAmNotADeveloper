@@ -25,8 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +52,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.platform.LocalAccessibilityManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.dismiss
@@ -65,6 +64,7 @@ import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
 import kotlinx.coroutines.delay
 import top.ltfan.material.m3.core.visual.pageGlass
+import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
@@ -170,7 +170,7 @@ fun GlassSnackbar(
                     onClick = { snackbarData.dismiss() },
                     content = {
                         @SuppressLint("PrivateResource") Icon(
-                            Icons.Filled.Close,
+                            painterResource(R.drawable.close_24px),
                             contentDescription = stringResource(androidx.compose.material3.R.string.m3c_snackbar_dismiss),
                         )
                     }

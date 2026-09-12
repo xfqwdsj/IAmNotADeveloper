@@ -24,8 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -193,7 +191,7 @@ private fun Header(packageInfo: PackageInfoWrapper) {
         }
         Row(Modifier.padding(horizontal = 8.dp)) {
             IconButtonWithTooltip(
-                imageVector = Icons.Default.ClearAll,
+                iconRes = R.drawable.clear_all_24px,
                 contentDescription = R.string.action_apps_modal_configuration_clear,
             ) {
                 val packageName = packageInfo.info.packageName

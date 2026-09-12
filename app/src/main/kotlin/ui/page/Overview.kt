@@ -2,8 +2,6 @@ package top.ltfan.notdeveloper.ui.page
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +39,7 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Overview : Main() {
     override val navigationLabel: Int = R.string.label_nav_overview
-    override val navigationIcon = Icons.Default.Home
+    override val navigationIcon = R.drawable.home_24px
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable

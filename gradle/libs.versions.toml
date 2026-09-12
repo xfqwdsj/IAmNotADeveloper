@@ -39,7 +39,6 @@ compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview"
 compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
-compose-icons = { module = "androidx.compose.material:material-icons-extended" }
 capsule = { module = "top.ltfan.capsule:capsule", version.ref = "capsule" }
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 m3Extended = { module = "top.ltfan.material:m3-extended", version.ref = "m3-extended" }

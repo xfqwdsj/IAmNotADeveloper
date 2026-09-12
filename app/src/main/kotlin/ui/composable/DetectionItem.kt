@@ -1,8 +1,5 @@
 package top.ltfan.notdeveloper.ui.composable
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -96,12 +94,12 @@ fun DetectionItem(
             if (packageInfo != null) return@PreferenceItem
             if (testResult) {
                 Icon(
-                    Icons.Outlined.Error,
+                    painterResource(R.drawable.error_24px),
                     contentDescription = null,
                 )
             } else {
                 Icon(
-                    Icons.Outlined.CheckCircle,
+                    painterResource(R.drawable.check_circle_24px),
                     contentDescription = null,
                 )
             }
