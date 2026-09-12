@@ -1,5 +1,6 @@
 package top.ltfan.notdeveloper.ui.page
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
@@ -34,7 +35,7 @@ import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.only
-import top.ltfan.notdeveloper.ui.util.operate
+import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Overview : Main() {
@@ -69,10 +70,7 @@ object Overview : Main() {
                 },
                 contentWindowInsets = AppWindowInsets,
             ) { contentPadding ->
-                val contentPadding = contentPadding.operate {
-                    top += 16.dp
-                    bottom += 16.dp
-                }
+                val contentPadding = contentPadding + PaddingValues(top = 16.dp, bottom = 16.dp)
 
                 GroupedLazyColumn(
                     modifier = Modifier

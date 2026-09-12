@@ -6,10 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
@@ -17,16 +19,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -50,7 +53,7 @@ import top.ltfan.notdeveloper.ui.composable.LiquidBottomTab
 import top.ltfan.notdeveloper.ui.composable.LiquidBottomTabs
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
-import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.LocalBottomBarHeight
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
@@ -86,27 +89,33 @@ class MainActivity : ComponentActivity() {
                 val backdrop = rememberBackdropLayer(background)
                 val overlayHost = remember { OverlayHostState() }
                 val blurEnabled = blur
+                val bottomBarHeight = remember { mutableStateOf(0.dp) }
                 CompositionLocalProvider(
                     LocalBackdrop provides backdrop,
                     LocalBlurEnabled provides blurEnabled,
                 ) {
                     OverlayHost(overlayHost) {
-                        NavDisplay(
-                            backStack = backStack,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .captureBackdrop(backdrop),
-                            entryDecorators = listOf(
-                                rememberSaveableStateHolderNavEntryDecorator(),
-                                rememberViewModelStoreNavEntryDecorator(),
-                            ),
-                            sceneDecoratorStrategies = listOf(
-                                BottomBarSceneDecorator { sceneBackdrop ->
-                                    if (vm.showNavBar) BottomBar(vm, sceneBackdrop)
-                                },
-                            ),
-                            entryProvider = { it.navEntry() },
-                        )
+                        CompositionLocalProvider(
+                            LocalBottomBarHeight provides
+                                    if (vm.showNavBar) bottomBarHeight.value else 0.dp,
+                        ) {
+                            NavDisplay(
+                                backStack = backStack,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .captureBackdrop(backdrop),
+                                entryDecorators = listOf(
+                                    rememberSaveableStateHolderNavEntryDecorator(),
+                                    rememberViewModelStoreNavEntryDecorator(),
+                                ),
+                                sceneDecoratorStrategies = listOf(
+                                    BottomBarSceneDecorator(bottomBarHeight) { sceneBackdrop ->
+                                        if (vm.showNavBar) BottomBar(vm, sceneBackdrop)
+                                    },
+                                ),
+                                entryProvider = { it.navEntry() },
+                            )
+                        }
                     }
                 }
             }
@@ -115,8 +124,11 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Draws the floating bottom bar over the scene content and reserves its
- * height at the bottom of the content.
+ * Draws the floating bottom bar over the scene content and exposes its
+ * measured height through [LocalBottomBarHeight] so the pages can reserve
+ * room for it in their own content padding. The scene content itself is
+ * left full-size (edge to edge), so page-level scrims cover the whole
+ * window.
  *
  * The scene content is captured into a scene-scoped backdrop that does
  * not contain the bar, and the bar samples that backdrop as a sibling.
@@ -126,14 +138,16 @@ class MainActivity : ComponentActivity() {
  * `NavDisplay`) is left for the overlays.
  */
 private class BottomBarSceneDecorator<T : Any>(
+    private val barHeight: MutableState<Dp>,
     private val bottomBar: @Composable (LayerBackdrop) -> Unit,
 ) : SceneDecoratorStrategy<T> {
     override fun SceneDecoratorStrategyScope<T>.decorateScene(scene: Scene<T>): Scene<T> =
-        DecoratedScene(scene, bottomBar)
+        DecoratedScene(scene, barHeight, bottomBar)
 }
 
 private class DecoratedScene<T : Any>(
     private val scene: Scene<T>,
+    private val barHeight: MutableState<Dp>,
     private val bottomBar: @Composable (LayerBackdrop) -> Unit,
 ) : Scene<T> {
     override val key get() = scene.key
@@ -152,31 +166,23 @@ private class DecoratedScene<T : Any>(
             drawRect(background)
             drawContent()
         }
-        var barHeight by remember { mutableStateOf(0.dp) }
         val density = LocalDensity.current
-        val animatedBarHeight by animateDpAsState(barHeight)
         Box(Modifier.fillMaxSize()) {
             Box(
                 Modifier
                     .fillMaxSize()
                     .layerBackdrop(sceneBackdrop)
             ) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(bottom = animatedBarHeight)
-                ) {
-                    scene.content()
-                }
+                scene.content()
             }
             Box(
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(AppWindowInsets.only { bottom })
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only { bottom })
             ) {
                 Box(
                     Modifier.onGloballyPositioned {
-                        barHeight = with(density) { it.size.height.toDp() }
+                        barHeight.value = with(density) { it.size.height.toDp() }
                     }
                 ) {
                     bottomBar(sceneBackdrop)
@@ -194,10 +200,13 @@ private fun BottomBar(viewModel: AppViewModel, backdrop: LayerBackdrop) {
         onTabSelected = { index -> viewModel.navigateMain(pages[index]) },
         backdrop = backdrop,
         tabsCount = pages.size,
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = Modifier.padding(horizontal = 28.dp),
     ) {
         pages.forEach { page ->
-            LiquidBottomTab(onClick = { viewModel.navigateMain(page) }) {
+            LiquidBottomTab(
+                onClick = { viewModel.navigateMain(page) },
+                modifier = Modifier.defaultMinSize(minWidth = 76.dp),
+            ) {
                 Icon(
                     painterResource(page.navigationIcon),
                     contentDescription = null,
@@ -208,6 +217,9 @@ private fun BottomBar(viewModel: AppViewModel, backdrop: LayerBackdrop) {
                     text = stringResource(page.navigationLabel),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Visible,
                 )
             }
         }
