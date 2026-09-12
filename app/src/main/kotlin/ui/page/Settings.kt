@@ -23,6 +23,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.material.m3.card
 import top.ltfan.material.m3.core.layout.GroupedLazyColumn
+import top.ltfan.material.m3.core.layout.only
+import top.ltfan.material.m3.core.layout.plus
 import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.backdropSurface
@@ -35,8 +37,6 @@ import top.ltfan.notdeveloper.settings.UiSettingsModelDescriber
 import top.ltfan.notdeveloper.ui.composable.PreferenceItem
 import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.only
-import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Settings : Main() {
