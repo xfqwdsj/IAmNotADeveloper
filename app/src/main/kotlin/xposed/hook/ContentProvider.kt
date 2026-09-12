@@ -5,8 +5,8 @@ import top.ltfan.notdeveloper.provider.DatabaseServiceProvider
 import top.ltfan.notdeveloper.provider.SystemServiceProvider
 
 /**
- * How the system server should answer a `getContentProvider` call that names a
- * provider registered by this module.
+ * How the system server should answer a `getContentProvider` call that
+ * names a provider registered by this module.
  */
 sealed interface ProviderPatch {
     /** Let the framework resolve the provider as usual. */
@@ -67,7 +67,7 @@ enum class RegisteredProvider(val authority: String) {
     };
 
     constructor(provider: top.ltfan.notdeveloper.provider.BinderProvider.Companion) :
-        this(provider.authority)
+            this(provider.authority)
 
     context(context: ContentProviderContext)
     abstract fun patch(provider: ContentProvider?): ProviderPatch

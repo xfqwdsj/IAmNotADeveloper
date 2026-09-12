@@ -26,8 +26,8 @@ sealed class DetectionMethod(
     @param:StringRes val labelResId: Int,
 ) {
     /**
-     * Key under which the framework shares this detection's enabled state
-     * with the hooked packages.
+     * Key under which the framework shares this detection's enabled state with
+     * the hooked packages.
      */
     val preferenceKey: String get() = name
 

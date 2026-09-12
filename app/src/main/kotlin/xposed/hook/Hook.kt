@@ -57,13 +57,14 @@ internal fun installAllMethods(
 }
 
 /**
- * Whether the hook guarded by [preferenceKey] is enabled for [packageName].
+ * Whether the hook guarded by [preferenceKey] is enabled for
+ * [packageName].
  *
- * The framework keeps remote preferences in sync with the module app, so
- * reading them returns the setting the module app stores. A package scoped
- * entry, when present, takes priority over the global one. A `null` receiver
- * means the framework delivers no remote preferences; every hook then stays
- * enabled, which the UI reports as "Preferences not working".
+ * The framework keeps remote preferences in sync with the module app,
+ * so reading them returns the setting the module app stores. A package
+ * scoped entry, when present, takes priority over the global one. A `null`
+ * receiver means the framework delivers no remote preferences; every hook
+ * then stays enabled, which the UI reports as "Preferences not working".
  */
 internal fun SharedPreferences?.isEnabled(packageName: String, preferenceKey: String): Boolean {
     val preferences = this ?: return true
