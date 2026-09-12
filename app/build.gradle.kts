@@ -98,7 +98,6 @@ dependencies {
 //    implementation(libs.compose.material3.adaptive)
     implementation(libs.capsule)
     implementation(libs.backdrop)
-    implementation(libs.shapes)
     implementation(libs.m3Extended)
     implementation(libs.settingsPageCore)
     ksp(libs.settingsPageProcessor)
