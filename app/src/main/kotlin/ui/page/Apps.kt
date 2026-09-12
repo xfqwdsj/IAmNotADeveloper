@@ -93,6 +93,8 @@ import kotlinx.coroutines.launch
 import top.ltfan.material.m3.card
 import top.ltfan.material.m3.core.layout.GroupedLazyColumn
 import top.ltfan.material.m3.core.layout.GroupedLazyListScope
+import top.ltfan.material.m3.core.layout.only
+import top.ltfan.material.m3.core.layout.plus
 import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.backdropSurface
@@ -124,8 +126,6 @@ import top.ltfan.notdeveloper.ui.util.EmptyContentTransform
 import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
-import top.ltfan.notdeveloper.ui.util.only
-import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
