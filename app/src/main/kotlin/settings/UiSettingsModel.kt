@@ -6,14 +6,16 @@ import top.ltfan.material.m3.settingspage.SettingsResource
 import top.ltfan.material.m3.settingspage.SettingsResources
 import top.ltfan.material.m3.settingspage.annotation.SettingsItem
 import top.ltfan.material.m3.settingspage.annotation.SettingsStore
+import kotlinx.serialization.Serializable
 import top.ltfan.material.m3.settingspage.annotation.SettingsValue
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.datastore.UiSettings
+import top.ltfan.notdeveloper.datastore.model.DataStoreCompanion
 
 /**
  * The user interface settings model. The settings page describer is
  * generated from this data class.
  */
+@Serializable
 @SettingsStore
 data class UiSettingsModel(
     @SettingsItem(BlurResources::class)
@@ -24,7 +26,12 @@ data class UiSettingsModel(
 
     @SettingsItem(ProgressiveResources::class)
     val progressive: ProgressiveMode = ProgressiveMode.Disabled,
-)
+) {
+    companion object : DataStoreCompanion<UiSettingsModel> {
+        override val fileName = "ui_settings"
+        override val default = UiSettingsModel()
+    }
+}
 
 /** The progressive blur mode applied to the top bars. */
 enum class ProgressiveMode : SettingsResources {
@@ -109,58 +116,4 @@ object ProgressiveResources : SettingsResources {
     override val icon: SettingsResource<Painter?>? = null
 }
 
-/** Reads the persisted settings as the settings model. */
-fun UiSettings.toModel(): UiSettingsModel = UiSettingsModel(
-    blur = blurSettings.value is UiSettings.BlurSettings.Value.Enabled,
-    smoothRoundedCorners = smoothRoundedCorners.value,
-    progressive = when (val blur = blurSettings.value) {
-        is UiSettings.BlurSettings.Value.Disabled -> ProgressiveMode.Disabled
-        is UiSettings.BlurSettings.Value.Enabled -> when (blur.progressiveSettings.value) {
-            is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Disabled ->
-                ProgressiveMode.Disabled
 
-            is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Mask ->
-                ProgressiveMode.Mask
-
-            is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Scaled.Auto ->
-                ProgressiveMode.ScaledAuto
-
-            is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Scaled.Custom ->
-                ProgressiveMode.ScaledCustom
-
-            is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Full ->
-                ProgressiveMode.Full
-        }
-    },
-)
-
-/** Writes the settings model back into the persisted settings. */
-fun UiSettingsModel.applyTo(current: UiSettings): UiSettings = current.copy(
-    blurSettings = UiSettings.BlurSettings(
-        if (blur) {
-            UiSettings.BlurSettings.Value.Enabled(
-                UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings(
-                    when (progressive) {
-                        ProgressiveMode.Disabled ->
-                            UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Disabled
-
-                        ProgressiveMode.Mask ->
-                            UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Mask
-
-                        ProgressiveMode.ScaledAuto ->
-                            UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Scaled.Auto
-
-                        ProgressiveMode.ScaledCustom ->
-                            UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Scaled.Custom()
-
-                        ProgressiveMode.Full ->
-                            UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Full
-                    }
-                )
-            )
-        } else {
-            UiSettings.BlurSettings.Value.Disabled
-        }
-    ),
-    smoothRoundedCorners = UiSettings.SmoothRoundedCorners(smoothRoundedCorners),
-)
