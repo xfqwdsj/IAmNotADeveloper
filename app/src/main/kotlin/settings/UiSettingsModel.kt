@@ -2,11 +2,11 @@ package top.ltfan.notdeveloper.settings
 
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
+import kotlinx.serialization.Serializable
 import top.ltfan.material.m3.settingspage.SettingsResource
 import top.ltfan.material.m3.settingspage.SettingsResources
 import top.ltfan.material.m3.settingspage.annotation.SettingsItem
 import top.ltfan.material.m3.settingspage.annotation.SettingsStore
-import kotlinx.serialization.Serializable
 import top.ltfan.material.m3.settingspage.annotation.SettingsValue
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.datastore.model.DataStoreCompanion
@@ -100,8 +100,8 @@ object SmoothCornersResources : SettingsResources {
         get() = SettingsResource.Composable {
             stringResource(R.string.label_settings_ui_smooth_corner)
         }
-    override val description: SettingsResource<String?>?
-        get() = SettingsResource.Composable<String?> {
+    override val description: SettingsResource<String?>
+        get() = SettingsResource.Composable {
             stringResource(R.string.description_settings_ui_smooth_corner)
         }
     override val icon: SettingsResource<Painter?>? = null
