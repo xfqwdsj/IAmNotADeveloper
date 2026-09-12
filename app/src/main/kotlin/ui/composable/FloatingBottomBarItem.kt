@@ -19,16 +19,16 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.kyant.capsule.ContinuousCapsule
 
-internal val LocalLiquidBottomTabScale =
+internal val LocalFloatingBottomBarTabScale =
     staticCompositionLocalOf { { 1f } }
 
 @Composable
-fun RowScope.LiquidBottomTab(
+fun RowScope.FloatingBottomBarItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val scale = LocalLiquidBottomTabScale.current
+    val scale = LocalFloatingBottomBarTabScale.current
     Column(
         modifier
             .clip(ContinuousCapsule)
