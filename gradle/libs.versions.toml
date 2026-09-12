@@ -1,23 +1,22 @@
 [versions]
 kotlin = "2.4.20"
-kotlinx-serialization = "1.9.0"
+kotlinx-serialization = "1.11.0"
 ksp = "2.3.12"
 agp = "9.5.0-alpha04"
 lifecycle = "2.11.0"
-lifecycle-viewmodelNav3 = "1.0.0-alpha04"
-splashscreen = "1.0.1"
+lifecycle-viewmodelNav3 = "2.11.0"
+splashscreen = "1.2.0"
 activity = "1.13.0"
 compose = "2026.09.00"
-navigation = "1.2.0-beta01"
-compose-adaptive = "1.0.0-SNAPSHOT"
-capsule = "0.1.0"
+navigation = "1.2.0-rc01"
+compose-adaptive = "1.3.0"
+capsule = "1.1.1"
 backdrop = "2.0.1"
 m3-extended = "0.1.0"
-coil = "3.3.0"
-room = "2.7.2"
-datastore = "1.1.7"
+coil = "3.6.2"
+room = "2.8.5"
+datastore = "1.2.1"
 preference = "1.2.1"
-dsl-utilities = "1.0.0"
 kaidl = "0.2.0"
 libxposed = "102.0.0"
 
@@ -50,14 +49,12 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 preference = { module = "androidx.preference:preference-ktx", version.ref = "preference" }
-dslUtilities = { module = "top.ltfan.dslutilities:dsl-utilities", version.ref = "dsl-utilities" }
 kaidl-compiler = { module = "io.github.goooler.kaidl:kaidl-compiler", version.ref = "kaidl" }
 kaidl-runtime = { module = "io.github.goooler.kaidl:kaidl-runtime", version.ref = "kaidl" }
 libxposed-api = { module = "io.github.libxposed:api", version.ref = "libxposed" }
 libxposed-service = { module = "io.github.libxposed:service", version.ref = "libxposed" }
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
