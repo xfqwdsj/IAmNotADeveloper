@@ -1,16 +1,16 @@
 package top.ltfan.notdeveloper.ui.composable
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import top.ltfan.notdeveloper.R
 
 @Composable
 fun FilterChip(
@@ -18,7 +18,7 @@ fun FilterChip(
     onClick: () -> Unit,
     @StringRes text: Int,
     modifier: Modifier = Modifier,
-    leadingPlaceholderIcon: ImageVector? = null,
+    @DrawableRes leadingPlaceholderIcon: Int? = null,
     trailing: @Composable (() -> Unit)? = null,
 ) {
     FilterChip(
@@ -37,7 +37,7 @@ fun FilterChip(
     onClick: () -> Unit,
     text: String,
     modifier: Modifier = Modifier,
-    leadingPlaceholderIcon: ImageVector? = null,
+    @DrawableRes leadingPlaceholderIcon: Int? = null,
     trailing: @Composable (() -> Unit)? = null,
 ) {
     Box(modifier) {
@@ -54,9 +54,9 @@ fun FilterChip(
                 if (leadingPlaceholderIcon != null) {
                     AnimatedContentWithBlur(selected) { selected ->
                         if (selected) {
-                            Icon(Icons.Default.Check, contentDescription = null)
+                            Icon(painterResource(R.drawable.check_24px), contentDescription = null)
                         } else {
-                            Icon(leadingPlaceholderIcon, contentDescription = null)
+                            Icon(painterResource(leadingPlaceholderIcon), contentDescription = null)
                         }
                     }
                 } else {
@@ -64,7 +64,7 @@ fun FilterChip(
                         visible = selected,
                         direction = EnterExitPredefinedDirection.Horizontal,
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = null)
+                        Icon(painterResource(R.drawable.check_24px), contentDescription = null)
                     }
                 }
             },
