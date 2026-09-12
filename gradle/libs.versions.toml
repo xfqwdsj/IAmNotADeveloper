@@ -12,7 +12,6 @@ navigation = "1.2.0-beta01"
 compose-adaptive = "1.0.0-SNAPSHOT"
 capsule = "0.1.0"
 backdrop = "2.0.1"
-shapes = "1.2.1"
 m3-extended = "0.1.0"
 coil = "3.3.0"
 room = "2.7.2"
@@ -42,7 +41,6 @@ compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
 capsule = { module = "top.ltfan.capsule:capsule", version.ref = "capsule" }
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
-shapes = { module = "io.github.kyant0:shapes", version.ref = "shapes" }
 m3Extended = { module = "top.ltfan.material:m3-extended", version.ref = "m3-extended" }
 settingsPageCore = { module = "top.ltfan.material:settings-page-core", version.ref = "m3-extended" }
 settingsPageProcessor = { module = "top.ltfan.material:settings-page-processor", version.ref = "m3-extended" }
