@@ -1,3 +1,6 @@
+// Adapted from Kyant0/AndroidLiquidGlass (Apache-2.0), the official backdrop
+// catalog. Only the package was adapted.
+
 package top.ltfan.notdeveloper.ui.animation
 
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -9,38 +12,39 @@ import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
-import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.util.fastFirstOrNull
 
-/**
- * Drag gestures that report presses without consuming the events, so a bar
- * can both drag its indicator and still let items handle their own clicks.
- */
 suspend fun PointerInputScope.inspectDragGestures(
     onDragStart: (down: PointerInputChange) -> Unit = {},
     onDragEnd: (change: PointerInputChange) -> Unit = {},
     onDragCancel: () -> Unit = {},
-    onDrag: (change: PointerInputChange, dragAmount: Offset) -> Unit,
+    onDrag: (change: PointerInputChange, dragAmount: Offset) -> Unit
 ) {
     awaitEachGesture {
-        val down = awaitFirstDown(
-            requireUnconsumed = false,
-            pass = PointerEventPass.Initial,
-        )
+        val initialDown = awaitFirstDown(false, PointerEventPass.Initial)
+
+        val down = awaitFirstDown(false)
+        val drag = initialDown
 
         onDragStart(down)
-        onDrag(down, Offset.Zero)
-        val upEvent = drag(
-            pointerId = down.id,
-            onDrag = { onDrag(it, it.positionChangeIgnoreConsumed()) },
-        )
-        if (upEvent != null) onDragEnd(upEvent) else onDragCancel()
+        onDrag(drag, Offset.Zero)
+        val upEvent =
+            drag(
+                pointerId = drag.id,
+                onDrag = { onDrag(it, it.positionChange()) }
+            )
+        if (upEvent == null) {
+            onDragCancel()
+        } else {
+            onDragEnd(upEvent)
+        }
     }
 }
 
 private suspend inline fun AwaitPointerEventScope.drag(
     pointerId: PointerId,
-    onDrag: (PointerInputChange) -> Unit,
+    onDrag: (PointerInputChange) -> Unit
 ): PointerInputChange? {
     val isPointerUp = currentEvent.changes.fastFirstOrNull { it.id == pointerId }?.pressed != true
     if (isPointerUp) {
@@ -49,6 +53,9 @@ private suspend inline fun AwaitPointerEventScope.drag(
     var pointer = pointerId
     while (true) {
         val change = awaitDragOrUp(pointer) ?: return null
+        if (change.isConsumed) {
+            return null
+        }
         if (change.changedToUpIgnoreConsumed()) {
             return change
         }
@@ -58,11 +65,11 @@ private suspend inline fun AwaitPointerEventScope.drag(
 }
 
 private suspend inline fun AwaitPointerEventScope.awaitDragOrUp(
-    pointerId: PointerId,
+    pointerId: PointerId
 ): PointerInputChange? {
     var pointer = pointerId
     while (true) {
-        val event = awaitPointerEvent(PointerEventPass.Initial)
+        val event = awaitPointerEvent()
         val dragEvent = event.changes.fastFirstOrNull { it.id == pointer } ?: return null
         if (dragEvent.changedToUpIgnoreConsumed()) {
             val otherDown = event.changes.fastFirstOrNull { it.pressed }
