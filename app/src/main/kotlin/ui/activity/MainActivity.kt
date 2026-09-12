@@ -39,10 +39,12 @@ import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
 import com.kyant.capsule.ContinuousCapsule
 import top.ltfan.notdeveloper.application.NotDevApplication
+import top.ltfan.notdeveloper.datastore.UiSettings
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.material.m3.core.visual.LocalBackdrop
+import top.ltfan.material.m3.core.visual.LocalBlurEnabled
 import top.ltfan.material.m3.core.visual.backdropSurface
 import top.ltfan.material.m3.core.visual.captureBackdrop
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
@@ -87,7 +89,11 @@ class MainActivity : ComponentActivity() {
                 val surface = MaterialTheme.colorScheme.surface
                 val backdrop = rememberBackdropLayer(background)
                 val overlayHost = remember { OverlayHostState() }
-                CompositionLocalProvider(LocalBackdrop provides backdrop) {
+                val blurEnabled = viewModel.blurSettings is UiSettings.BlurSettings.Value.Enabled
+                CompositionLocalProvider(
+                    LocalBackdrop provides backdrop,
+                    LocalBlurEnabled provides blurEnabled,
+                ) {
                 OverlayHost(overlayHost) {
                 SubcomposeLayout { constraints ->
                     val width = constraints.maxWidth
