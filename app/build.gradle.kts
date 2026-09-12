@@ -96,7 +96,6 @@ dependencies {
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
 //    implementation(libs.compose.material3.adaptive)
-    implementation(libs.compose.icons)
     implementation(libs.capsule)
     implementation(libs.backdrop)
     implementation(libs.m3Extended)

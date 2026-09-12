@@ -39,18 +39,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -82,6 +70,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
@@ -142,7 +131,7 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Apps : Main() {
     override val navigationLabel = R.string.label_nav_apps
-    override val navigationIcon = Icons.Default.Apps
+    override val navigationIcon = R.drawable.apps_24px
 
     val lazyListState = LazyListState()
 
@@ -256,7 +245,7 @@ object Apps : Main() {
     fun AppBarActions() {
         if (viewModel.isAppListError) {
             IconButtonWithTooltip(
-                imageVector = Icons.Default.Warning,
+                iconRes = R.drawable.warning_24px,
                 contentDescription = R.string.action_apps_query_details_show,
                 onClick = { showAppListErrorInfoDialog = true },
             )
@@ -298,14 +287,14 @@ object Apps : Main() {
             }
             if (showing) {
                 IconButtonWithTooltip(
-                    imageVector = Icons.Default.ExpandLess,
+                    iconRes = R.drawable.expand_circle_up_24px,
                     contentDescription = R.string.action_apps_user_select_hide,
                     modifier = Modifier.rotate(rotation),
                     onClick = { showUserFilter = false },
                 )
             } else {
                 IconButtonWithTooltip(
-                    imageVector = Icons.Default.ExpandMore,
+                    iconRes = R.drawable.expand_circle_down_24px,
                     contentDescription = R.string.action_apps_user_select_show,
                     modifier = Modifier.rotate(rotation),
                     onClick = { showUserFilter = true },
@@ -314,7 +303,7 @@ object Apps : Main() {
         }
 
         IconButtonWithTooltip(
-            imageVector = Icons.Default.FilterList,
+            iconRes = R.drawable.filter_list_24px,
             contentDescription = R.string.action_apps_bottom_sheet_filter_show,
             onClick = { showFilterBottomSheet = true },
         )
@@ -344,7 +333,7 @@ object Apps : Main() {
                         ) {
                             PointerInjector()
                             IconButtonSizedIcon(
-                                imageVector = Icons.Default.AccountCircle,
+                                iconRes = R.drawable.account_circle_24px,
                                 contentDescription = stringResource(R.string.label_apps_user_select),
                             )
                         }
@@ -361,12 +350,12 @@ object Apps : Main() {
                             AnimatedContent(refreshFinished) {
                                 if (it) {
                                     IconButtonSizedIcon(
-                                        imageVector = Icons.Default.Done,
+                                        iconRes = R.drawable.check_24px,
                                         contentDescription = stringResource(R.string.label_apps_user_list_refresh_done),
                                     )
                                 } else {
                                     IconButtonWithTooltip(
-                                        imageVector = Icons.Default.Refresh,
+                                        iconRes = R.drawable.refresh_24px,
                                         contentDescription = R.string.action_apps_user_list_refresh,
                                         onClick = {
                                             updateUsers()
@@ -451,12 +440,12 @@ object Apps : Main() {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.label_apps_item_menu_fab_add_app)) },
                 onClick = {},
-                leadingIcon = { Icon(Icons.Default.Add, null) }
+                leadingIcon = { Icon(painterResource(R.drawable.add_24px), null) }
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.label_apps_item_menu_fab_search)) },
                 onClick = {},
-                leadingIcon = { Icon(Icons.Default.Search, null) }
+                leadingIcon = { Icon(painterResource(R.drawable.search_24px), null) }
             )
         }
     }
@@ -573,7 +562,7 @@ object Apps : Main() {
                                 }
                             },
                             text = AppFilter.All.labelRes,
-                            leadingPlaceholderIcon = Icons.Default.Remove,
+                            leadingPlaceholderIcon = R.drawable.remove_24px,
                         )
                         AppFilter.toggleableEntries.forEach {
                             val selected = !appFilteredMethods.contains(it)
@@ -590,7 +579,7 @@ object Apps : Main() {
                                 modifier = Modifier
                                     .animateBounds(this@SharedTransitionLayout)
                                     .skipToLookaheadSize(),
-                                leadingPlaceholderIcon = Icons.Default.Remove,
+                                leadingPlaceholderIcon = R.drawable.remove_24px,
                             )
                         }
                     }

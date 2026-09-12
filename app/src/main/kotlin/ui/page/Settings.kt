@@ -4,8 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,7 +40,7 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Settings : Main() {
     override val navigationLabel = R.string.label_nav_settings
-    override val navigationIcon = Icons.Default.Settings
+    override val navigationIcon = R.drawable.settings_24px
 
     val lazyListState = LazyListState()
 

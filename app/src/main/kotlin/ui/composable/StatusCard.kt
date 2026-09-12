@@ -1,5 +1,6 @@
 package top.ltfan.notdeveloper.ui.composable
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -13,9 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -29,7 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -75,7 +73,7 @@ fun StatusCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(Modifier.width(24.dp))
-            Icon(status.icon, contentDescription = null, modifier = Modifier.size(32.dp))
+            Icon(painterResource(status.icon), contentDescription = null, modifier = Modifier.size(32.dp))
             Column(Modifier.weight(1f)) {
                 Text(
                     text = status.summary,
@@ -242,10 +240,11 @@ enum class Status {
             Error -> MaterialTheme.colorScheme.errorContainer
         }
 
-    val icon: ImageVector
-        @Composable get() = when (this) {
-            Normal -> Icons.Default.CheckCircle
-            else -> Icons.Default.Warning
+    @get:DrawableRes
+    val icon: Int
+        get() = when (this) {
+            Normal -> R.drawable.check_circle_24px
+            else -> R.drawable.warning_24px
         }
 
     val summary: String
