@@ -48,13 +48,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
-import androidx.navigationevent.compose.NavigationEventHandler
 import com.kyant.capsule.ContinuousRoundedRectangle
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.database.PackageSettingsDao
@@ -64,7 +63,6 @@ import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
 import top.ltfan.notdeveloper.ui.theme.AppRadiusMedium
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.getAppId
 import top.ltfan.notdeveloper.util.getUserId

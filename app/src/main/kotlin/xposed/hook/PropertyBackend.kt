@@ -9,9 +9,9 @@ import java.lang.reflect.Executable
 /**
  * How a system property override reaches the target process.
  *
- * The default [JvmPropertyBackend] hooks the `SystemProperties` getters. A
- * native backend can override the property's final value instead, which also
- * covers readers that bypass the Java getters.
+ * The default [JvmPropertyBackend] hooks the `SystemProperties` getters.
+ * A native backend can override the property's final value instead, which
+ * also covers readers that bypass the Java getters.
  */
 interface PropertyBackend {
     fun interceptor(

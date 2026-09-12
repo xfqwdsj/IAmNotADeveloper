@@ -32,8 +32,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneDecoratorStrategy
@@ -224,7 +224,11 @@ private fun BottomBar(viewModel: AppViewModel, backdrop: BackdropLayerHandle) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
-                            Icon(page.navigationIcon, contentDescription = null, tint = contentColor)
+                            Icon(
+                                page.navigationIcon,
+                                contentDescription = null,
+                                tint = contentColor
+                            )
                             Text(
                                 text = stringResource(page.navigationLabel),
                                 color = contentColor,

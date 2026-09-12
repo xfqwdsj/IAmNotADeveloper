@@ -18,8 +18,8 @@ object ScopeController {
     /**
      * Makes the framework's scope match [desired]: it requests the packages
      * that are missing and removes the ones that are no longer wanted. A
-     * missing service means the module is not activated yet, so the request
-     * is skipped and retried on the next [sync].
+     * missing service means the module is not activated yet, so the request is
+     * skipped and retried on the next [sync].
      */
     fun sync(desired: Set<String>) {
         val service = ModuleService.service ?: return

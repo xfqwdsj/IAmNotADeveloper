@@ -15,7 +15,6 @@ import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.data.UserInfoName
 import top.ltfan.notdeveloper.data.wrapped
-import top.ltfan.notdeveloper.database.PackageInfo as DatabasePackageInfo
 import top.ltfan.notdeveloper.database.ParcelablePackageInfo
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -26,13 +25,14 @@ import top.ltfan.notdeveloper.provider.getInterfaceOrNull
 import top.ltfan.notdeveloper.util.Reflect
 import top.ltfan.notdeveloper.util.clearBinderCallingIdentity
 import top.ltfan.notdeveloper.util.getUserId
+import top.ltfan.notdeveloper.database.PackageInfo as DatabasePackageInfo
 
 const val CallMethodNotify = "NOTIFY"
 const val BundleExtraType = "type"
 
 /**
- * Cross-process contract served from system server, which can enumerate every
- * user and their packages on behalf of the module app.
+ * Cross-process contract served from system server, which can enumerate
+ * every user and their packages on behalf of the module app.
  */
 @BinderInterface
 interface SystemServiceInterface {
@@ -49,7 +49,8 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
         val application = callingApplication(identity) ?: return emptyList()
 
         return clearBinderCallingIdentity {
-            val userManager = application.getSystemService<UserManager>() ?: return@clearBinderCallingIdentity emptyList()
+            val userManager = application.getSystemService<UserManager>()
+                ?: return@clearBinderCallingIdentity emptyList()
             (Reflect.callMethod(userManager, "getUsers") as List<*>)
                 .map { user ->
                     UserInfo(
@@ -201,8 +202,8 @@ fun SystemServiceClient(service: SystemServiceInterface): SystemServiceClient =
     object : SystemServiceClient, SystemServiceInterface by service {}
 
 /**
- * In-process fallback used while the system server service is not reachable.
- * It serves the current user and its installed packages.
+ * In-process fallback used while the system server service is not
+ * reachable. It serves the current user and its installed packages.
  */
 class LocalSystemService(private val context: Context) : SystemServiceClient {
     override fun queryUsers(userIds: List<Int>): List<UserInfo> {
