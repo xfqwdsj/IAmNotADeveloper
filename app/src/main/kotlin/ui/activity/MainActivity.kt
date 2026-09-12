@@ -7,21 +7,25 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -92,7 +96,7 @@ class MainActivity : ComponentActivity() {
                     val insetsBottom = insets.getBottom(this)
 
                     val navBar = subcompose("navBar") {
-                        NavigationBar(
+                        Box(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                                 .backdropSurface(
@@ -104,22 +108,63 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onDrawSurface = { drawRect(surface.copy(alpha = 0.6f)) },
                                 ),
-                            containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                            tonalElevation = 0.dp,
-                            windowInsets = insets.only { horizontal + bottom }
                         ) {
-                            Main.pages.forEach { page ->
-                                NavigationBarItem(
-                                    selected = navBarEntry == page,
-                                    onClick = { navigateMain(page) },
-                                    icon = {
-                                        Icon(page.navigationIcon, contentDescription = null)
-                                    },
-                                    label = {
-                                        Text(stringResource(page.navigationLabel))
+                            Row(Modifier.fillMaxWidth()) {
+                                Main.pages.forEach { page ->
+                                    val selected = navBarEntry == page
+                                    val contentColor =
+                                        if (selected) MaterialTheme.colorScheme.onSurface
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable { navigateMain(page) }
+                                            .padding(vertical = 6.dp, horizontal = 8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            if (selected) {
+                                                Box(
+                                                    Modifier
+                                                        .matchParentSize()
+                                                        .padding(horizontal = 4.dp)
+                                                        .backdropSurface(
+                                                            handle = backdrop,
+                                                            shape = ContinuousCapsule,
+                                                            effects = {
+                                                                lens(
+                                                                    refractionHeight = 12.dp.toPx(),
+                                                                    refractionAmount = 16.dp.toPx(),
+                                                                    depthEffect = true,
+                                                                    chromaticAberration = true,
+                                                                )
+                                                            },
+                                                            highlight = null,
+                                                            shadow = null,
+                                                            onDrawSurface = {
+                                                                drawRect(contentColor.copy(alpha = 0.1f))
+                                                            },
+                                                        ),
+                                                )
+                                            }
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                            ) {
+                                                Icon(
+                                                    page.navigationIcon,
+                                                    contentDescription = null,
+                                                    tint = contentColor,
+                                                )
+                                                Text(
+                                                    text = stringResource(page.navigationLabel),
+                                                    color = contentColor,
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                )
+                                            }
+                                        }
                                     }
-                                )
+                                }
                             }
                         }
                     }
