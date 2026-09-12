@@ -1,6 +1,5 @@
 package top.ltfan.notdeveloper.ui.page
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavEntry
@@ -14,17 +13,14 @@ sealed class Page {
     open val metadata: Map<String, Any> = emptyMap()
 
     @Composable
-    context(contentPadding: PaddingValues)
     abstract fun AppViewModel.Content()
 
     context(viewModel: AppViewModel)
-    fun navEntry(contentPadding: PaddingValues) = NavEntry(
+    fun navEntry() = NavEntry(
         key = this,
         metadata = metadata,
     ) {
-        context(contentPadding) {
-            viewModel.Content()
-        }
+        viewModel.Content()
     }
 }
 

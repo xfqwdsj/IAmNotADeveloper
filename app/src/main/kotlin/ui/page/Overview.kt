@@ -47,7 +47,6 @@ object Overview : Main() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
         val background = MaterialTheme.colorScheme.background
@@ -72,7 +71,7 @@ object Overview : Main() {
                     colors = LargeTopAppBarColorsTransparent,
                 )
             },
-            contentWindowInsets = AppWindowInsets + contentPadding,
+            contentWindowInsets = AppWindowInsets,
         ) { contentPadding ->
             val contentPadding = contentPadding.operate {
                 top += 16.dp
