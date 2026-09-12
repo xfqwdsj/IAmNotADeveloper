@@ -8,6 +8,8 @@
     <string name="category_development_mode">Development mode</string>
     <string name="category_usb_debugging">USB debugging</string>
     <string name="category_wireless_debugging">Wireless debugging</string>
+    <string name="category_bootloader">Bootloader</string>
+    <string name="category_oem_unlock">OEM unlock</string>
 
     <!-- Detection methods -->
     <string name="toggle_hide_development_mode">Hide development mode</string>
@@ -23,6 +25,14 @@
     <string name="toggle_hide_adb_svc_adbd">Hide ADB service daemon (prop)</string>
     <string name="toggle_hide_adb_ffs_ready">Hide ADB FFS ready state (prop)</string>
     <string name="toggle_hide_wireless_debugging">Hide wireless debugging</string>
+    <string name="toggle_hide_development_mode_debuggable_force">Hide debuggable build (force)</string>
+    <string name="toggle_hide_adb_tcp_port">Hide ADB TCP port (persist)</string>
+    <string name="toggle_hide_adb_tcp_port_service">Hide ADB TCP port (service)</string>
+    <string name="toggle_hide_usb_mass_storage">Hide USB mass storage</string>
+    <string name="toggle_hide_bootloader_verified_state">Hide verified boot state</string>
+    <string name="toggle_hide_bootloader_flash_locked">Hide flash locked state</string>
+    <string name="toggle_hide_bootloader_verity_mode">Hide verity mode</string>
+    <string name="toggle_hide_oem_unlock">Hide OEM unlock allowed</string>
 
     <!-- Status -->
     <string name="status_normal">Working normally</string>
