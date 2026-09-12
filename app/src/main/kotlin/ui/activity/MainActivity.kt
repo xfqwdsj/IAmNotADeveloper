@@ -122,12 +122,12 @@ class MainActivity : ComponentActivity() {
  * Draws the floating bottom bar over the scene content and reserves its
  * height at the bottom of the content.
  *
- * The scene content is captured into a scene-scoped backdrop that does not
- * contain the bar, and the bar samples that backdrop as a sibling. Sampling
- * a backdrop from inside its own captured subtree would make the layer draw
- * itself while recording, so the two subtrees must stay disjoint. The
- * app-scoped backdrop (captured around the whole `NavDisplay`) is left for
- * the overlays.
+ * The scene content is captured into a scene-scoped backdrop that does
+ * not contain the bar, and the bar samples that backdrop as a sibling.
+ * Sampling a backdrop from inside its own captured subtree would make
+ * the layer draw itself while recording, so the two subtrees must
+ * stay disjoint. The app-scoped backdrop (captured around the whole
+ * `NavDisplay`) is left for the overlays.
  */
 private class BottomBarSceneDecorator<T : Any>(
     private val bottomBar: @Composable () -> Unit,
@@ -144,6 +144,11 @@ private class DecoratedScene<T : Any>(
     override val entries get() = scene.entries
     override val previousEntries get() = scene.previousEntries
     override val metadata get() = scene.metadata
+
+    override fun equals(other: Any?): Boolean =
+        other is DecoratedScene<*> && other.scene == scene
+
+    override fun hashCode(): Int = scene.hashCode()
 
     override val content: @Composable () -> Unit = {
         val background = MaterialTheme.colorScheme.background
