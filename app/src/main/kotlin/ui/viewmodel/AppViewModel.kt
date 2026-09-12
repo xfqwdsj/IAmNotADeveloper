@@ -32,7 +32,6 @@ import top.ltfan.notdeveloper.data.wrapped
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppListSettings
 import top.ltfan.notdeveloper.datastore.GlobalPreferences
-import top.ltfan.notdeveloper.datastore.UiSettings
 import top.ltfan.notdeveloper.datastore.model.AppDataStore
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
@@ -41,8 +40,6 @@ import top.ltfan.notdeveloper.service.ScopeController
 import top.ltfan.notdeveloper.service.SystemServiceClient
 import top.ltfan.notdeveloper.service.systemService
 import top.ltfan.notdeveloper.settings.UiSettingsModel
-import top.ltfan.notdeveloper.settings.applyTo
-import top.ltfan.notdeveloper.settings.toModel
 import top.ltfan.notdeveloper.ui.page.Apps
 import top.ltfan.notdeveloper.ui.page.Apps.processed
 import top.ltfan.notdeveloper.ui.page.Main
@@ -56,31 +53,19 @@ import kotlin.reflect.KProperty
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
     val appListSettingsStore = AppListSettings.createDataStore()
-    val uiSettingsStore = UiSettings.createDataStore()
+    val uiSettingsStore = UiSettingsModel.createDataStore()
     val globalPreferencesStore = GlobalPreferences.createDataStore()
 
-    var blurSettings: UiSettings.BlurSettings.Value by uiSettingsStore.propertyAsMutableState(
-        get = { it.blurSettings.value },
-        set = { settings, blurSettings ->
-            settings.copy(blurSettings = UiSettings.BlurSettings(blurSettings))
-        },
+    var blur by uiSettingsStore.propertyAsMutableState(
+        get = { it.blur },
+        set = { settings, value -> settings.copy(blur = value) },
     )
 
-    var smoothRoundedCorners by uiSettingsStore.propertyAsMutableState(
-        get = { it.smoothRoundedCorners.value },
-        set = { settings, value ->
-            settings.copy(smoothRoundedCorners = UiSettings.SmoothRoundedCorners(value))
-        },
-    )
-
-    /**
-     * The settings page model, derived from the persisted user interface
-     * settings.
-     */
-    val uiSettingsModelFlow: Flow<UiSettingsModel> = uiSettingsStore.data.map { it.toModel() }
+    /** The settings page model, the persisted user interface settings. */
+    val uiSettingsModelFlow: Flow<UiSettingsModel> = uiSettingsStore.data
 
     fun updateUiSettingsModel(model: UiSettingsModel) {
-        viewModelScope.launch { uiSettingsStore.updateData { model.applyTo(it) } }
+        viewModelScope.launch { uiSettingsStore.updateData { model } }
     }
 
     /**

@@ -53,7 +53,6 @@ import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.material.m3.overlay.OverlayHost
 import top.ltfan.material.m3.overlay.OverlayHostState
 import top.ltfan.notdeveloper.application.NotDevApplication
-import top.ltfan.notdeveloper.datastore.UiSettings
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -91,7 +90,7 @@ class MainActivity : ComponentActivity() {
                 val background = MaterialTheme.colorScheme.background
                 val backdrop = rememberBackdropLayer(background)
                 val overlayHost = remember { OverlayHostState() }
-                val blurEnabled = blurSettings is UiSettings.BlurSettings.Value.Enabled
+                val blurEnabled = blur
                 CompositionLocalProvider(
                     LocalBackdrop provides backdrop,
                     LocalBlurEnabled provides blurEnabled,
