@@ -41,6 +41,9 @@ import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.service.ScopeController
 import top.ltfan.notdeveloper.service.SystemServiceClient
 import top.ltfan.notdeveloper.service.systemService
+import top.ltfan.notdeveloper.settings.UiSettingsModel
+import top.ltfan.notdeveloper.settings.applyTo
+import top.ltfan.notdeveloper.settings.toModel
 import top.ltfan.notdeveloper.ui.page.Apps
 import top.ltfan.notdeveloper.ui.page.Apps.processed
 import top.ltfan.notdeveloper.ui.page.Main
@@ -70,6 +73,13 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
             settings.copy(smoothRoundedCorners = UiSettings.SmoothRoundedCorners(value))
         },
     )
+
+    /** The settings page model, derived from the persisted user interface settings. */
+    val uiSettingsModelFlow: Flow<UiSettingsModel> = uiSettingsStore.data.map { it.toModel() }
+
+    fun updateUiSettingsModel(model: UiSettingsModel) {
+        viewModelScope.launch { uiSettingsStore.updateData { model.applyTo(it) } }
+    }
 
     /**
      * Latest global detection states, mirrored into the framework remote
