@@ -1,6 +1,5 @@
-// Adapted from KernelSU manager's DampedDragAnimation (Apache-2.0), which was
-// adapted from compose-miuix-ui. Kept as a plain animation holder so the drag
-// behaviour is independent of the blur implementation.
+// Adapted from Kyant0/AndroidLiquidGlass (Apache-2.0), the official backdrop
+// catalog. Only the package and the Android awaitFrame import were adapted.
 
 package top.ltfan.notdeveloper.ui.animation
 
@@ -14,13 +13,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.IntSize
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.android.awaitFrame
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
-import kotlin.time.TimeSource
+import kotlin.time.Clock
 
 class DampedDragAnimation(
     private val animationScope: CoroutineScope,
@@ -29,10 +27,8 @@ class DampedDragAnimation(
     val visibilityThreshold: Float,
     val initialScale: Float,
     val pressedScale: Float,
-    val canDrag: (Offset) -> Boolean = { true },
     val onDragStarted: DampedDragAnimation.(position: Offset) -> Unit,
     val onDragStopped: DampedDragAnimation.() -> Unit,
-    val onDragCancelled: DampedDragAnimation.() -> Unit = onDragStopped,
     val onDrag: DampedDragAnimation.(size: IntSize, dragAmount: Offset) -> Unit,
 ) {
 
@@ -60,13 +56,10 @@ class DampedDragAnimation(
 
     private val mutatorMutex = MutatorMutex()
 
-    private var pressJob: Job? = null
-    private var releaseJob: Job? = null
-
     private val velocityTracker = VelocityTracker()
-    private val startMark = TimeSource.Monotonic.markNow()
 
     val value: Float get() = valueAnimation.value
+    val progress: Float get() = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
     val targetValue: Float get() = valueAnimation.targetValue
     val pressProgress: Float get() = pressProgressAnimation.value
     val scaleX: Float get() = scaleXAnimation.value
@@ -84,27 +77,17 @@ class DampedDragAnimation(
                 release()
             },
             onDragCancel = {
-                onDragCancelled()
+                onDragStopped()
                 release()
             }
         ) { change, dragAmount ->
-            val position = change.position
-            val previousPosition = change.previousPosition
-
-            val isInside = canDrag(position)
-            val wasInside = canDrag(previousPosition)
-
-            if (isInside && wasInside) {
-                onDrag(size, dragAmount)
-            }
+            onDrag(size, dragAmount)
         }
     }
 
     fun press() {
-        releaseJob?.cancel()
-        pressJob?.cancel()
         velocityTracker.resetTracking()
-        pressJob = animationScope.launch {
+        animationScope.launch {
             launch { pressProgressAnimation.animateTo(1f, pressProgressAnimationSpec) }
             launch { scaleXAnimation.animateTo(pressedScale, scaleXAnimationSpec) }
             launch { scaleYAnimation.animateTo(pressedScale, scaleYAnimationSpec) }
@@ -112,12 +95,13 @@ class DampedDragAnimation(
     }
 
     fun release() {
-        releaseJob?.cancel()
-        releaseJob = animationScope.launch {
+        animationScope.launch {
             awaitFrame()
             if (value != targetValue) {
                 val threshold = (valueRange.endInclusive - valueRange.start) * 0.025f
-                snapshotFlow { valueAnimation.value }.first { abs(it - valueAnimation.targetValue) < threshold }
+                snapshotFlow { valueAnimation.value }
+                    .filter { abs(it - valueAnimation.targetValue) < threshold }
+                    .first()
             }
             launch { pressProgressAnimation.animateTo(0f, pressProgressAnimationSpec) }
             launch { scaleXAnimation.animateTo(initialScale, scaleXAnimationSpec) }
@@ -127,20 +111,24 @@ class DampedDragAnimation(
 
     fun updateValue(value: Float) {
         val targetValue = value.coerceIn(valueRange)
-        animationScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            valueAnimation.animateTo(targetValue, valueAnimationSpec) { updateVelocity() }
+        animationScope.launch {
+            launch {
+                valueAnimation.animateTo(
+                    targetValue,
+                    valueAnimationSpec
+                ) { updateVelocity() }
+            }
         }
     }
 
     fun animateToValue(value: Float) {
         animationScope.launch {
-            val scope = this
             mutatorMutex.mutate {
                 press()
                 val targetValue = value.coerceIn(valueRange)
-                scope.launch { valueAnimation.animateTo(targetValue, valueAnimationSpec) }
+                launch { valueAnimation.animateTo(targetValue, valueAnimationSpec) }
                 if (velocity != 0f) {
-                    scope.launch { velocityAnimation.animateTo(0f, velocityAnimationSpec) }
+                    launch { velocityAnimation.animateTo(0f, velocityAnimationSpec) }
                 }
                 release()
             }
@@ -149,13 +137,11 @@ class DampedDragAnimation(
 
     private fun updateVelocity() {
         velocityTracker.addPosition(
-            startMark.elapsedNow().inWholeMilliseconds,
-            Offset(value, 0f),
+            Clock.System.now().toEpochMilliseconds(),
+            Offset(value, 0f)
         )
-        val span = (valueRange.endInclusive - valueRange.start).coerceAtLeast(1e-6f)
-        val targetVelocity = velocityTracker.calculateVelocity().x / span
-        animationScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            velocityAnimation.snapTo(targetVelocity)
-        }
+        val targetVelocity =
+            velocityTracker.calculateVelocity().x / (valueRange.endInclusive - valueRange.start)
+        animationScope.launch { velocityAnimation.animateTo(targetVelocity, velocityAnimationSpec) }
     }
 }
