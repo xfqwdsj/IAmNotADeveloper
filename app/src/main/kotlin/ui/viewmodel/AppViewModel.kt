@@ -17,7 +17,6 @@ import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -74,7 +73,10 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         },
     )
 
-    /** The settings page model, derived from the persisted user interface settings. */
+    /**
+     * The settings page model, derived from the persisted user interface
+     * settings.
+     */
     val uiSettingsModelFlow: Flow<UiSettingsModel> = uiSettingsStore.data.map { it.toModel() }
 
     fun updateUiSettingsModel(model: UiSettingsModel) {

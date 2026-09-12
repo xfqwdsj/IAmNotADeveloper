@@ -12,8 +12,8 @@ import java.lang.reflect.Method
 
 /**
  * Installs the system-server side of the module: a hook on
- * `ActivityManagerService.getContentProvider` that serves the module's own
- * providers (the cross-process app list and the settings database).
+ * `ActivityManagerService.getContentProvider` that serves the module's
+ * own providers (the cross-process app list and the settings database).
  */
 context(module: Module)
 fun installSystemHooks(classLoader: ClassLoader) {

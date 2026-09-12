@@ -5,8 +5,8 @@ import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
 /**
- * Reflection helpers used by the system-server side of the module, replacing
- * the legacy `XposedHelpers` API.
+ * Reflection helpers used by the system-server side of the module,
+ * replacing the legacy `XposedHelpers` API.
  */
 object Reflect {
     fun findClass(name: String, classLoader: ClassLoader): Class<*> =

@@ -52,11 +52,11 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.keepSizeWhenLookingAhead
-import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)

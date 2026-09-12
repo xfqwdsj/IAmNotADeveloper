@@ -30,8 +30,8 @@ class SystemServiceProvider(service: SystemServiceInterface) : BinderProvider() 
 
         /**
          * Builds and returns the [ContentProviderHolder] that the system server
-         * should hand to the module app for [authority], or `null` when the
-         * caller must not receive it.
+         * should hand to the module app for [authority], or `null` when the caller
+         * must not receive it.
          */
         @OptIn(ExperimentalTime::class)
         fun patch(

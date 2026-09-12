@@ -67,7 +67,8 @@ fun GlassAlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
     ) {
-        GlassAlertDialogContent(            buttons = {
+        GlassAlertDialogContent(
+            buttons = {
                 AlertDialogFlowRow(
                     mainAxisSpacing = ButtonsMainAxisSpacing,
                     crossAxisSpacing = ButtonsCrossAxisSpacing
@@ -117,11 +118,11 @@ internal fun GlassAlertDialogContent(
     ) {
         Column(
             modifier = Modifier
-            .pageGlass(
-                shape = shape,
-                containerColor = containerColor,
-            )
-            .padding(DialogPadding),
+                .pageGlass(
+                    shape = shape,
+                    containerColor = containerColor,
+                )
+                .padding(DialogPadding),
         ) {
             icon?.let {
                 CompositionLocalProvider(LocalContentColor provides iconContentColor) {

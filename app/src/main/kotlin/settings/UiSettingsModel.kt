@@ -11,8 +11,8 @@ import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.datastore.UiSettings
 
 /**
- * The user interface settings model. The settings page describer is generated
- * from this data class.
+ * The user interface settings model. The settings page describer is
+ * generated from this data class.
  */
 @SettingsStore
 data class UiSettingsModel(
@@ -30,72 +30,81 @@ data class UiSettingsModel(
 enum class ProgressiveMode : SettingsResources {
     @SettingsValue
     Disabled {
-        override val label get() = SettingsResource.Composable {
-            stringResource(R.string.label_settings_ui_blur_enabled_progressive_disabled)
-        }
+        override val label
+            get() = SettingsResource.Composable {
+                stringResource(R.string.label_settings_ui_blur_enabled_progressive_disabled)
+            }
         override val description: SettingsResource<String?>? = null
         override val icon: SettingsResource<Painter?>? = null
     },
 
     @SettingsValue
     Mask {
-        override val label get() = SettingsResource.Composable {
-            stringResource(R.string.label_settings_ui_blur_enabled_progressive_mask)
-        }
+        override val label
+            get() = SettingsResource.Composable {
+                stringResource(R.string.label_settings_ui_blur_enabled_progressive_mask)
+            }
         override val description: SettingsResource<String?>? = null
         override val icon: SettingsResource<Painter?>? = null
     },
 
     @SettingsValue
     ScaledAuto {
-        override val label get() = SettingsResource.Composable {
-            stringResource(R.string.label_settings_ui_blur_enabled_progressive_scaled_auto)
-        }
+        override val label
+            get() = SettingsResource.Composable {
+                stringResource(R.string.label_settings_ui_blur_enabled_progressive_scaled_auto)
+            }
         override val description: SettingsResource<String?>? = null
         override val icon: SettingsResource<Painter?>? = null
     },
 
     @SettingsValue
     ScaledCustom {
-        override val label get() = SettingsResource.Composable {
-            stringResource(R.string.label_settings_ui_blur_enabled_progressive_scaled_custom)
-        }
+        override val label
+            get() = SettingsResource.Composable {
+                stringResource(R.string.label_settings_ui_blur_enabled_progressive_scaled_custom)
+            }
         override val description: SettingsResource<String?>? = null
         override val icon: SettingsResource<Painter?>? = null
     },
 
     @SettingsValue
     Full {
-        override val label get() = SettingsResource.Composable {
-            stringResource(R.string.label_settings_ui_blur_enabled_progressive_full)
-        }
+        override val label
+            get() = SettingsResource.Composable {
+                stringResource(R.string.label_settings_ui_blur_enabled_progressive_full)
+            }
         override val description: SettingsResource<String?>? = null
         override val icon: SettingsResource<Painter?>? = null
     },
 }
 
 object BlurResources : SettingsResources {
-    override val label get() = SettingsResource.Composable {
-        stringResource(R.string.label_settings_ui_blur)
-    }
+    override val label
+        get() = SettingsResource.Composable {
+            stringResource(R.string.label_settings_ui_blur)
+        }
     override val description: SettingsResource<String?>? = null
     override val icon: SettingsResource<Painter?>? = null
 }
 
 object SmoothCornersResources : SettingsResources {
-    override val label get() = SettingsResource.Composable {
-        stringResource(R.string.label_settings_ui_smooth_corner)
-    }
-    override val description: SettingsResource<String?>? get() = SettingsResource.Composable<String?> {
-        stringResource(R.string.description_settings_ui_smooth_corner)
-    }
+    override val label
+        get() = SettingsResource.Composable {
+            stringResource(R.string.label_settings_ui_smooth_corner)
+        }
+    override val description: SettingsResource<String?>?
+        get() = SettingsResource.Composable<String?> {
+            stringResource(R.string.description_settings_ui_smooth_corner)
+        }
     override val icon: SettingsResource<Painter?>? = null
 }
 
 object ProgressiveResources : SettingsResources {
-    override val label get() = SettingsResource.Composable {
-        stringResource(R.string.label_settings_ui_blur_enabled_progressive)
-    }
+    override val label
+        get() = SettingsResource.Composable {
+            stringResource(R.string.label_settings_ui_blur_enabled_progressive)
+        }
     override val description: SettingsResource<String?>? = null
     override val icon: SettingsResource<Painter?>? = null
 }

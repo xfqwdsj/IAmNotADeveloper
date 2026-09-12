@@ -5,13 +5,13 @@ import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
 import top.ltfan.notdeveloper.xposed.Module
 
 /**
- * Hides a system property by overriding the value every getter that reads it
- * reports.
+ * Hides a system property by overriding the value every getter that reads
+ * it reports.
  *
  * [overrides] maps the name of a `SystemProperties` method to the value it
- * has to report instead; its keys also decide which methods are hooked. The
- * actual interception is delegated to [PropertyBackends.backend], so a native
- * backend can take over without changing this hook.
+ * has to report instead; its keys also decide which methods are hooked.
+ * The actual interception is delegated to [PropertyBackends.backend],
+ * so a native backend can take over without changing this hook.
  */
 class SystemPropertyHook(
     private val propertyKey: String,
@@ -36,8 +36,8 @@ class SystemPropertyHook(
 
     companion object {
         /**
-         * Hides [propertyKey]: the string getters report [value] as is, while
-         * the typed getters parse it.
+         * Hides [propertyKey]: the string getters report [value] as is, while the
+         * typed getters parse it.
          */
         fun of(propertyKey: String, value: String, preferenceKey: String) =
             SystemPropertyHook(

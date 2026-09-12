@@ -33,5 +33,6 @@ sealed class Main : Page() {
     }
 
     context(viewModel: AppViewModel)
-    open fun secondClick() {}
+    open fun secondClick() {
+    }
 }

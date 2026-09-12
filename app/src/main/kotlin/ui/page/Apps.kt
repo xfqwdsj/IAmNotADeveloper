@@ -51,19 +51,19 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -78,6 +78,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -97,12 +98,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
+import com.kyant.capsule.ContinuousCapsule
 import com.kyant.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.launch
 import top.ltfan.material.m3.card
 import top.ltfan.material.m3.core.layout.GroupedLazyColumn
 import top.ltfan.material.m3.core.layout.GroupedLazyListScope
+import top.ltfan.material.m3.core.visual.BackdropEdge
+import top.ltfan.material.m3.core.visual.LocalBackdrop
+import top.ltfan.material.m3.core.visual.backdropSurface
+import top.ltfan.material.m3.core.visual.captureBackdrop
+import top.ltfan.material.m3.core.visual.pageGlass
+import top.ltfan.material.m3.core.visual.progressiveBlur
+import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.material.m3.layout.header
+import top.ltfan.material.m3.overlay.GlassBottomSheet
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.datastore.AppFilter
@@ -124,20 +134,9 @@ import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.EmptyContentTransform
 import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
-import androidx.compose.ui.graphics.RectangleShape
-import com.kyant.capsule.ContinuousCapsule
-import top.ltfan.material.m3.core.visual.BackdropEdge
-import top.ltfan.material.m3.overlay.GlassBottomSheet
-import top.ltfan.material.m3.core.visual.LocalBackdrop
-import top.ltfan.material.m3.core.visual.backdropSurface
-import top.ltfan.material.m3.core.visual.captureBackdrop
-import top.ltfan.material.m3.core.visual.rememberBackdropLayer
-import top.ltfan.material.m3.core.visual.progressiveBlur
-import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
-import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
@@ -163,83 +162,83 @@ object Apps : Main() {
         val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
 
         CompositionLocalProvider(LocalBackdrop provides backdrop) {
-        SharedTransitionLayout {
-            Scaffold(
-                topBar = {
-                    Column(
-                        Modifier.backdropSurface(
-                            handle = backdrop,
-                            shape = RectangleShape,
-                            effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
-                            highlight = null,
-                            shadow = null,
-                        )
-                    ) {
-                        CenterAlignedTopAppBar(
-                            title = { Text(stringResource(navigationLabel)) },
-                            actions = {
-                                Row(
-                                    modifier = Modifier.pageGlass(
-                                        shape = ContinuousCapsule,
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                        blurRadius = 4.dp,
-                                    ),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    AppBarActions()
-                                }
-                            },
-                            windowInsets = AppWindowInsets.only { horizontal + top },
-                            colors = TopAppBarColorsTransparent,
-                        )
-                        FilterBar()
-                    }
-                },
-                snackbarHost = { GlassSnackbarHost(snackbarHostState) },
-                floatingActionButton = { Fab() },
-                contentWindowInsets = AppWindowInsets,
-            ) { contentPadding ->
-                val (configuredList, unconfiguredList) = collectAppLists()
-
-                GroupedLazyColumn(
-                    modifier = Modifier
-                        .captureBackdrop(backdrop)
-                        .fillMaxSize(),
-                    state = lazyListState,
-                    contentPadding = contentPadding.operate {
-                        top += 16.dp
-                        bottom += 16.dp
+            SharedTransitionLayout {
+                Scaffold(
+                    topBar = {
+                        Column(
+                            Modifier.backdropSurface(
+                                handle = backdrop,
+                                shape = RectangleShape,
+                                effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
+                                highlight = null,
+                                shadow = null,
+                            )
+                        ) {
+                            CenterAlignedTopAppBar(
+                                title = { Text(stringResource(navigationLabel)) },
+                                actions = {
+                                    Row(
+                                        modifier = Modifier.pageGlass(
+                                            shape = ContinuousCapsule,
+                                            containerColor = MaterialTheme.colorScheme.surface,
+                                            blurRadius = 4.dp,
+                                        ),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        AppBarActions()
+                                    }
+                                },
+                                windowInsets = AppWindowInsets.only { horizontal + top },
+                                colors = TopAppBarColorsTransparent,
+                            )
+                            FilterBar()
+                        }
                     },
-                    spacing = 16.dp,
-                ) {
-                    context(transition) {
-                        appListCard(
-                            list = configuredList,
-                            header = R.string.label_apps_list_header_configured,
-                        )
+                    snackbarHost = { GlassSnackbarHost(snackbarHostState) },
+                    floatingActionButton = { Fab() },
+                    contentWindowInsets = AppWindowInsets,
+                ) { contentPadding ->
+                    val (configuredList, unconfiguredList) = collectAppLists()
 
-                        appListCard(
-                            list = unconfiguredList,
-                            header = R.string.label_apps_list_header_unconfigured,
-                        )
+                    GroupedLazyColumn(
+                        modifier = Modifier
+                            .captureBackdrop(backdrop)
+                            .fillMaxSize(),
+                        state = lazyListState,
+                        contentPadding = contentPadding.operate {
+                            top += 16.dp
+                            bottom += 16.dp
+                        },
+                        spacing = 16.dp,
+                    ) {
+                        context(transition) {
+                            appListCard(
+                                list = configuredList,
+                                header = R.string.label_apps_list_header_configured,
+                            )
+
+                            appListCard(
+                                list = unconfiguredList,
+                                header = R.string.label_apps_list_header_unconfigured,
+                            )
+                        }
                     }
+
+                    AnimatedVisibility(
+                        visible = isAppListUpdating,
+                        modifier = Modifier.padding(contentPadding),
+                        enter = expandVertically(),
+                        exit = shrinkVertically(),
+                    ) {
+                        LinearProgressIndicator()
+                    }
+
+                    NoAppsBackground(contentPadding)
+                    FilterBottomSheet()
                 }
 
-                AnimatedVisibility(
-                    visible = isAppListUpdating,
-                    modifier = Modifier.padding(contentPadding),
-                    enter = expandVertically(),
-                    exit = shrinkVertically(),
-                ) {
-                    LinearProgressIndicator()
-                }
-
-                NoAppsBackground(contentPadding)
-                FilterBottomSheet()
+                context(transition) { AppConfiguration() }
             }
-
-            context(transition) { AppConfiguration() }
-        }
         }
 
         val event by appListErrorSnackbarTrigger.collectAsState(null)
