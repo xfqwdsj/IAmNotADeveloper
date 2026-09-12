@@ -5,10 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavEntry
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import top.ltfan.material.m3.core.navigation.Page as MaterialPage
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Serializable
-sealed class Page {
+sealed class Page : MaterialPage {
     @Transient
     open val metadata: Map<String, Any> = emptyMap()
 
@@ -26,6 +27,7 @@ sealed class Page {
 
 sealed class Main : Page() {
     abstract val navigationLabel: Int
+
     @get:DrawableRes
     abstract val navigationIcon: Int
 
