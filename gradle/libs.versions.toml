@@ -43,6 +43,8 @@ compose-icons = { module = "androidx.compose.material:material-icons-extended" }
 capsule = { module = "top.ltfan.capsule:capsule", version.ref = "capsule" }
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 m3Extended = { module = "top.ltfan.material:m3-extended", version.ref = "m3-extended" }
+settingsPageCore = { module = "top.ltfan.material:settings-page-core", version.ref = "m3-extended" }
+settingsPageProcessor = { module = "top.ltfan.material:settings-page-processor", version.ref = "m3-extended" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }

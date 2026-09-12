@@ -100,6 +100,8 @@ dependencies {
     implementation(libs.capsule)
     implementation(libs.backdrop)
     implementation(libs.m3Extended)
+    implementation(libs.settingsPageCore)
+    ksp(libs.settingsPageProcessor)
     implementation(libs.coil)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)

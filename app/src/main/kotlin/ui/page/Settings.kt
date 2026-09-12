@@ -17,26 +17,29 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.material.m3.card
 import top.ltfan.material.m3.core.layout.GroupedLazyColumn
-import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.datastore.UiSettings
-import top.ltfan.notdeveloper.ui.composable.PreferenceItem
-import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
-import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.backdropSurface
 import top.ltfan.material.m3.core.visual.captureBackdrop
+import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
+import top.ltfan.material.m3.settingspage.SettingsItem
+import top.ltfan.notdeveloper.R
+import top.ltfan.notdeveloper.settings.UiSettingsModelDescriber
+import top.ltfan.notdeveloper.ui.composable.PreferenceItem
+import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
+import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.util.operate
 import top.ltfan.notdeveloper.ui.util.plus
-import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Settings : Main() {
@@ -51,6 +54,17 @@ object Settings : Main() {
     override fun AppViewModel.Content() {
         val background = MaterialTheme.colorScheme.background
         val backdrop = rememberBackdropLayer(background)
+        val coroutineScope = rememberCoroutineScope()
+        val describer = remember {
+            UiSettingsModelDescriber(
+                dataSource = uiSettingsModelFlow,
+                updateData = { model ->
+                    updateUiSettingsModel(model)
+                    model
+                },
+                coroutineScope = coroutineScope,
+            )
+        }
         CompositionLocalProvider(LocalBackdrop provides backdrop) {
             Scaffold(
                 topBar = {
@@ -89,87 +103,41 @@ object Settings : Main() {
                             )
                         },
                     ) {
-                        item {
-                            PreferenceItem(
-                                value = blurSettings is UiSettings.BlurSettings.Value.Enabled,
-                                onValueChange = { enabled ->
-                                    blurSettings = if (enabled) {
-                                        UiSettings.BlurSettings.Value.Enabled()
-                                    } else {
-                                        UiSettings.BlurSettings.Value.Disabled
+                        describer.items.forEach { settingsItem ->
+                            when (settingsItem) {
+                                is SettingsItem.Item.Switch -> item {
+                                    PreferenceItem(
+                                        value = settingsItem.value,
+                                        onValueChange = { settingsItem.value = it },
+                                        headlineContent = { Text(settingsItem.label) },
+                                        supportingContent = settingsItem.description?.let { description ->
+                                            @Composable { Text(description) }
+                                        },
+                                    )
+                                }
+
+                                is SettingsItem.Item.Selector<*> -> {
+                                    @Suppress("UNCHECKED_CAST")
+                                    val selector = settingsItem as SettingsItem.Item.Selector<Any?>
+                                    item {
+                                        Text(
+                                            text = selector.label,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            modifier = Modifier.padding(horizontal = 16.dp),
+                                        )
                                     }
-                                },
-                                headlineContent = {
-                                    Text(stringResource(R.string.label_settings_ui_blur))
-                                },
-                            )
-                        }
-                        item {
-                            PreferenceItem(
-                                value = smoothRoundedCorners,
-                                onValueChange = { smoothRoundedCorners = it },
-                                headlineContent = {
-                                    Text(stringResource(R.string.label_settings_ui_smooth_corner))
-                                },
-                                supportingContent = {
-                                    Text(stringResource(R.string.description_settings_ui_smooth_corner))
-                                },
-                            )
-                        }
-                    }
+                                    selector.options.forEach { option ->
+                                        item {
+                                            SelectorItem(
+                                                selected = option.value == selector.value.value,
+                                                label = { Text(option.label) },
+                                                onSelect = { selector.value = option },
+                                            )
+                                        }
+                                    }
+                                }
 
-                    val enabled = blurSettings as? UiSettings.BlurSettings.Value.Enabled
-                    if (enabled != null) {
-                        val current = enabled.progressiveSettings.value
-
-                        fun select(value: UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value) {
-                            blurSettings = UiSettings.BlurSettings.Value.Enabled(
-                                UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings(value),
-                            )
-                        }
-
-                        card {
-                            item {
-                                Text(
-                                    text = stringResource(R.string.label_settings_ui_blur_enabled_progressive),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                )
-                            }
-                            item {
-                                ProgressiveItem(
-                                    selected = current is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Disabled,
-                                    label = R.string.label_settings_ui_blur_enabled_progressive_disabled,
-                                    onSelect = { select(UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Disabled) },
-                                )
-                            }
-                            item {
-                                ProgressiveItem(
-                                    selected = current is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Mask,
-                                    label = R.string.label_settings_ui_blur_enabled_progressive_mask,
-                                    onSelect = { select(UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Mask) },
-                                )
-                            }
-                            item {
-                                ProgressiveItem(
-                                    selected = current is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Scaled.Auto,
-                                    label = R.string.label_settings_ui_blur_enabled_progressive_scaled_auto,
-                                    onSelect = { select(UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Scaled.Auto) },
-                                )
-                            }
-                            item {
-                                ProgressiveItem(
-                                    selected = current is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Scaled.Custom,
-                                    label = R.string.label_settings_ui_blur_enabled_progressive_scaled_custom,
-                                    onSelect = { select(UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Scaled.Custom()) },
-                                )
-                            }
-                            item {
-                                ProgressiveItem(
-                                    selected = current is UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Full,
-                                    label = R.string.label_settings_ui_blur_enabled_progressive_full,
-                                    onSelect = { select(UiSettings.BlurSettings.Value.Enabled.ProgressiveSettings.Value.Full) },
-                                )
+                                else -> Unit
                             }
                         }
                     }
@@ -179,13 +147,13 @@ object Settings : Main() {
     }
 
     @Composable
-    private fun ProgressiveItem(
+    private fun SelectorItem(
         selected: Boolean,
-        label: Int,
+        label: @Composable () -> Unit,
         onSelect: () -> Unit,
     ) {
         ListItem(
-            headlineContent = { Text(stringResource(label)) },
+            headlineContent = label,
             trailingContent = {
                 RadioButton(selected = selected, onClick = onSelect)
             },
