@@ -64,7 +64,7 @@ import kotlin.math.abs
 import kotlin.math.sign
 
 @Composable
-fun LiquidBottomTabs(
+fun FloatingBottomBar(
     selectedTabIndex: () -> Int,
     onTabSelected: (index: Int) -> Unit,
     backdrop: Backdrop,
@@ -101,7 +101,7 @@ fun LiquidBottomTabs(
         }
     }
 
-    var currentIndex by remember(selectedTabIndex) {
+    var currentIndex by remember {
         mutableIntStateOf(selectedTabIndex())
     }
     val dampedDragAnimation = remember(animationScope) {
@@ -199,8 +199,6 @@ fun LiquidBottomTabs(
                     onDrawSurface = { drawRect(containerColor) }
                 )
                 .then(interactiveHighlight.modifier)
-                .then(interactiveHighlight.gestureModifier)
-                .then(dampedDragAnimation.modifier)
                 .height(64.dp)
                 .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -208,7 +206,7 @@ fun LiquidBottomTabs(
         )
 
         CompositionLocalProvider(
-            LocalLiquidBottomTabScale provides {
+            LocalFloatingBottomBarTabScale provides {
                 lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
             }
         ) {
@@ -257,6 +255,8 @@ fun LiquidBottomTabs(
                             if (isLtr) dampedDragAnimation.value * tabWidthPx + panelOffset
                             else size.width - (dampedDragAnimation.value + 1f) * tabWidthPx + panelOffset
                     }
+                    .then(interactiveHighlight.gestureModifier)
+                    .then(dampedDragAnimation.modifier)
                     .drawBackdrop(
                         backdrop = combinedBackdrop,
                         shape = { ContinuousCapsule },
