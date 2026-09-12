@@ -160,10 +160,15 @@ private class DecoratedScene<T : Any>(
             Box(
                 Modifier
                     .fillMaxSize()
-                    .padding(bottom = animatedBarHeight)
                     .layerBackdrop(sceneBackdrop)
             ) {
-                scene.content()
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(bottom = animatedBarHeight)
+                ) {
+                    scene.content()
+                }
             }
             Box(
                 Modifier
