@@ -44,7 +44,6 @@ import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
 import com.kyant.capsule.ContinuousCapsule
-import top.ltfan.material.m3.core.visual.BackdropLayerHandle
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.LocalBlurEnabled
 import top.ltfan.material.m3.core.visual.backdropSurface
@@ -107,7 +106,7 @@ class MainActivity : ComponentActivity() {
                             ),
                             sceneDecoratorStrategies = listOf(
                                 BottomBarSceneDecorator {
-                                    if (vm.showNavBar) BottomBar(vm, backdrop)
+                                    if (vm.showNavBar) BottomBar(vm)
                                 },
                             ),
                             entryProvider = { it.navEntry() },
@@ -122,6 +121,13 @@ class MainActivity : ComponentActivity() {
 /**
  * Draws the floating bottom bar over the scene content and reserves its
  * height at the bottom of the content.
+ *
+ * The scene content is captured into a scene-scoped backdrop that does not
+ * contain the bar, and the bar samples that backdrop as a sibling. Sampling
+ * a backdrop from inside its own captured subtree would make the layer draw
+ * itself while recording, so the two subtrees must stay disjoint. The
+ * app-scoped backdrop (captured around the whole `NavDisplay`) is left for
+ * the overlays.
  */
 private class BottomBarSceneDecorator<T : Any>(
     private val bottomBar: @Composable () -> Unit,
@@ -140,6 +146,8 @@ private class DecoratedScene<T : Any>(
     override val metadata get() = scene.metadata
 
     override val content: @Composable () -> Unit = {
+        val background = MaterialTheme.colorScheme.background
+        val sceneBackdrop = rememberBackdropLayer(background)
         var barHeight by remember { mutableStateOf(0.dp) }
         val density = LocalDensity.current
         val animatedBarHeight by animateDpAsState(barHeight)
@@ -148,20 +156,23 @@ private class DecoratedScene<T : Any>(
                 Modifier
                     .fillMaxSize()
                     .padding(bottom = animatedBarHeight)
+                    .captureBackdrop(sceneBackdrop)
             ) {
                 scene.content()
             }
-            Box(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(AppWindowInsets.only { bottom })
-            ) {
+            CompositionLocalProvider(LocalBackdrop provides sceneBackdrop) {
                 Box(
-                    Modifier.onGloballyPositioned {
-                        barHeight = with(density) { it.size.height.toDp() }
-                    }
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .windowInsetsPadding(AppWindowInsets.only { bottom })
                 ) {
-                    bottomBar()
+                    Box(
+                        Modifier.onGloballyPositioned {
+                            barHeight = with(density) { it.size.height.toDp() }
+                        }
+                    ) {
+                        bottomBar()
+                    }
                 }
             }
         }
@@ -169,7 +180,8 @@ private class DecoratedScene<T : Any>(
 }
 
 @Composable
-private fun BottomBar(viewModel: AppViewModel, backdrop: BackdropLayerHandle) {
+private fun BottomBar(viewModel: AppViewModel) {
+    val backdrop = LocalBackdrop.current ?: return
     val surface = MaterialTheme.colorScheme.surface
     Box(
         modifier = Modifier
