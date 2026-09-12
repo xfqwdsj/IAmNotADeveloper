@@ -50,7 +50,6 @@ object Settings : Main() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
         val background = MaterialTheme.colorScheme.background
         val backdrop = rememberBackdropLayer(background)
@@ -81,7 +80,7 @@ object Settings : Main() {
                         colors = LargeTopAppBarColorsTransparent,
                     )
                 },
-                contentWindowInsets = AppWindowInsets + contentPadding,
+                contentWindowInsets = AppWindowInsets,
             ) { contentPadding ->
                 val padding = contentPadding.operate {
                     top += 16.dp

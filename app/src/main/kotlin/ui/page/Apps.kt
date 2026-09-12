@@ -154,7 +154,6 @@ object Apps : Main() {
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     @Composable
-    context(contentPadding: PaddingValues)
     override fun AppViewModel.Content() {
         val transition = rememberTransition(packageInfoConfiguringTransitionState)
         val background = MaterialTheme.colorScheme.background
@@ -198,7 +197,7 @@ object Apps : Main() {
                 },
                 snackbarHost = { GlassSnackbarHost(snackbarHostState) },
                 floatingActionButton = { Fab() },
-                contentWindowInsets = AppWindowInsets + contentPadding,
+                contentWindowInsets = AppWindowInsets,
             ) { contentPadding ->
                 val (configuredList, unconfiguredList) = collectAppLists()
 
