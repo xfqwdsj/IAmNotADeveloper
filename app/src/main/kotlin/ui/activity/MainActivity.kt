@@ -35,6 +35,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.kyant.backdrop.backdrops.LayerBackdrop
+import top.ltfan.material.m3.core.layout.only
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.LocalBlurEnabled
 import top.ltfan.material.m3.core.visual.captureBackdrop
@@ -47,7 +48,6 @@ import top.ltfan.notdeveloper.ui.composable.FloatingBottomBarItem
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.LocalBottomBarHeight
-import top.ltfan.notdeveloper.ui.util.only
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
 
