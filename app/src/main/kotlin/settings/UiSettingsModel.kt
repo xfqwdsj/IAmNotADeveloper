@@ -24,7 +24,7 @@ data class UiSettingsModel(
     @SettingsItem(SmoothCornersResources::class)
     val smoothRoundedCorners: Boolean = true,
 
-    @SettingsItem(ProgressiveResources::class)
+    @SettingsItem(ProgressiveResources::class, dependsOn = ["blur"])
     val progressive: ProgressiveMode = ProgressiveMode.Disabled,
 ) {
     companion object : DataStoreCompanion<UiSettingsModel> {

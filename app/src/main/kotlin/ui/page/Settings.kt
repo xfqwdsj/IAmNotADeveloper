@@ -1,16 +1,12 @@
 package top.ltfan.notdeveloper.ui.page
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,8 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import top.ltfan.material.m3.card
-import top.ltfan.material.m3.core.layout.GroupedLazyColumn
+import top.ltfan.material.m3.CardSettings
 import top.ltfan.material.m3.core.layout.only
 import top.ltfan.material.m3.core.layout.plus
 import top.ltfan.material.m3.core.visual.BackdropEdge
@@ -31,10 +26,8 @@ import top.ltfan.material.m3.core.visual.backdropSurface
 import top.ltfan.material.m3.core.visual.captureBackdrop
 import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
-import top.ltfan.material.m3.settingspage.SettingsItem
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.settings.UiSettingsModelDescriber
-import top.ltfan.notdeveloper.ui.composable.PreferenceItem
 import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
@@ -79,78 +72,26 @@ object Settings : Main() {
                 },
                 contentWindowInsets = AppWindowInsets,
             ) { contentPadding ->
-                val padding = contentPadding + PaddingValues(top = 16.dp, bottom = 16.dp)
-
-                GroupedLazyColumn(
-                    modifier = Modifier
-                        .captureBackdrop(backdrop)
-                        .fillMaxSize(),
-                    state = lazyListState,
-                    contentPadding = padding,
-                    spacing = 16.dp,
-                ) {
-                    card(
-                        colors = {
-                            CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                            )
-                        },
-                    ) {
-                        describer.items.forEach { settingsItem ->
-                            when (settingsItem) {
-                                is SettingsItem.Item.Switch -> item {
-                                    PreferenceItem(
-                                        value = settingsItem.value,
-                                        onValueChange = { settingsItem.value = it },
-                                        headlineContent = { Text(settingsItem.label) },
-                                        supportingContent = settingsItem.description?.let { description ->
-                                            @Composable { Text(description) }
-                                        },
-                                    )
-                                }
-
-                                is SettingsItem.Item.Selector<*> -> {
-                                    @Suppress("UNCHECKED_CAST")
-                                    val selector = settingsItem as SettingsItem.Item.Selector<Any?>
-                                    item {
-                                        Text(
-                                            text = selector.label,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            modifier = Modifier.padding(horizontal = 16.dp),
-                                        )
-                                    }
-                                    selector.options.forEach { option ->
-                                        item {
-                                            SelectorItem(
-                                                selected = option.value == selector.value.value,
-                                                label = { Text(option.label) },
-                                                onSelect = { selector.value = option },
-                                            )
-                                        }
-                                    }
-                                }
-
-                                else -> Unit
-                            }
-                        }
-                    }
+                with(this@Settings) {
+                    CardSettings(
+                        store = describer,
+                        modifier = Modifier
+                            .captureBackdrop(backdrop)
+                            .fillMaxSize(),
+                        lazyListState = lazyListState,
+                        contentPadding = contentPadding + PaddingValues(
+                            start = 16.dp,
+                            top = 16.dp,
+                            end = 16.dp,
+                            bottom = 16.dp,
+                        ),
+                        cardColors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        ),
+                        cardElevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    )
                 }
             }
         }
-    }
-
-    @Composable
-    private fun SelectorItem(
-        selected: Boolean,
-        label: @Composable () -> Unit,
-        onSelect: () -> Unit,
-    ) {
-        ListItem(
-            headlineContent = label,
-            trailingContent = {
-                RadioButton(selected = selected, onClick = onSelect)
-            },
-            modifier = Modifier.clickable(onClick = onSelect),
-        )
     }
 }
