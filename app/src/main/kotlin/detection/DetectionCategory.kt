@@ -53,6 +53,17 @@ sealed class DetectionCategory(
                 return SystemPropsUtil.equalsValue("ro.debuggable", "1")
             }
         }
+
+        data object DebuggableForce : DetectionMethod.SystemPropertiesMethod(
+            name = "ro_force_debuggable",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_development_mode_debuggable_force,
+            propertyKey = "ro.force.debuggable",
+            overrideValue = "0",
+        ) {
+            override fun test(context: Context): Boolean {
+                return SystemPropsUtil.equalsValue("ro.force.debuggable", "1")
+            }
+        }
     }
 
     data object UsbDebugging : DetectionCategory(
@@ -172,6 +183,43 @@ sealed class DetectionCategory(
                 else -> "0"
             }
         }
+
+        data object AdbTcpPort : DetectionMethod.SystemPropertiesMethod(
+            name = "persist_adb_tcp_port",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_tcp_port,
+            propertyKey = "persist.adb.tcp.port",
+            overrideValue = "-1",
+        ) {
+            override fun test(context: Context): Boolean {
+                return !SystemPropsUtil.equalsValue("persist.adb.tcp.port", "-1")
+            }
+        }
+
+        data object AdbTcpPortService : DetectionMethod.SystemPropertiesMethod(
+            name = "service_adb_tcp_port",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_adb_tcp_port_service,
+            propertyKey = "service.adb.tcp.port",
+            overrideValue = "-1",
+        ) {
+            override fun test(context: Context): Boolean {
+                return !SystemPropsUtil.equalsValue("service.adb.tcp.port", "-1")
+            }
+        }
+
+        data object UsbMassStorage : DetectionMethod.SettingsMethod(
+            name = "usb_mass_storage_enabled",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_usb_mass_storage,
+            settingsClass = android.provider.Settings.Global::class.java,
+            settingKey = "usb_mass_storage_enabled",
+        ) {
+            override fun test(context: Context): Boolean {
+                return android.provider.Settings.Global.getInt(
+                    context.contentResolver,
+                    "usb_mass_storage_enabled",
+                    0
+                ) == 1
+            }
+        }
     }
 
     data object WirelessDebugging : DetectionCategory(
@@ -189,6 +237,58 @@ sealed class DetectionCategory(
                     "adb_wifi_enabled",
                     0
                 ) == 1
+            }
+        }
+    }
+
+    data object Bootloader : DetectionCategory(
+        labelResId = top.ltfan.notdeveloper.R.string.category_bootloader
+    ) {
+        data object VerifiedBootState : DetectionMethod.SystemPropertiesMethod(
+            name = "ro_boot_verifiedbootstate",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_bootloader_verified_state,
+            propertyKey = "ro.boot.verifiedbootstate",
+            overrideValue = "green",
+        ) {
+            override fun test(context: Context): Boolean {
+                return !SystemPropsUtil.equalsValue("ro.boot.verifiedbootstate", "green")
+            }
+        }
+
+        data object FlashLocked : DetectionMethod.SystemPropertiesMethod(
+            name = "ro_boot_flash_locked",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_bootloader_flash_locked,
+            propertyKey = "ro.boot.flash.locked",
+            overrideValue = "1",
+        ) {
+            override fun test(context: Context): Boolean {
+                return SystemPropsUtil.equalsValue("ro.boot.flash.locked", "0")
+            }
+        }
+
+        data object VerityMode : DetectionMethod.SystemPropertiesMethod(
+            name = "ro_boot_veritymode",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_bootloader_verity_mode,
+            propertyKey = "ro.boot.veritymode",
+            overrideValue = "enforcing",
+        ) {
+            override fun test(context: Context): Boolean {
+                return !SystemPropsUtil.equalsValue("ro.boot.veritymode", "enforcing")
+            }
+        }
+    }
+
+    data object OemUnlock : DetectionCategory(
+        labelResId = top.ltfan.notdeveloper.R.string.category_oem_unlock
+    ) {
+        data object OemUnlockAllowed : DetectionMethod.SystemPropertiesMethod(
+            name = "sys_oem_unlock_allowed",
+            labelResId = top.ltfan.notdeveloper.R.string.toggle_hide_oem_unlock,
+            propertyKey = "sys.oem_unlock_allowed",
+            overrideValue = "0",
+        ) {
+            override fun test(context: Context): Boolean {
+                return SystemPropsUtil.equalsValue("sys.oem_unlock_allowed", "1")
             }
         }
     }

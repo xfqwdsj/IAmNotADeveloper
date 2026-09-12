@@ -6,6 +6,8 @@
     <string name="category_development_mode">开发者模式</string>
     <string name="category_usb_debugging">USB调试</string>
     <string name="category_wireless_debugging">无线调试</string>
+    <string name="category_bootloader">引导程序</string>
+    <string name="category_oem_unlock">OEM解锁</string>
 
     <!-- Detection methods -->
     <string name="toggle_hide_development_mode">隐藏开发者模式</string>
@@ -18,6 +20,14 @@
     <string name="toggle_hide_adb_svc_adbd">隐藏ADB服务守护进程（属性）</string>
     <string name="toggle_hide_adb_ffs_ready">隐藏ADB FFS就绪状态（属性）</string>
     <string name="toggle_hide_wireless_debugging">隐藏无线调试</string>
+    <string name="toggle_hide_development_mode_debuggable_force">隐藏可调试构建（强制属性）</string>
+    <string name="toggle_hide_adb_tcp_port">隐藏ADB TCP端口（持久属性）</string>
+    <string name="toggle_hide_adb_tcp_port_service">隐藏ADB TCP端口（服务属性）</string>
+    <string name="toggle_hide_usb_mass_storage">隐藏USB大容量存储</string>
+    <string name="toggle_hide_bootloader_verified_state">隐藏验证启动状态</string>
+    <string name="toggle_hide_bootloader_flash_locked">隐藏刷写锁状态</string>
+    <string name="toggle_hide_bootloader_verity_mode">隐藏校验模式</string>
+    <string name="toggle_hide_oem_unlock">隐藏OEM解锁许可</string>
 
     <!-- Status -->
     <string name="status_normal">正常工作中</string>
