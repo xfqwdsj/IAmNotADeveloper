@@ -1,8 +1,12 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    id("kotlin-parcelize")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -76,19 +80,39 @@ android {
 
 dependencies {
     implementation(libs.kotlin.reflect)
+    implementation(libs.kotlinx.serialization.cbor)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
-    implementation(libs.activity.compose)
-
+    implementation(libs.lifecycle.viewmodelNav3)
+    implementation(libs.splashscreen)
+    implementation(libs.activity)
+    implementation(libs.navigation.runtime)
+    implementation(libs.navigation.ui)
     implementation(platform(libs.compose))
-
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
+//    implementation(libs.compose.material3.adaptive)
+    implementation(libs.capsule)
+    implementation(libs.backdrop)
+    implementation(libs.m3Extended)
+    implementation(libs.settingsPageCore)
+    ksp(libs.settingsPageProcessor)
+    implementation(libs.coil)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.datastore)
+    implementation(libs.room.ktx)
     implementation(libs.preference)
+    ksp(libs.kaidl.compiler)
+    implementation(libs.kaidl.runtime)
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }

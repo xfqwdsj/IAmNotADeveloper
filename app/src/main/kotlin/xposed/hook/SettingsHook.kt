@@ -22,14 +22,16 @@ class SettingsHook(
 ) : Hook {
     context(module: Module)
     override fun install(param: PackageReadyParam): Int =
-        installAllMethods(settingsType.java, GET_STRING_FOR_USER) { interceptor(it) }
+        installAllMethods(settingsType.java, GET_STRING_FOR_USER) {
+            interceptor(it, param.packageName)
+        }
 
     context(module: Module)
-    override fun interceptor(executable: Executable): Hooker {
+    override fun interceptor(executable: Executable, packageName: String): Hooker {
         val prefs = module.preferences
         return Hooker { chain ->
             val name = chain.getArg(1) as String
-            if (prefs.isEnabled(preferenceKey) && name == settingKey) {
+            if (prefs.isEnabled(packageName, preferenceKey) && name == settingKey) {
                 Log.d("${executable.name}($name) reported as 0")
                 // Report the hidden value without running the original lookup.
                 "0"
