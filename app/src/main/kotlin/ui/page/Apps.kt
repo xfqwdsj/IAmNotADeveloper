@@ -125,7 +125,7 @@ import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.only
-import top.ltfan.notdeveloper.ui.util.operate
+import top.ltfan.notdeveloper.ui.util.plus
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
@@ -194,10 +194,10 @@ object Apps : Main() {
                             .captureBackdrop(backdrop)
                             .fillMaxSize(),
                         state = lazyListState,
-                        contentPadding = contentPadding.operate {
-                            top += 16.dp
-                            bottom += 16.dp
-                        },
+                        contentPadding = contentPadding + PaddingValues(
+                            top = 16.dp,
+                            bottom = 16.dp
+                        ),
                         spacing = 16.dp,
                     ) {
                         context(transition) {
