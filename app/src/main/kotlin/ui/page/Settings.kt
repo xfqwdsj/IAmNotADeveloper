@@ -3,7 +3,6 @@ package top.ltfan.notdeveloper.ui.page
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +27,7 @@ import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.settings.UiSettingsModelDescriber
+import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
 import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
@@ -85,10 +85,7 @@ object Settings : Main() {
                             end = 16.dp,
                             bottom = 16.dp,
                         ),
-                        cardColors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        ),
-                        cardElevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        cardColors = CardColorsLowest,
                     )
                 }
             }
