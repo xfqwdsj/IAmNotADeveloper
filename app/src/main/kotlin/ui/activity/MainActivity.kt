@@ -5,50 +5,68 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
-import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.detection.DetectionCategory
-import top.ltfan.notdeveloper.detection.DetectionMethod
-import top.ltfan.notdeveloper.ui.composable.CategoryCard
-import top.ltfan.notdeveloper.ui.composable.StatusCard
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.kyant.backdrop.backdrops.LayerBackdrop
+import top.ltfan.material.m3.core.layout.only
+import top.ltfan.material.m3.core.visual.LocalBackdrop
+import top.ltfan.material.m3.core.visual.LocalBlurEnabled
+import top.ltfan.material.m3.core.visual.captureBackdrop
+import top.ltfan.material.m3.core.visual.rememberBackdropLayer
+import top.ltfan.material.m3.overlay.OverlayHost
+import top.ltfan.material.m3.overlay.OverlayHostState
+import top.ltfan.notdeveloper.application.NotDevApplication
+import top.ltfan.notdeveloper.ui.composable.FloatingBottomBar
+import top.ltfan.notdeveloper.ui.composable.FloatingBottomBarItem
+import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
+import top.ltfan.notdeveloper.ui.util.LocalBottomBarHeight
+import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.isMiui
-import top.ltfan.notdeveloper.xposed.Log
-import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
-import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
 
 class MainActivity : ComponentActivity() {
-    private val testResults = mutableStateMapOf<DetectionMethod, Boolean>()
+    private val viewModel: AppViewModel by viewModels {
+        viewModelFactory {
+            addInitializer(AppViewModel::class) {
+                AppViewModel(this@MainActivity.application as NotDevApplication)
+            }
+        }
+    }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
         enableEdgeToEdge()
         @Suppress("DEPRECATION") if (isMiui) {
             window.setFlags(
@@ -61,81 +79,102 @@ class MainActivity : ComponentActivity() {
             )
         }
         super.onCreate(savedInstanceState)
+        splash.setKeepOnScreenCondition { !viewModel.storesReady }
 
         setContent {
-            IAmNotADeveloperTheme {
-                val scrollBehavior =
-                    TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-                val isModuleActivated = statusIsModuleActivated
-                val isPreferencesReady = statusIsPreferencesReady
-
-                Scaffold(
-                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                    topBar = {
-                        LargeTopAppBar(
-                            title = {
-                                Text(stringResource(R.string.app_name))
-                            },
-                            windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
-                            scrollBehavior = scrollBehavior
-                        )
-                    },
-                ) { padding ->
-                    val layoutDirection = LocalLayoutDirection.current
-                    val insets = WindowInsets.displayCutout
-                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-                        .asPaddingValues()
-                    val contentPadding = PaddingValues(
-                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(
-                            layoutDirection
-                        ),
-                        top = padding.calculateTopPadding() + insets.calculateTopPadding() + 16.dp,
-                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(
-                            layoutDirection
-                        ),
-                        bottom = padding.calculateBottomPadding() + insets.calculateBottomPadding() + 16.dp,
-                    )
-                    LazyColumn(
-                        modifier = Modifier
-                            .consumeWindowInsets(contentPadding)
-                            .fillMaxSize(),
-                        contentPadding = contentPadding,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        item {
-                            StatusCard(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                isModuleActivated = isModuleActivated,
-                                isPreferencesReady = isPreferencesReady
-                            )
-                        }
-
-                        items(DetectionCategory.values) { category ->
-                            CategoryCard(
-                                category = category,
-                                testResults = testResults,
-                                afterChange = ::check,
-                                isPreferencesReady = isPreferencesReady,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
+            IAmNotADeveloperTheme(viewModel) {
+                val vm = this
+                val background = MaterialTheme.colorScheme.background
+                val backdrop = rememberBackdropLayer(background)
+                val overlayHost = remember { OverlayHostState() }
+                val blurEnabled = blur
+                val bottomBarHeight = remember { mutableStateOf(0.dp) }
+                val density = LocalDensity.current
+                CompositionLocalProvider(
+                    LocalBackdrop provides backdrop,
+                    LocalBlurEnabled provides blurEnabled,
+                ) {
+                    OverlayHost(overlayHost) {
+                        Box(Modifier.fillMaxSize()) {
+                            CompositionLocalProvider(
+                                LocalBottomBarHeight provides
+                                        if (vm.showNavBar) bottomBarHeight.value else 0.dp,
+                            ) {
+                                NavDisplay(
+                                    backStack = backStack,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .captureBackdrop(backdrop),
+                                    entryDecorators = listOf(
+                                        rememberSaveableStateHolderNavEntryDecorator(),
+                                        rememberViewModelStoreNavEntryDecorator(),
+                                    ),
+                                    entryProvider = { it.navEntry() },
+                                )
+                            }
+                            if (vm.showNavBar) {
+                                Box(
+                                    Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .windowInsetsPadding(WindowInsets.safeDrawing.only { bottom })
+                                ) {
+                                    Box(
+                                        Modifier.onGloballyPositioned {
+                                            bottomBarHeight.value =
+                                                with(density) { it.size.height.toDp() }
+                                        }
+                                    ) {
+                                        BottomBar(vm, backdrop.layer)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
 
-    override fun onResume() {
-        super.onResume()
-        check()
-    }
-
-    private fun check() {
-        DetectionCategory.allMethods.forEach { method ->
-            val result = method.test(this)
-            testResults[method] = result
-            Log.Android.v("${method.preferenceKey} test result: $result")
+/**
+ * The floating bottom bar is hosted as a sibling of [NavDisplay] rather
+ * than inside a scene, so it is composed once and stays fixed while the
+ * scenes cross-fade underneath it. Its measured height is published
+ * through [LocalBottomBarHeight] for the pages to reserve as content
+ * padding. The app-scoped backdrop captures the [NavDisplay] content
+ * alone, so the sibling bar samples a layer that does not contain itself.
+ */
+@Composable
+private fun BottomBar(viewModel: AppViewModel, backdrop: LayerBackdrop) {
+    val pages = Main.pages
+    val selectedIndex = pages.indexOf(viewModel.navBarEntry).coerceAtLeast(0)
+    FloatingBottomBar(
+        selectedTabIndex = { selectedIndex },
+        onTabSelected = { index -> viewModel.navigateMain(pages[index]) },
+        backdrop = backdrop,
+        tabsCount = pages.size,
+        modifier = Modifier.padding(horizontal = 28.dp),
+    ) {
+        pages.forEach { page ->
+            FloatingBottomBarItem(
+                onClick = { viewModel.navigateMain(page) },
+                modifier = Modifier.defaultMinSize(minWidth = 76.dp),
+            ) {
+                Icon(
+                    painterResource(page.navigationIcon),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = stringResource(page.navigationLabel),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Visible,
+                )
+            }
         }
     }
 }

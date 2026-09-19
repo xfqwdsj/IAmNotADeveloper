@@ -8,28 +8,52 @@
     <string name="category_development_mode">Development mode</string>
     <string name="category_usb_debugging">USB debugging</string>
     <string name="category_wireless_debugging">Wireless debugging</string>
+    <string name="category_bootloader">Bootloader</string>
+    <string name="category_oem_unlock">OEM unlock</string>
 
     <!-- Detection methods -->
     <string name="toggle_hide_development_mode">Hide development mode</string>
     <string name="toggle_hide_development_mode_legacy">Hide development mode (legacy)</string>
+    <string name="toggle_hide_development_mode_debuggable">Hide debuggable build (prop)</string>
     <string name="toggle_hide_usb_debugging">Hide USB debugging</string>
     <string name="toggle_hide_usb_debugging_legacy">Hide USB debugging (legacy)</string>
     <string name="toggle_hide_adb_usb_state">Hide ADB USB state (prop)</string>
+    <string name="toggle_hide_adb_secure">Hide ADB authentication state (prop)</string>
+    <string name="toggle_hide_adb_root">Hide ADB root state (prop)</string>
     <string name="toggle_hide_adb_usb_config">Hide ADB USB config (prop)</string>
     <string name="toggle_hide_adb_reboot_func">Hide ADB reboot function (prop)</string>
     <string name="toggle_hide_adb_svc_adbd">Hide ADB service daemon (prop)</string>
     <string name="toggle_hide_adb_ffs_ready">Hide ADB FFS ready state (prop)</string>
     <string name="toggle_hide_wireless_debugging">Hide wireless debugging</string>
+    <string name="toggle_hide_development_mode_debuggable_force">Hide debuggable build (force)</string>
+    <string name="toggle_hide_adb_tcp_port">Hide ADB TCP port (persist)</string>
+    <string name="toggle_hide_adb_tcp_port_service">Hide ADB TCP port (service)</string>
+    <string name="toggle_hide_usb_mass_storage">Hide USB mass storage</string>
+    <string name="toggle_hide_bootloader_verified_state">Hide verified boot state</string>
+    <string name="toggle_hide_bootloader_flash_locked">Hide flash locked state</string>
+    <string name="toggle_hide_bootloader_verity_mode">Hide verity mode</string>
+    <string name="toggle_hide_oem_unlock">Hide OEM unlock allowed</string>
 
     <!-- Status -->
     <string name="status_normal">Working normally</string>
     <string name="status_partial">Partially working</string>
     <string name="status_error">May not work</string>
+    <plurals name="description_status_potential_issue">
+        <item quantity="one">Needs attention. There is an entry that may indicate a potential issue with the module.</item>
+        <item quantity="other">Needs attention. There are entries that may indicate potential issues with the module.</item>
+    </plurals>
+    <string name="description_status_normal">Normal</string>
+    <string name="description_status_abnormal">Abnormal</string>
 
     <!-- Activation status -->
     <string name="status_entry_activation_y">Module activated</string>
     <string name="status_entry_activation_n">Module not activated</string>
     <string name="status_entry_activation_description">The module\'s activation status directly affects its functionality. If the module isn\'t activated, it won\'t work. The module learns its activation status from the framework service that the Xposed framework delivers to the app. If you suspect a false report, force stop the app and reopen it.</string>
+
+    <!-- Service status -->
+    <string name="status_entry_service_y">Service connected</string>
+    <string name="status_entry_service_n">Service not connected</string>
+    <string name="status_entry_service_description">Service status determines whether system-level hiding can function. If the service is abnormal, system-level hiding will not work. Select System Framework in LSPosed and reboot to start the service.</string>
 
     <!-- Preferences status -->
     <string name="status_entry_prefs_y">Preferences ready</string>
@@ -39,8 +63,75 @@
     <!-- Descriptions -->
     <string name="description_changes_application">All changes will take effect immediately</string>
     <string name="description_more_info">Click to view more information</string>
+    <string name="description_more_info_collapse">Click to collapse</string>
 
     <!-- Test results -->
     <string name="test_result_on">Test result of this item: On</string>
     <string name="test_result_off">Test result of this item: Off</string>
+
+    <!-- Floating action button -->
+    <string name="description_fab_menu">Menu</string>
+    <string name="action_fab_menu_expand">Expand menu</string>
+    <string name="action_fab_menu_collapse">Collapse menu</string>
+
+    <!-- Overview -->
+    <string name="label_nav_overview">Overview</string>
+    <string name="toggle_overview_use_global_preferences">Use global preferences</string>
+    <string name="description_overview_use_global_preferences">If enabled, the module will use global preferences for all apps. If disabled, each app can have its own preferences.</string>
+
+    <!-- Apps -->
+    <string name="label_nav_apps">Apps</string>
+    <string name="message_apps_empty">There are no apps to show</string>
+    <string name="label_apps_empty_filter_show">Show filter</string>
+    <string name="label_apps_list_header_configured">Configured Apps</string>
+    <string name="label_apps_list_header_unconfigured">Unconfigured Apps</string>
+    <string name="description_apps_package_name">Package name</string>
+    <string name="description_apps_label">App name</string>
+    <string name="description_apps_version">Version name: %1$s; version code: %2$d</string>
+    <string name="text_apps_version">%1$s (%2$d)</string>
+    <string name="action_apps_user_select_show">Show user selection</string>
+    <string name="action_apps_user_select_hide">Hide user selection</string>
+    <string name="label_apps_user_select">Select user</string>
+    <string name="label_apps_user_current">Current user</string>
+    <string name="action_apps_user_list_refresh">Refresh user list</string>
+    <string name="label_apps_user_list_refresh_done">User list refreshed</string>
+    <string name="action_apps_bottom_sheet_filter_show">Filter</string>
+    <string name="title_apps_bottom_sheet_filter">Filter Apps</string>
+    <string name="label_apps_bottom_sheet_filter_sort">Sort by</string>
+    <string name="item_apps_bottom_sheet_filter_sort_label">Label</string>
+    <string name="item_apps_bottom_sheet_filter_sort_package">Package name</string>
+    <string name="item_apps_bottom_sheet_filter_sort_updated">Last updated</string>
+    <string name="label_apps_bottom_sheet_filter">Filter by</string>
+    <string name="item_apps_bottom_sheet_filter_all">All</string>
+    <string name="item_apps_bottom_sheet_filter_configured">Configured</string>
+    <string name="item_apps_bottom_sheet_filter_unconfigured">Unconfigured</string>
+    <string name="item_apps_bottom_sheet_filter_system">System</string>
+    <string name="title_apps_modal_configuration">App Configuration</string>
+    <string name="action_apps_modal_configuration_close">Close app configuration</string>
+    <string name="action_apps_modal_configuration_clear">Clear configurations for this app</string>
+    <string name="label_apps_item_menu_fab_add_app">Manually add app</string>
+    <string name="label_apps_item_menu_fab_search">Search</string>
+    <string name="message_apps_snackbar_query_failed">Failed to query apps</string>
+    <string name="action_apps_query_details_show">Apps query failed. Click to show details</string>
+    <string name="title_apps_dialog_query_failed">Failed to query apps</string>
+    <string name="message_apps_dialog_query_failed">Please check if the module is activated and the service is running.</string>
+
+    <!-- Settings -->
+    <string name="label_nav_settings">Settings</string>
+    <string name="label_settings_category_ui">User Interface</string>
+    <string name="label_settings_ui_blur">Blur effect</string>
+    <string name="label_settings_ui_blur_disabled">Disabled</string>
+    <string name="label_settings_ui_blur_enabled">Enabled</string>
+    <string name="label_settings_ui_blur_enabled_progressive">Progressive blur</string>
+    <string name="label_settings_ui_blur_enabled_progressive_disabled">Disabled</string>
+    <string name="label_settings_ui_blur_enabled_progressive_mask">Mask</string>
+    <string name="description_settings_ui_blur_enabled_progressive_mask">Use a mask effect instead of the expensive progressive blur effect.</string>
+    <string name="label_settings_ui_blur_enabled_progressive_scaled">Scaled</string>
+    <string name="description_settings_ui_blur_enabled_progressive_scaled">Scale down the content before applying the blur effect to improve performance.</string>
+    <string name="label_settings_ui_blur_enabled_progressive_scaled_auto">Auto scale</string>
+    <string name="label_settings_ui_blur_enabled_progressive_scaled_custom">Custom scale</string>
+    <string name="label_settings_ui_blur_enabled_progressive_scaled_custom_factor">Scale factor</string>
+    <string name="label_settings_ui_blur_enabled_progressive_full">Full</string>
+    <string name="label_settings_ui_smooth_corner">Smooth rounded corners</string>
+    <string name="description_settings_ui_smooth_corner">Enable smooth rounded corners across the app. May cause performance issues on some devices.</string>
 </resources>

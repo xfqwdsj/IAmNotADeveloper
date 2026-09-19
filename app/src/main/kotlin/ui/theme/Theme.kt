@@ -9,10 +9,13 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Composable
 fun IAmNotADeveloperTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit
+    viewModel: AppViewModel,
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable AppViewModel.() -> Unit,
 ) {
     val colorScheme = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -25,6 +28,11 @@ fun IAmNotADeveloperTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme, content = content
-    )
+        colorScheme = colorScheme,
+        shapes = AppShapes,
+    ) {
+        with(viewModel) {
+            content()
+        }
+    }
 }
