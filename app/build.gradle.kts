@@ -58,16 +58,13 @@ android {
         }
     }
 
-    buildFeatures {
-        buildConfig = true
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
@@ -98,9 +95,11 @@ dependencies {
 //    implementation(libs.compose.material3.adaptive)
     implementation(libs.capsule)
     implementation(libs.backdrop)
-    implementation(libs.m3Extended)
-    implementation(libs.settingsPageCore)
-    ksp(libs.settingsPageProcessor)
+    implementation(libs.m3.extended)
+    implementation(libs.m3.settingsPage.core)
+    ksp(libs.m3.settingsPage.processor)
+    implementation(libs.m3.datastore.core)
+    ksp(libs.m3.datastore.processor)
     implementation(libs.coil)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)

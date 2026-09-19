@@ -5,24 +5,20 @@ import android.os.Parcelable
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
+import top.ltfan.material.m3.datastore.annotation.Store
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
-import top.ltfan.notdeveloper.datastore.model.DataStoreCompanion
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Parcelize
 @Serializable
+@Store(codec = AppCodec::class)
 data class AppListSettings(
     val selectedUser: UserInfo = UserInfo.current,
     val sort: AppSort = AppSort.Label,
     val filtered: Set<AppFilter> = setOf(AppFilter.System),
-) : Parcelable {
-    companion object : DataStoreCompanion<AppListSettings> {
-        override val fileName = "app_list_settings"
-        override val default = AppListSettings()
-    }
-}
+) : Parcelable
 
 enum class AppSort(@param:StringRes val labelRes: Int) {
     Label(R.string.item_apps_bottom_sheet_filter_sort_label) {

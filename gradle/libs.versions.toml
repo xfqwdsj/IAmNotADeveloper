@@ -10,10 +10,10 @@ activity = "1.13.0"
 compose = "2026.09.00"
 navigation = "1.2.0-rc01"
 compose-adaptive = "1.3.0"
-capsule = "1.1.1"
+capsule = "1.1.4"
 backdrop = "2.0.1"
 m3-extended = "0.1.0"
-coil = "3.6.2"
+coil = "3.6.3"
 room = "2.8.5"
 datastore = "1.2.1"
 preference = "1.2.1"
@@ -40,9 +40,11 @@ compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
 capsule = { module = "top.ltfan.capsule:capsule", version.ref = "capsule" }
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
-m3Extended = { module = "top.ltfan.material:m3-extended", version.ref = "m3-extended" }
-settingsPageCore = { module = "top.ltfan.material:settings-page-core", version.ref = "m3-extended" }
-settingsPageProcessor = { module = "top.ltfan.material:settings-page-processor", version.ref = "m3-extended" }
+m3-extended = { module = "top.ltfan.material:m3-extended", version.ref = "m3-extended" }
+m3-settingsPage-core = { module = "top.ltfan.material:settings-page-core", version.ref = "m3-extended" }
+m3-settingsPage-processor = { module = "top.ltfan.material:settings-page-processor", version.ref = "m3-extended" }
+m3-datastore-core = { module = "top.ltfan.material:datastore-core", version.ref = "m3-extended" }
+m3-datastore-processor = { module = "top.ltfan.material:datastore-processor", version.ref = "m3-extended" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }

@@ -4,16 +4,15 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.parcelableCreator
 import kotlinx.serialization.Serializable
-import top.ltfan.notdeveloper.datastore.model.DataStoreCompanion
+import top.ltfan.material.m3.datastore.annotation.Store
 
 @Parcelize
 @Serializable
+@Store(codec = AppCodec::class)
 data class GlobalPreferences(
     val useGlobalPreferences: Boolean = false,
 ) : Parcelable {
-    companion object : DataStoreCompanion<GlobalPreferences> {
-        override val fileName = "global_preferences"
-        override val default = GlobalPreferences()
+    companion object {
         val CREATOR = parcelableCreator<GlobalPreferences>()
     }
 }

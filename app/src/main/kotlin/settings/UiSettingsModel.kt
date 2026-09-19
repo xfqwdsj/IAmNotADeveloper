@@ -3,13 +3,14 @@ package top.ltfan.notdeveloper.settings
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import kotlinx.serialization.Serializable
+import top.ltfan.material.m3.datastore.annotation.Store
 import top.ltfan.material.m3.settingspage.SettingsResource
 import top.ltfan.material.m3.settingspage.SettingsResources
 import top.ltfan.material.m3.settingspage.annotation.SettingsItem
 import top.ltfan.material.m3.settingspage.annotation.SettingsStore
 import top.ltfan.material.m3.settingspage.annotation.SettingsValue
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.datastore.model.DataStoreCompanion
+import top.ltfan.notdeveloper.datastore.AppCodec
 
 /**
  * The user interface settings model. The settings page describer is
@@ -17,6 +18,7 @@ import top.ltfan.notdeveloper.datastore.model.DataStoreCompanion
  */
 @Serializable
 @SettingsStore
+@Store(name = "ui_settings", codec = AppCodec::class)
 data class UiSettingsModel(
     @SettingsItem(BlurResources::class)
     val blur: Boolean = true,
@@ -26,12 +28,7 @@ data class UiSettingsModel(
 
     @SettingsItem(ProgressiveResources::class, dependsOn = ["blur"])
     val progressive: ProgressiveMode = ProgressiveMode.Disabled,
-) {
-    companion object : DataStoreCompanion<UiSettingsModel> {
-        override val fileName = "ui_settings"
-        override val default = UiSettingsModel()
-    }
-}
+)
 
 /** The progressive blur mode applied to the top bars. */
 enum class ProgressiveMode : SettingsResources {
