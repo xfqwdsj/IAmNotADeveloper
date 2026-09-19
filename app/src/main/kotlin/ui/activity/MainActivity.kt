@@ -60,8 +60,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.onResume()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splash = installSplashScreen()
         enableEdgeToEdge()
         @Suppress("DEPRECATION")
         if (isMiui) {
@@ -75,6 +80,7 @@ class MainActivity : ComponentActivity() {
             )
         }
         super.onCreate(savedInstanceState)
+        splash.setKeepOnScreenCondition { !viewModel.storesReady }
 
         setContent {
             IAmNotADeveloperTheme(viewModel) {

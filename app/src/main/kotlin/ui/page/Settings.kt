@@ -10,8 +10,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
@@ -26,7 +24,6 @@ import top.ltfan.material.m3.core.visual.captureBackdrop
 import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.settings.UiSettingsModelDescriber
 import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
 import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
@@ -43,17 +40,7 @@ object Settings : Main() {
     override fun AppViewModel.Content() {
         val background = MaterialTheme.colorScheme.background
         val backdrop = rememberBackdropLayer(background)
-        val coroutineScope = rememberCoroutineScope()
-        val describer = remember {
-            UiSettingsModelDescriber(
-                dataSource = uiSettingsModelFlow,
-                updateData = { model ->
-                    updateUiSettingsModel(model)
-                    model
-                },
-                coroutineScope = coroutineScope,
-            )
-        }
+        val describer = settingsDescriber
         CompositionLocalProvider(LocalBackdrop provides backdrop) {
             Scaffold(
                 topBar = {

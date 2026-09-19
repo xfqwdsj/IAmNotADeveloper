@@ -4,17 +4,15 @@ import android.content.Context
 import androidx.compose.animation.core.SeekableTransitionState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.core.content.edit
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -23,6 +21,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import top.ltfan.material.m3.settingspage.SettingsStoreDescriber
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.ModuleService
 import top.ltfan.notdeveloper.application.NotDevApplication
@@ -30,16 +30,21 @@ import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.data.wrapped
 import top.ltfan.notdeveloper.datastore.AppFilter
-import top.ltfan.notdeveloper.datastore.AppListSettings
-import top.ltfan.notdeveloper.datastore.GlobalPreferences
-import top.ltfan.notdeveloper.datastore.model.AppDataStore
+import top.ltfan.notdeveloper.datastore.AppListSettingsStore
+import top.ltfan.notdeveloper.datastore.GlobalPreferencesStore
+import top.ltfan.notdeveloper.datastore.filtered
+import top.ltfan.notdeveloper.datastore.selectedUser
+import top.ltfan.notdeveloper.datastore.sort
+import top.ltfan.notdeveloper.datastore.useGlobalPreferences
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.service.ScopeController
 import top.ltfan.notdeveloper.service.SystemServiceClient
 import top.ltfan.notdeveloper.service.systemService
-import top.ltfan.notdeveloper.settings.UiSettingsModel
+import top.ltfan.notdeveloper.settings.UiSettingsModelStore
+import top.ltfan.notdeveloper.settings.blur
+import top.ltfan.notdeveloper.settings.settingsDescriber
 import top.ltfan.notdeveloper.ui.page.Apps
 import top.ltfan.notdeveloper.ui.page.Apps.processed
 import top.ltfan.notdeveloper.ui.page.Main
@@ -48,25 +53,40 @@ import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.util.getUserId
 import top.ltfan.notdeveloper.util.toAndroid
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
+import kotlin.time.Duration.Companion.seconds
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
-    val appListSettingsStore = AppListSettings.createDataStore()
-    val uiSettingsStore = UiSettingsModel.createDataStore()
-    val globalPreferencesStore = GlobalPreferences.createDataStore()
+    private val stores = app.storeHost
+    private val appListSettingsStore = stores.mutable(AppListSettingsStore)
+    private val uiSettingsStore = stores.mutable(UiSettingsModelStore)
+    private val globalPreferencesStore = stores.mutable(GlobalPreferencesStore)
 
-    var blur by uiSettingsStore.propertyAsMutableState(
-        get = { it.blur },
-        set = { settings, value -> settings.copy(blur = value) },
-    )
+    /** `true` when every persisted store has read its first value. */
+    var storesReady by mutableStateOf(false)
+        private set
 
-    /** The settings page model, the persisted user interface settings. */
-    val uiSettingsModelFlow: Flow<UiSettingsModel> = uiSettingsStore.data
-
-    fun updateUiSettingsModel(model: UiSettingsModel) {
-        viewModelScope.launch { uiSettingsStore.updateData { model } }
+    init {
+        viewModelScope.launch {
+            withTimeoutOrNull(StoreReadyTimeout) {
+                appListSettingsStore.awaitInitialized()
+                uiSettingsStore.awaitInitialized()
+                globalPreferencesStore.awaitInitialized()
+            }
+            storesReady = true
+        }
     }
+
+    /**
+     * The settings page describer, backed by the persisted user interface
+     * settings.
+     */
+    val settingsDescriber: SettingsStoreDescriber by lazy {
+        uiSettingsStore.settingsDescriber(
+            viewModelScope
+        )
+    }
+
+    var blur by uiSettingsStore.blur
 
     /**
      * Latest global detection states, mirrored into the framework remote
@@ -107,10 +127,10 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     private fun writeRemotePreferences() {
         val preferences = ModuleService.preferences ?: return
-        preferences.edit().apply {
+        preferences.edit {
             globalDetectionStates.forEach { (key, value) -> putBoolean(key, value) }
             perAppDetectionStates.forEach { (key, value) -> putBoolean(key, value) }
-        }.apply()
+        }
     }
 
     val showNavBar: Boolean
@@ -147,12 +167,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         backStack.removeRange(existingIndex, nextMainIndex)
     }
 
-    var useGlobalPreferences by globalPreferencesStore.propertyAsMutableState(
-        get = { it.useGlobalPreferences },
-        set = { settings, useGlobalPreferences ->
-            settings.copy(useGlobalPreferences = useGlobalPreferences)
-        },
-    )
+    var useGlobalPreferences by globalPreferencesStore.useGlobalPreferences
 
     var isPreferencesReady by mutableStateOf(false)
     var service: SystemServiceClient? by mutableStateOf(null)
@@ -166,23 +181,26 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     private var _users by mutableStateOf(queryUsers())
     val users get() = _users
 
-    val selectedUserFlow = appListSettingsStore.propertyAsSharedFlow { it.selectedUser }
-    var selectedUser by appListSettingsStore.propertyAsMutableState(
-        get = { it.selectedUser },
-        set = { settings, user -> settings.copy(selectedUser = user) },
+    val selectedUserFlow = appListSettingsStore.data.map { it.selectedUser }.shareIn(
+        viewModelScope,
+        started = SharingStarted.Eagerly,
+        replay = 1,
     )
+    var selectedUser by appListSettingsStore.selectedUser
 
-    val appSortMethodFlow = appListSettingsStore.propertyAsSharedFlow { it.sort }
-    var appSortMethod by appListSettingsStore.propertyAsMutableState(
-        get = { it.sort },
-        set = { settings, sort -> settings.copy(sort = sort) },
+    val appSortMethodFlow = appListSettingsStore.data.map { it.sort }.shareIn(
+        viewModelScope,
+        started = SharingStarted.Eagerly,
+        replay = 1,
     )
+    var appSortMethod by appListSettingsStore.sort
 
-    val appFilteredMethodsFlow = appListSettingsStore.propertyAsSharedFlow { it.filtered }
-    var appFilteredMethods by appListSettingsStore.propertyAsMutableState(
-        get = { it.filtered },
-        set = { settings, filtered -> settings.copy(filtered = filtered) },
+    val appFilteredMethodsFlow = appListSettingsStore.data.map { it.filtered }.shareIn(
+        viewModelScope,
+        started = SharingStarted.Eagerly,
+        replay = 1,
     )
+    var appFilteredMethods by appListSettingsStore.filtered
 
     private var _isAppListError by mutableStateOf(false)
     val isAppListError get() = _isAppListError
@@ -221,7 +239,6 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         queryDatabaseList(it)
     }.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = emptySet())
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val appLists = combine(
         appListFlow,
         databaseListFlow,
@@ -332,33 +349,6 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
                 it.getPackageInfoFlow()
             }
         }.map { service?.queryApps(it)?.toSet() ?: it.toAndroid() }
-
-    private fun <T> Flow<T>.collectAsStateVM(initial: T): State<T> {
-        val delegate = mutableStateOf(initial)
-        viewModelScope.launch { collect { delegate.value = it } }
-        return delegate
-    }
-
-    @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
-    private fun <T, R> AppDataStore<T>.propertyAsSharedFlow(
-        transform: (T) -> R,
-    ) = data.map { transform(it) }.shareIn(
-        viewModelScope,
-        started = SharingStarted.Eagerly,
-        replay = 1,
-    )
-
-    private fun <T, R> AppDataStore<T>.propertyAsMutableState(
-        defaultValue: T = this.defaultValue,
-        get: (T) -> R,
-        set: (T, R) -> T,
-    ): ReadWriteProperty<Any?, R> {
-        val delegate = data.collectAsStateVM(defaultValue)
-        return object : ReadWriteProperty<Any?, R> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>) = get(delegate.value)
-            override fun setValue(thisRef: Any?, property: KProperty<*>, value: R) {
-                viewModelScope.launch { updateData { set(it, value) } }
-            }
-        }
-    }
 }
+
+private val StoreReadyTimeout = 2.seconds
