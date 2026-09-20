@@ -4,8 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.CubicBezierEasing
@@ -40,7 +38,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -93,12 +90,8 @@ import kotlinx.coroutines.launch
 import top.ltfan.material.m3.card
 import top.ltfan.material.m3.core.layout.GroupedLazyColumn
 import top.ltfan.material.m3.core.layout.GroupedLazyListScope
-import top.ltfan.material.m3.core.layout.item
-import top.ltfan.material.m3.core.layout.items
 import top.ltfan.material.m3.core.layout.only
 import top.ltfan.material.m3.core.layout.plus
-import top.ltfan.material.m3.item
-import top.ltfan.material.m3.items
 import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.backdropSurface
@@ -106,8 +99,15 @@ import top.ltfan.material.m3.core.visual.captureBackdrop
 import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
+import top.ltfan.material.m3.items
+import top.ltfan.material.m3.layout.FocusRequestingEffect
 import top.ltfan.material.m3.layout.header
+import top.ltfan.material.m3.overlay.GlassAlertDialog
 import top.ltfan.material.m3.overlay.GlassBottomSheet
+import top.ltfan.material.m3.overlay.GlassMenuDefaults
+import top.ltfan.material.m3.overlay.GlassMenuItem
+import top.ltfan.material.m3.overlay.GlassSnackbarHost
+import top.ltfan.material.m3.overlay.localSharedTransitionScope
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.datastore.AppFilter
@@ -115,9 +115,7 @@ import top.ltfan.notdeveloper.datastore.AppSort
 import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.FilterChip
-import top.ltfan.notdeveloper.ui.composable.GlassAlertDialog
 import top.ltfan.notdeveloper.ui.composable.GlassFloatingActionButtonWithMenu
-import top.ltfan.notdeveloper.ui.composable.GlassSnackbarHost
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
@@ -127,7 +125,6 @@ import top.ltfan.notdeveloper.ui.theme.TopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.EmptyContentTransform
-import top.ltfan.notdeveloper.ui.util.FocusRequestingEffect
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
@@ -144,7 +141,7 @@ object Apps : Main() {
     var showAppListErrorInfoDialog by mutableStateOf(false)
     var showFilterBottomSheet by mutableStateOf(false)
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun AppViewModel.Content() {
         val transition = rememberTransition(packageInfoConfiguringTransitionState)
@@ -155,44 +152,43 @@ object Apps : Main() {
         val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
 
         CompositionLocalProvider(LocalBackdrop provides backdrop) {
-            SharedTransitionLayout {
-                Scaffold(
-                    topBar = {
-                        Column(
-                            Modifier.backdropSurface(
-                                handle = backdrop,
-                                shape = RectangleShape,
-                                effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
-                                highlight = null,
-                                shadow = null,
-                            )
-                        ) {
-                            CenterAlignedTopAppBar(
-                                title = { Text(stringResource(navigationLabel)) },
-                                actions = {
-                                    Row(
-                                        modifier = Modifier.pageGlass(
-                                            shape = ContinuousCapsule,
-                                            containerColor = MaterialTheme.colorScheme.surface,
-                                            blurRadius = 4.dp,
-                                        ),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        AppBarActions()
-                                    }
-                                },
-                                windowInsets = AppWindowInsets.only { horizontal + top },
-                                colors = TopAppBarColorsTransparent,
-                            )
-                            FilterBar()
-                        }
-                    },
-                    snackbarHost = { GlassSnackbarHost(snackbarHostState) },
-                    floatingActionButton = { Fab() },
-                    contentWindowInsets = AppWindowInsets,
-                ) { contentPadding ->
-                    val (configuredList, unconfiguredList) = collectAppLists()
+            Scaffold(
+                topBar = {
+                    Column(
+                        Modifier.backdropSurface(
+                            handle = backdrop,
+                            shape = RectangleShape,
+                            effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
+                            highlight = null,
+                            shadow = null,
+                        )
+                    ) {
+                        CenterAlignedTopAppBar(
+                            title = { Text(stringResource(navigationLabel)) },
+                            actions = {
+                                Row(
+                                    modifier = Modifier.pageGlass(
+                                        shape = ContinuousCapsule,
+                                        containerColor = MaterialTheme.colorScheme.surface,
+                                        blurRadius = 4.dp,
+                                    ),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    AppBarActions()
+                                }
+                            },
+                            windowInsets = AppWindowInsets.only { horizontal + top },
+                            colors = TopAppBarColorsTransparent,
+                        )
+                        FilterBar()
+                    }
+                },
+                floatingActionButton = { Fab() },
+                contentWindowInsets = AppWindowInsets,
+            ) { contentPadding ->
+                val (configuredList, unconfiguredList) = collectAppLists()
 
+                localSharedTransitionScope {
                     GroupedLazyColumn(
                         modifier = Modifier
                             .captureBackdrop(backdrop)
@@ -216,22 +212,24 @@ object Apps : Main() {
                             )
                         }
                     }
-
-                    AnimatedVisibility(
-                        visible = isAppListUpdating,
-                        modifier = Modifier.padding(contentPadding),
-                        enter = expandVertically(),
-                        exit = shrinkVertically(),
-                    ) {
-                        LinearProgressIndicator()
-                    }
-
-                    NoAppsBackground(contentPadding)
-                    FilterBottomSheet()
                 }
 
-                context(transition) { AppConfiguration() }
+                AnimatedVisibility(
+                    visible = isAppListUpdating,
+                    modifier = Modifier.padding(contentPadding),
+                    enter = expandVertically(),
+                    exit = shrinkVertically(),
+                ) {
+                    LinearProgressIndicator()
+                }
+
+                NoAppsBackground(contentPadding)
+                FilterBottomSheet()
             }
+
+            localSharedTransitionScope { context(transition) { AppConfiguration() } }
+
+            GlassSnackbarHost(snackbarHostState)
         }
 
         val event by appListErrorSnackbarTrigger.collectAsState(null)
@@ -254,24 +252,23 @@ object Apps : Main() {
                 onClick = { showAppListErrorInfoDialog = true },
             )
 
-            if (showAppListErrorInfoDialog) {
-                GlassAlertDialog(
-                    onDismissRequest = { showAppListErrorInfoDialog = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = { showAppListErrorInfoDialog = false },
-                        ) {
-                            Text(stringResource(android.R.string.ok))
-                        }
-                    },
-                    title = {
-                        Text(stringResource(R.string.title_apps_dialog_query_failed))
-                    },
-                    text = {
-                        Text(stringResource(R.string.message_apps_dialog_query_failed))
-                    },
-                )
-            }
+            GlassAlertDialog(
+                visible = showAppListErrorInfoDialog,
+                onDismissRequest = { showAppListErrorInfoDialog = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = { showAppListErrorInfoDialog = false },
+                    ) {
+                        Text(stringResource(android.R.string.ok))
+                    }
+                },
+                title = {
+                    Text(stringResource(R.string.title_apps_dialog_query_failed))
+                },
+                text = {
+                    Text(stringResource(R.string.message_apps_dialog_query_failed))
+                },
+            )
         }
 
         AnimatedContent(
@@ -439,17 +436,19 @@ object Apps : Main() {
     fun Fab() {
         GlassFloatingActionButtonWithMenu(
             showMenu = showFabMenu,
-            onClick = { showFabMenu = !showFabMenu },
+            onExpandedChange = { expanded -> showFabMenu = expanded },
         ) {
-            DropdownMenuItem(
+            GlassMenuItem(
                 text = { Text(stringResource(R.string.label_apps_item_menu_fab_add_app)) },
-                onClick = {},
-                leadingIcon = { Icon(painterResource(R.drawable.add_24px), null) }
+                onClick = { showFabMenu = false },
+                leadingIcon = { Icon(painterResource(R.drawable.add_24px), null) },
+                shape = GlassMenuDefaults.itemThemedShape(0, 2),
             )
-            DropdownMenuItem(
+            GlassMenuItem(
                 text = { Text(stringResource(R.string.label_apps_item_menu_fab_search)) },
-                onClick = {},
-                leadingIcon = { Icon(painterResource(R.drawable.search_24px), null) }
+                onClick = { showFabMenu = false },
+                leadingIcon = { Icon(painterResource(R.drawable.search_24px), null) },
+                shape = GlassMenuDefaults.itemThemedShape(1, 2),
             )
         }
     }
@@ -497,7 +496,6 @@ object Apps : Main() {
         }
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     @Composable
     context(viewModel: AppViewModel)
     fun FilterBottomSheet() {
@@ -519,7 +517,7 @@ object Apps : Main() {
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(8.dp))
-                SharedTransitionLayout {
+                localSharedTransitionScope {
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -547,7 +545,7 @@ object Apps : Main() {
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(8.dp))
-                SharedTransitionLayout {
+                localSharedTransitionScope {
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -581,7 +579,7 @@ object Apps : Main() {
                                 },
                                 text = it.labelRes,
                                 modifier = Modifier
-                                    .animateBounds(this@SharedTransitionLayout)
+                                    .animateBounds(this@localSharedTransitionScope)
                                     .skipToLookaheadSize(),
                                 leadingPlaceholderIcon = R.drawable.remove_24px,
                             )
@@ -653,7 +651,6 @@ object Apps : Main() {
         }
     }
 
-    @OptIn(ExperimentalSharedTransitionApi::class)
     context(
         viewModel: AppViewModel,
         transition: Transition<PackageInfoWrapper?>,

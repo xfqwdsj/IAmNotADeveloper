@@ -2,7 +2,6 @@ package top.ltfan.notdeveloper.ui.page
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.EnterExitState
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
@@ -52,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.ltfan.material.m3.core.visual.pageGlass
+import top.ltfan.material.m3.overlay.glassSharedElement
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.database.PackageSettingsDao
@@ -65,7 +65,6 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.getAppId
 import top.ltfan.notdeveloper.util.getUserId
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 context(
     page: Page,
@@ -125,12 +124,11 @@ fun AppViewModel.AppConfiguration() {
                                     .padding(24.dp)
                                     .widthIn(max = 600.dp)
                                     .fillMaxWidth()
-                                    .sharedBounds(
+                                    .glassSharedElement(
                                         sharedContentState = rememberSharedContentState(
                                             AppConfigurationSharedKey.Container(packageInfo)
                                         ),
                                         animatedVisibilityScope = this@AnimatedContent,
-                                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
                                     .clip(ContinuousRoundedRectangle(radius))
                                     .pageGlass(
@@ -146,12 +144,11 @@ fun AppViewModel.AppConfiguration() {
                                 Header(packageInfo)
                                 AppListItem(
                                     packageInfo = packageInfo,
-                                    modifier = Modifier.sharedBounds(
+                                    modifier = Modifier.glassSharedElement(
                                         sharedContentState = rememberSharedContentState(
                                             AppConfigurationSharedKey.ListItem(packageInfo)
                                         ),
                                         animatedVisibilityScope = this@AnimatedContent,
-                                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     ),
                                 )
                             }
