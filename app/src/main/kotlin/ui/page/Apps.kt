@@ -253,7 +253,7 @@ object Apps : Main() {
             )
 
             GlassAlertDialog(
-                visible = showAppListErrorInfoDialog,
+                visible = { showAppListErrorInfoDialog },
                 onDismissRequest = { showAppListErrorInfoDialog = false },
                 confirmButton = {
                     TextButton(
@@ -435,7 +435,7 @@ object Apps : Main() {
     context(viewModel: AppViewModel)
     fun Fab() {
         GlassFloatingActionButtonWithMenu(
-            showMenu = showFabMenu,
+            showMenu = { showFabMenu },
             onExpandedChange = { expanded -> showFabMenu = expanded },
         ) {
             GlassMenuItem(

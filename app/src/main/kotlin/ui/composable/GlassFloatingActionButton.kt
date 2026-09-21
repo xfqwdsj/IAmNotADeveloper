@@ -19,7 +19,7 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 @Composable
 context(viewModel: AppViewModel, page: Page)
 fun GlassFloatingActionButtonWithMenu(
-    showMenu: Boolean,
+    showMenu: () -> Boolean,
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     menuContent: @Composable ColumnScope.() -> Unit,
