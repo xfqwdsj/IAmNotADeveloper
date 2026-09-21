@@ -31,6 +31,8 @@ class NotDevApplication : App() {
 
     override fun onCreate() {
         super.onCreate()
+        // Temporary: receive the overlay probe lines of the library.
+        top.ltfan.material.m3.overlay.GlassDebug.sink = { line -> android.util.Log.e("GLASSDBG", line) }
         // Warm the stores up as early as possible.
         storeHost
     }
