@@ -44,7 +44,8 @@ fun IconButtonWithTooltip(
             },
             state = tooltipState,
             positionProvider = positionProvider,
-            focusable = tooltipText != null,
+            // The tooltip of the icon button has no action, so it stays out of the focus order and
+            // is only announced to accessibility services.
             enableUserInput = tooltipText != null,
         ) {
             IconButton(onClick = onClick) {
