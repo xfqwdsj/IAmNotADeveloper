@@ -6,25 +6,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import top.ltfan.material.m3.GlassFloatingActionButton
+import top.ltfan.material.m3.ExtendedFloatingActionButton
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 /**
- * The floating action button and its glass menu, with the icons and the
+ * The floating action button and its backdrop menu, with the icons and the
  * descriptions of this app. The button, the menu and the shared bounds
- * between them come from `GlassFloatingActionButton`.
+ * between them come from `ExtendedFloatingActionButton`.
  */
 @Composable
 context(viewModel: AppViewModel, page: Page)
-fun GlassFloatingActionButtonWithMenu(
+fun ExtendedFloatingActionButtonWithMenu(
     showMenu: () -> Boolean,
     onExpandedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     menuContent: @Composable ColumnScope.() -> Unit,
 ) {
-    GlassFloatingActionButton(
+    ExtendedFloatingActionButton(
         expanded = showMenu,
         onExpandedChange = onExpandedChange,
         modifier = modifier,

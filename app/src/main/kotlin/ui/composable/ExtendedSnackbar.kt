@@ -63,20 +63,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
 import kotlinx.coroutines.delay
-import top.ltfan.material.m3.core.visual.pageGlass
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
+import top.ltfan.notdeveloper.ui.util.pageSurface
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import kotlin.math.max
 import kotlin.math.min
 
 @Composable
 context(viewModel: AppViewModel, page: Page)
-fun GlassSnackbarHost(
+fun ExtendedSnackbarHost(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
-    snackbar: @Composable (SnackbarData) -> Unit = { GlassSnackbar(it) }
+    snackbar: @Composable (SnackbarData) -> Unit = { ExtendedSnackbar(it) }
 ) {
     val currentSnackbarData = hostState.currentSnackbarData
     val accessibilityManager = LocalAccessibilityManager.current
@@ -139,7 +139,7 @@ internal fun SnackbarDuration.toMillis(
 
 @Composable
 context(viewModel: AppViewModel, page: Page)
-fun GlassSnackbar(
+fun ExtendedSnackbar(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier,
     actionOnNewLine: Boolean = false,
@@ -179,7 +179,7 @@ fun GlassSnackbar(
         } else {
             null
         }
-    GlassSnackbar(
+    ExtendedSnackbar(
         modifier = modifier.padding(12.dp),
         action = actionComposable,
         dismissAction = dismissActionComposable,
@@ -195,7 +195,7 @@ fun GlassSnackbar(
 
 @Composable
 context(viewModel: AppViewModel, page: Page)
-fun GlassSnackbar(
+fun ExtendedSnackbar(
     modifier: Modifier = Modifier,
     action: @Composable (() -> Unit)? = null,
     dismissAction: @Composable (() -> Unit)? = null,
@@ -214,7 +214,7 @@ fun GlassSnackbar(
         contentColor = contentColor,
     ) {
         Box(
-            Modifier.pageGlass(
+            Modifier.pageSurface(
                 shape = shape,
                 containerColor = containerColor,
             )

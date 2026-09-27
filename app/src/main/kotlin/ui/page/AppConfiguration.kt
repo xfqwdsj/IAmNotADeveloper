@@ -50,8 +50,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import top.ltfan.material.m3.core.visual.pageGlass
-import top.ltfan.material.m3.overlay.glassSharedElement
+import top.ltfan.material.m3.overlay.extendedSharedElement
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.database.PackageSettingsDao
@@ -61,6 +60,7 @@ import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
 import top.ltfan.notdeveloper.ui.theme.AppRadiusMedium
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.pageSurface
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 import top.ltfan.notdeveloper.util.getAppId
 import top.ltfan.notdeveloper.util.getUserId
@@ -124,14 +124,14 @@ fun AppViewModel.AppConfiguration() {
                                     .padding(24.dp)
                                     .widthIn(max = 600.dp)
                                     .fillMaxWidth()
-                                    .glassSharedElement(
+                                    .extendedSharedElement(
                                         sharedContentState = rememberSharedContentState(
                                             AppConfigurationSharedKey.Container(packageInfo)
                                         ),
                                         animatedVisibilityScope = this@AnimatedContent,
                                     )
                                     .clip(ContinuousRoundedRectangle(radius))
-                                    .pageGlass(
+                                    .pageSurface(
                                         shape = ContinuousRoundedRectangle(radius),
                                         containerColor = MaterialTheme.colorScheme.surface,
                                     )
@@ -144,7 +144,7 @@ fun AppViewModel.AppConfiguration() {
                                 Header(packageInfo)
                                 AppListItem(
                                     packageInfo = packageInfo,
-                                    modifier = Modifier.glassSharedElement(
+                                    modifier = Modifier.extendedSharedElement(
                                         sharedContentState = rememberSharedContentState(
                                             AppConfigurationSharedKey.ListItem(packageInfo)
                                         ),

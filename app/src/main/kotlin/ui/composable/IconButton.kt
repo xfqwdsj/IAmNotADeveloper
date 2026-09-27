@@ -12,33 +12,33 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import top.ltfan.material.m3.overlay.GlassPlainTooltip
-import top.ltfan.material.m3.overlay.GlassTooltipAnchorPosition
-import top.ltfan.material.m3.overlay.GlassTooltipBox
-import top.ltfan.material.m3.overlay.rememberGlassTooltipPositionProvider
-import top.ltfan.material.m3.overlay.rememberGlassTooltipState
+import top.ltfan.material.m3.overlay.ExtendedPlainTooltip
+import top.ltfan.material.m3.overlay.ExtendedTooltipAnchorPosition
+import top.ltfan.material.m3.overlay.ExtendedTooltipBox
+import top.ltfan.material.m3.overlay.rememberExtendedTooltipPositionProvider
+import top.ltfan.material.m3.overlay.rememberExtendedTooltipState
 
 @Composable
 fun IconButtonWithTooltip(
     @DrawableRes iconRes: Int,
     @StringRes contentDescription: Int?,
     modifier: Modifier = Modifier,
-    preferredTooltipPosition: GlassTooltipAnchorPosition = GlassTooltipAnchorPosition.Below,
+    preferredTooltipPosition: ExtendedTooltipAnchorPosition = ExtendedTooltipAnchorPosition.Below,
     tooltipSpacing: Dp = 8.dp,
     onClick: () -> Unit,
 ) {
     val tooltipText = contentDescription?.let { stringResource(it) }
-    val tooltipState = rememberGlassTooltipState()
+    val tooltipState = rememberExtendedTooltipState()
     val positionProvider =
-        rememberGlassTooltipPositionProvider(
+        rememberExtendedTooltipPositionProvider(
             positioning = preferredTooltipPosition,
             spacingBetweenTooltipAndAnchor = tooltipSpacing,
         )
 
     Box(modifier) {
-        GlassTooltipBox(
+        ExtendedTooltipBox(
             tooltip = {
-                GlassPlainTooltip {
+                ExtendedPlainTooltip {
                     Text(tooltipText.orEmpty())
                 }
             },

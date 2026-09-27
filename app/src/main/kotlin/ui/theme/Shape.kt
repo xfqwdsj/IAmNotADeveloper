@@ -2,22 +2,22 @@ package top.ltfan.notdeveloper.ui.theme
 
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
-import top.ltfan.material.m3.core.graphic.ContinuousRoundedCornerShape
+import com.kyant.capsule.ContinuousRoundedRectangle
 
 val AppRadiusExtraSmall = 8.dp
-val AppExtraSmallShape = ContinuousRoundedCornerShape(AppRadiusExtraSmall)
+val AppExtraSmallShape = ContinuousRoundedRectangle(AppRadiusExtraSmall)
 
 val AppRadiusSmall = 12.dp
-val AppSmallShape = ContinuousRoundedCornerShape(AppRadiusSmall)
+val AppSmallShape = ContinuousRoundedRectangle(AppRadiusSmall)
 
 val AppRadiusMedium = 16.dp
-val AppMediumShape = ContinuousRoundedCornerShape(AppRadiusMedium)
+val AppMediumShape = ContinuousRoundedRectangle(AppRadiusMedium)
 
 val AppRadiusLarge = 24.dp
-val AppLargeShape = ContinuousRoundedCornerShape(AppRadiusLarge)
+val AppLargeShape = ContinuousRoundedRectangle(AppRadiusLarge)
 
 val AppRadiusExtraLarge = 36.dp
-val AppExtraLargeShape = ContinuousRoundedCornerShape(AppRadiusExtraLarge)
+val AppExtraLargeShape = ContinuousRoundedRectangle(AppRadiusExtraLarge)
 
 val AppShapes = Shapes(
     extraSmall = AppExtraSmallShape,

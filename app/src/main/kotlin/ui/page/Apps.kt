@@ -96,17 +96,17 @@ import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.backdropSurface
 import top.ltfan.material.m3.core.visual.captureBackdrop
-import top.ltfan.material.m3.core.visual.pageGlass
+import top.ltfan.notdeveloper.ui.util.pageSurface
 import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.material.m3.items
-import top.ltfan.material.m3.layout.FocusRequestingEffect
+import top.ltfan.material.m3.core.transition.FocusRequestingEffect
 import top.ltfan.material.m3.layout.header
-import top.ltfan.material.m3.overlay.GlassAlertDialog
-import top.ltfan.material.m3.overlay.GlassBottomSheet
-import top.ltfan.material.m3.overlay.GlassMenuDefaults
-import top.ltfan.material.m3.overlay.GlassMenuItem
-import top.ltfan.material.m3.overlay.GlassSnackbarHost
+import top.ltfan.material.m3.overlay.ExtendedAlertDialog
+import top.ltfan.material.m3.overlay.ExtendedBottomSheet
+import top.ltfan.material.m3.overlay.ExtendedMenuDefaults
+import top.ltfan.material.m3.overlay.ExtendedMenuItem
+import top.ltfan.material.m3.overlay.ExtendedSnackbarHost
 import top.ltfan.material.m3.overlay.localSharedTransitionScope
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
@@ -115,7 +115,7 @@ import top.ltfan.notdeveloper.datastore.AppSort
 import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.composable.FilterChip
-import top.ltfan.notdeveloper.ui.composable.GlassFloatingActionButtonWithMenu
+import top.ltfan.notdeveloper.ui.composable.ExtendedFloatingActionButtonWithMenu
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
@@ -167,7 +167,7 @@ object Apps : Main() {
                             title = { Text(stringResource(navigationLabel)) },
                             actions = {
                                 Row(
-                                    modifier = Modifier.pageGlass(
+                                    modifier = Modifier.pageSurface(
                                         shape = ContinuousCapsule,
                                         containerColor = MaterialTheme.colorScheme.surface,
                                         blurRadius = 4.dp,
@@ -229,7 +229,7 @@ object Apps : Main() {
 
             localSharedTransitionScope { context(transition) { AppConfiguration() } }
 
-            GlassSnackbarHost(snackbarHostState)
+            ExtendedSnackbarHost(snackbarHostState)
         }
 
         val event by appListErrorSnackbarTrigger.collectAsState(null)
@@ -252,7 +252,7 @@ object Apps : Main() {
                 onClick = { showAppListErrorInfoDialog = true },
             )
 
-            GlassAlertDialog(
+            ExtendedAlertDialog(
                 visible = { showAppListErrorInfoDialog },
                 onDismissRequest = { showAppListErrorInfoDialog = false },
                 confirmButton = {
@@ -369,6 +369,10 @@ object Apps : Main() {
                     },
                 ) { contentPadding ->
                     val focusRequester = remember { FocusRequester() }
+                    // The request belongs to the bar, not to the first item: inside the lazy item it
+                    // would run again every time that item re-enters the composition while scrolling,
+                    // and steal focus back to the first chip.
+                    FocusRequestingEffect(focusRequester)
 
                     LazyRow(
                         modifier = Modifier
@@ -420,10 +424,6 @@ object Apps : Main() {
                                         )
                                     },
                             )
-
-                            if (index == 0) {
-                                FocusRequestingEffect(focusRequester)
-                            }
                         }
                     }
                 }
@@ -434,21 +434,21 @@ object Apps : Main() {
     @Composable
     context(viewModel: AppViewModel)
     fun Fab() {
-        GlassFloatingActionButtonWithMenu(
+        ExtendedFloatingActionButtonWithMenu(
             showMenu = { showFabMenu },
             onExpandedChange = { expanded -> showFabMenu = expanded },
         ) {
-            GlassMenuItem(
+            ExtendedMenuItem(
                 text = { Text(stringResource(R.string.label_apps_item_menu_fab_add_app)) },
                 onClick = { showFabMenu = false },
                 leadingIcon = { Icon(painterResource(R.drawable.add_24px), null) },
-                shape = GlassMenuDefaults.itemThemedShape(0, 2),
+                shape = ExtendedMenuDefaults.itemThemedShape(0, 2),
             )
-            GlassMenuItem(
+            ExtendedMenuItem(
                 text = { Text(stringResource(R.string.label_apps_item_menu_fab_search)) },
                 onClick = { showFabMenu = false },
                 leadingIcon = { Icon(painterResource(R.drawable.search_24px), null) },
-                shape = GlassMenuDefaults.itemThemedShape(1, 2),
+                shape = ExtendedMenuDefaults.itemThemedShape(1, 2),
             )
         }
     }
@@ -501,7 +501,7 @@ object Apps : Main() {
     fun FilterBottomSheet() {
         if (!showFilterBottomSheet) return
         with(viewModel) {
-            GlassBottomSheet(
+            ExtendedBottomSheet(
                 onDismissRequest = { showFilterBottomSheet = false },
             ) {
                 Text(
