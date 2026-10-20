@@ -16,7 +16,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.m3x.backdrop.BackdropHost
-import top.ltfan.m3x.backdrop.captureBackdrop
 import top.ltfan.m3x.backdrop.rememberBackdropLayer
 import top.ltfan.m3x.compose.foundation.GroupedLazyColumn
 import top.ltfan.m3x.compose.foundation.item
@@ -32,6 +31,7 @@ import top.ltfan.notdeveloper.ui.composable.PreferenceItem
 import top.ltfan.notdeveloper.ui.composable.StatusCard
 import top.ltfan.notdeveloper.ui.composable.categoryCards
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.PageBackdropContent
 import top.ltfan.notdeveloper.ui.util.appBarEffects
 import top.ltfan.notdeveloper.ui.util.appBarMask
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
@@ -64,59 +64,62 @@ object Overview : Main() {
             ) { contentPadding ->
                 val contentPadding = contentPadding + PaddingValues(top = 16.dp, bottom = 16.dp)
 
-                GroupedLazyColumn(
-                    modifier = Modifier.captureBackdrop(backdrop).fillMaxSize(),
-                    contentPadding = contentPadding,
-                    spacing = 16.dp,
-                ) {
-                    item {
-                        StatusCard(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            isPreferencesReady = isPreferencesReady,
-                            isServiceConnected = service != null,
-                        )
-                    }
-
-                    card(
-                        colors = {
-                            CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            )
-                        },
-                        elevation = { CardDefaults.elevatedCardElevation() },
+                PageBackdropContent(backdrop) {
+                    GroupedLazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = contentPadding,
+                        spacing = 16.dp,
                     ) {
-                        item(
-                            key = "global-preferences",
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                        ) {
-                            PreferenceItem(
-                                value = useGlobalPreferences,
-                                onValueChange = { useGlobalPreferences = it },
-                                headlineContent = {
-                                    Text(
-                                        stringResource(
-                                            R.string.toggle_overview_use_global_preferences,
-                                        ),
-                                    )
-                                },
-                                supportingContent = {
-                                    Text(
-                                        stringResource(
-                                            R.string.description_overview_use_global_preferences,
-                                        ),
-                                    )
-                                },
-                                colors = ListItemColorsTransparent,
+                        item {
+                            StatusCard(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                isPreferencesReady = isPreferencesReady,
+                                isServiceConnected = service != null,
                             )
                         }
-                    }
 
-                    categoryCards(
-                        groups = DetectionCategory.values,
-                        afterChange = ::afterGlobalDetectionChange,
-                        afterTest = ::afterGlobalDetectionTest,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    )
+                        card(
+                            colors = {
+                                CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                )
+                            },
+                            elevation = { CardDefaults.elevatedCardElevation() },
+                        ) {
+                            item(
+                                key = "global-preferences",
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            ) {
+                                PreferenceItem(
+                                    value = useGlobalPreferences,
+                                    onValueChange = { useGlobalPreferences = it },
+                                    headlineContent = {
+                                        Text(
+                                            stringResource(
+                                                R.string.toggle_overview_use_global_preferences,
+                                            ),
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            stringResource(
+                                                R.string
+                                                    .description_overview_use_global_preferences,
+                                            ),
+                                        )
+                                    },
+                                    colors = ListItemColorsTransparent,
+                                )
+                            }
+                        }
+
+                        categoryCards(
+                            groups = DetectionCategory.values,
+                            afterChange = ::afterGlobalDetectionChange,
+                            afterTest = ::afterGlobalDetectionTest,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                    }
                 }
             }
         }

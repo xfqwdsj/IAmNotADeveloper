@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.ltfan.m3x.backdrop.BackdropHost
-import top.ltfan.m3x.backdrop.captureBackdrop
 import top.ltfan.m3x.backdrop.rememberBackdropLayer
 import top.ltfan.m3x.compose.foundation.only
 import top.ltfan.m3x.compose.foundation.plus
@@ -21,6 +20,7 @@ import top.ltfan.m3x.material.backdrop.BackdropCenterAlignedTopAppBar
 import top.ltfan.m3x.settingspage.material.CardSettings
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.PageBackdropContent
 import top.ltfan.notdeveloper.ui.util.appBarEffects
 import top.ltfan.notdeveloper.ui.util.appBarMask
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
@@ -50,20 +50,22 @@ object Settings : Main() {
                 contentWindowInsets = AppWindowInsets,
             ) { contentPadding ->
                 with(this@Settings) {
-                    CardSettings(
-                        store = describer,
-                        modifier = Modifier.captureBackdrop(backdrop).fillMaxSize(),
-                        lazyListState = lazyListState,
-                        contentPadding =
-                            contentPadding +
-                                PaddingValues(
-                                    start = 16.dp,
-                                    top = 16.dp,
-                                    end = 16.dp,
-                                    bottom = 16.dp,
-                                ),
-                        cardColors = CardColorsLowest,
-                    )
+                    PageBackdropContent(backdrop) {
+                        CardSettings(
+                            store = describer,
+                            modifier = Modifier.fillMaxSize(),
+                            lazyListState = lazyListState,
+                            contentPadding =
+                                contentPadding +
+                                    PaddingValues(
+                                        start = 16.dp,
+                                        top = 16.dp,
+                                        end = 16.dp,
+                                        bottom = 16.dp,
+                                    ),
+                            cardColors = CardColorsLowest,
+                        )
+                    }
                 }
             }
         }

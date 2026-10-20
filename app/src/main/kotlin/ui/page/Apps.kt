@@ -12,6 +12,7 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.createChildTransition
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
@@ -52,7 +53,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,7 +82,6 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
 import top.ltfan.m3x.backdrop.BackdropHost
-import top.ltfan.m3x.backdrop.captureBackdrop
 import top.ltfan.m3x.backdrop.rememberBackdropLayer
 import top.ltfan.m3x.compose.animation.AnimatedVisibilityWithBlur
 import top.ltfan.m3x.compose.animation.FocusRequestingEffect
@@ -116,6 +115,7 @@ import top.ltfan.notdeveloper.datastore.AppSort
 import top.ltfan.notdeveloper.ui.composable.AppListItem
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
+import top.ltfan.notdeveloper.ui.util.PageBackdropContent
 import top.ltfan.notdeveloper.ui.util.appBarEffects
 import top.ltfan.notdeveloper.ui.util.appBarMask
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
@@ -174,27 +174,29 @@ object Apps : Main() {
                 val (configuredList, unconfiguredList) = collectAppLists()
 
                 with(requireNotNull(LocalSharedTransitionScope.current)) {
-                    GroupedLazyColumn(
-                        modifier = Modifier.captureBackdrop(backdrop).fillMaxSize(),
-                        state = lazyListState,
-                        contentPadding =
-                            contentPadding +
-                                PaddingValues(
-                                    top = 16.dp,
-                                    bottom = 16.dp,
-                                ),
-                        spacing = 16.dp,
-                    ) {
-                        context(transition) {
-                            appListCard(
-                                list = configuredList,
-                                header = R.string.label_apps_list_header_configured,
-                            )
+                    PageBackdropContent(backdrop) {
+                        GroupedLazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = lazyListState,
+                            contentPadding =
+                                contentPadding +
+                                    PaddingValues(
+                                        top = 16.dp,
+                                        bottom = 16.dp,
+                                    ),
+                            spacing = 16.dp,
+                        ) {
+                            context(transition) {
+                                appListCard(
+                                    list = configuredList,
+                                    header = R.string.label_apps_list_header_configured,
+                                )
 
-                            appListCard(
-                                list = unconfiguredList,
-                                header = R.string.label_apps_list_header_unconfigured,
-                            )
+                                appListCard(
+                                    list = unconfiguredList,
+                                    header = R.string.label_apps_list_header_unconfigured,
+                                )
+                            }
                         }
                     }
                 }
@@ -734,12 +736,14 @@ object Apps : Main() {
                     Modifier.animateItem().padding(horizontal = 16.dp)
                 },
             ) { info ->
-                val coroutineScope = rememberCoroutineScope()
-
-                transition.AnimatedContent(
+                val itemTransition =
+                    transition.createChildTransition(label = "AppConfiguration:${info.listKey}") {
+                        it == info
+                    }
+                itemTransition.AnimatedContent(
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
-                ) { currentInfo ->
-                    if (currentInfo != info) {
+                ) { configuring ->
+                    if (!configuring) {
                         with(sharedTransitionScope) {
                             Box(
                                 Modifier.sharedTransitionBounds(

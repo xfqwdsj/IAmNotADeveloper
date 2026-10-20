@@ -30,7 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.ltfan.m3x.material.overlay.IconButtonWithTooltip
 import top.ltfan.m3x.material.overlay.OverlayDialog
-import top.ltfan.m3x.material.overlay.OverlayDialogProperties
 import top.ltfan.m3x.material.overlay.overlaySharedBounds
 import top.ltfan.m3x.overlay.OverlayNavigationTransition
 import top.ltfan.notdeveloper.R
@@ -59,12 +58,13 @@ fun AppViewModel.AppConfiguration(navigationTransition: OverlayNavigationTransit
             navigationTransition = navigationTransition,
             sharedClipShape = shape,
             containerColor = MaterialTheme.colorScheme.surface,
-            properties = OverlayDialogProperties(usePlatformDefaultWidth = false),
-            modifier = Modifier.padding(24.dp).widthIn(max = 600.dp).fillMaxWidth(),
+            modifier = Modifier.widthIn(min = 280.dp, max = 560.dp).fillMaxWidth(),
         ) {
             context(dao) {
                 Column(
-                    Modifier.verticalScroll(rememberScrollState()).semantics { paneTitle = title },
+                    Modifier.verticalScroll(rememberScrollState())
+                        .padding(bottom = 24.dp)
+                        .semantics { paneTitle = title },
                 ) {
                     Header(packageInfo)
                     AppListItem(
