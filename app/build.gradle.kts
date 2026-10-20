@@ -1,9 +1,14 @@
+import com.android.build.api.variant.HostTestBuilder
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.spotless)
+    id("kotlin-parcelize")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -57,16 +62,17 @@ android {
         }
     }
 
-    buildFeatures {
-        buildConfig = true
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
@@ -77,23 +83,54 @@ android {
     }
 }
 
+androidComponents {
+    beforeVariants(selector().all()) { variant ->
+        variant.hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
+    }
+}
+
 dependencies {
     implementation(libs.kotlin.reflect)
+    implementation(libs.kotlinx.serialization.cbor)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
-    implementation(libs.activity.compose)
-
+    implementation(libs.lifecycle.viewmodelNav3)
+    implementation(libs.splashscreen)
+    implementation(libs.activity)
+    implementation(libs.navigation.runtime)
+    implementation(libs.navigation.ui)
     implementation(platform(libs.compose))
-
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
+    implementation(libs.compose.material3.adaptive)
+    implementation(libs.m3x.material.bundle)
+    implementation(libs.m3x.runtime)
+    implementation(libs.m3x.settingsPage.core)
+    implementation(libs.m3x.settingsPage.material)
+    implementation(libs.m3x.settingsPage.datastore)
+    ksp(libs.m3x.settingsPage.processor)
+    implementation(libs.m3x.resource.compose)
+    implementation(libs.m3x.datastore.compose)
+    implementation(libs.m3x.datastore.core)
+    ksp(libs.m3x.datastore.processor)
+    implementation(libs.coil)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.datastore)
+    implementation(libs.room.ktx)
     implementation(libs.preference)
+    ksp(libs.kaidl.compiler)
+    implementation(libs.kaidl.runtime)
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 spotless {
@@ -101,7 +138,6 @@ spotless {
         target("src/*/kotlin/**/*.kt")
         ktfmt().kotlinlangStyle()
     }
-
     kotlinGradle {
         ktfmt().kotlinlangStyle()
     }

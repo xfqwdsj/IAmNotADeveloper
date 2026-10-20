@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name=".App"
+        android:name=".application.NotDevApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:description="@string/module_description"
@@ -20,7 +20,7 @@
             android:name=".ui.activity.MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen"
             android:exported="true"
-            android:theme="@style/Theme.IAmNotADeveloper">
+            android:theme="@style/Theme.IAmNotADeveloper.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,6 +28,12 @@
                 <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="top.ltfan.notdeveloper.provider.DatabaseServiceProvider"
+            android:authorities="notdevsettings"
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" />
     </application>
 
 </manifest>
