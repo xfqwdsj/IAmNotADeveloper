@@ -2,18 +2,16 @@ package top.ltfan.notdeveloper.xposed.hook
 
 import io.github.libxposed.api.XposedInterface.Hooker
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
-import top.ltfan.notdeveloper.xposed.Log
-import top.ltfan.notdeveloper.xposed.Module
 import java.lang.reflect.Executable
 import kotlin.reflect.KClass
+import top.ltfan.notdeveloper.xposed.Log
+import top.ltfan.notdeveloper.xposed.Module
 
 /**
- * Hides one settings entry by forcing `Settings.getStringForUser` to
- * report it as `"0"`.
+ * Hides one settings entry by forcing `Settings.getStringForUser` to report it as `"0"`.
  *
- * [settingsType] is the concrete `Settings` subclass to hook —
- * `Settings.Global` or `Settings.Secure` — because each subclass declares
- * its own user aware lookup.
+ * [settingsType] is the concrete `Settings` subclass to hook — `Settings.Global` or
+ * `Settings.Secure` — because each subclass declares its own user aware lookup.
  */
 class SettingsHook(
     private val settingsType: KClass<*>,

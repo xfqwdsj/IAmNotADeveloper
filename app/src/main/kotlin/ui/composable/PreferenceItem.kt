@@ -31,12 +31,12 @@ fun PreferenceItem(
             if (testResult) {
                 Icon(
                     painterResource(R.drawable.warning_24px),
-                    contentDescription = stringResource(R.string.test_result_on)
+                    contentDescription = stringResource(R.string.test_result_on),
                 )
             } else {
                 Icon(
                     painterResource(R.drawable.check_24px),
-                    contentDescription = stringResource(R.string.test_result_off)
+                    contentDescription = stringResource(R.string.test_result_off),
                 )
             }
         },
