@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 agp = "9.5.0-alpha05"
 compose = "2026.09.00"
 lifecycle = "2.11.0"
