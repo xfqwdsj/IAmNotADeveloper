@@ -6,6 +6,7 @@ lifecycle = "2.11.0"
 activity = "1.13.0"
 preference = "1.2.1"
 libxposed = "102.0.0"
+spotless = "8.10.4"
 
 [libraries]
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
@@ -27,3 +28,4 @@ libxposed-service = { module = "io.github.libxposed:service", version.ref = "lib
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

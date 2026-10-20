@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.spotless)
 }
 
 kotlin {
@@ -17,9 +18,10 @@ android {
 
     namespace = appId
     compileSdk {
-        version = release(37) {
-            minorApiLevel = 2
-        }
+        version =
+            release(37) {
+                minorApiLevel = 2
+            }
     }
 
     signingConfigs {
@@ -44,7 +46,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("config")
         }
@@ -91,4 +94,15 @@ dependencies {
     implementation(libs.preference)
     compileOnly(libs.libxposed.api)
     implementation(libs.libxposed.service)
+}
+
+spotless {
+    kotlin {
+        target("src/*/kotlin/**/*.kt")
+        ktfmt().kotlinlangStyle()
+    }
+
+    kotlinGradle {
+        ktfmt().kotlinlangStyle()
+    }
 }

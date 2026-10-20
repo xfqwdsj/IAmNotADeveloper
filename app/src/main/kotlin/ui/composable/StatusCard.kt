@@ -36,7 +36,7 @@ import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
 fun StatusCard(
     modifier: Modifier = Modifier,
     isModuleActivated: Boolean = statusIsModuleActivated,
-    isPreferencesReady: Boolean
+    isPreferencesReady: Boolean,
 ) {
     val status = Status.from(isModuleActivated, isPreferencesReady)
 
@@ -48,10 +48,8 @@ fun StatusCard(
         colors = CardDefaults.cardColors(containerColor = status.containerColor),
     ) {
         Row(
-            Modifier
-                .padding(24.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            Modifier.padding(24.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(status.icon, contentDescription = null, modifier = Modifier.size(32.dp))
             Spacer(Modifier.width(16.dp))
@@ -67,7 +65,7 @@ fun StatusCard(
                 AnimatedVisibility(
                     visible = status != Status.Normal || expanded,
                     enter = expandVertically(expandFrom = Alignment.CenterVertically),
-                    exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+                    exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically),
                 ) {
                     Spacer(Modifier.height(8.dp))
                 }
@@ -77,20 +75,20 @@ fun StatusCard(
                 AnimatedVisibility(visible = !isModuleActivated) {
                     Text(
                         stringResource(R.string.status_entry_activation_n),
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
                     )
                 }
                 AnimatedVisibility(visible = expanded) {
                     Text(
                         stringResource(R.string.status_entry_activation_description),
-                        style = MaterialTheme.typography.labelSmall
+                        style = MaterialTheme.typography.labelSmall,
                     )
                 }
 
                 AnimatedVisibility(
                     visible = expanded,
                     enter = expandVertically(expandFrom = Alignment.CenterVertically),
-                    exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+                    exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically),
                 ) {
                     Spacer(Modifier.height(8.dp))
                 }
@@ -101,13 +99,13 @@ fun StatusCard(
                 AnimatedVisibility(visible = !isPreferencesReady) {
                     Text(
                         stringResource(R.string.status_entry_prefs_n),
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
                     )
                 }
                 AnimatedVisibility(visible = expanded) {
                     Text(
                         stringResource(R.string.status_entry_prefs_description),
-                        style = MaterialTheme.typography.labelSmall
+                        style = MaterialTheme.typography.labelSmall,
                     )
                 }
             }
@@ -127,7 +125,9 @@ fun StatusCardPreview() {
 }
 
 enum class Status {
-    Normal, Partial, Error;
+    Normal,
+    Partial,
+    Error;
 
     companion object {
         fun from(isModuleActivated: Boolean, isPreferencesReady: Boolean): Status {
@@ -139,24 +139,30 @@ enum class Status {
     }
 
     val containerColor: Color
-        @Composable get() = when (this) {
-            Normal -> MaterialTheme.colorScheme.primaryContainer
-            Partial -> MaterialTheme.colorScheme.tertiaryContainer
-            Error -> MaterialTheme.colorScheme.errorContainer
-        }
+        @Composable
+        get() =
+            when (this) {
+                Normal -> MaterialTheme.colorScheme.primaryContainer
+                Partial -> MaterialTheme.colorScheme.tertiaryContainer
+                Error -> MaterialTheme.colorScheme.errorContainer
+            }
 
     val icon: Painter
-        @Composable get() = when (this) {
-            Normal -> painterResource(R.drawable.check_circle_24px)
-            else -> painterResource(R.drawable.warning_24px)
-        }
+        @Composable
+        get() =
+            when (this) {
+                Normal -> painterResource(R.drawable.check_circle_24px)
+                else -> painterResource(R.drawable.warning_24px)
+            }
 
     val summary: String
-        @Composable get() = stringResource(
-            when (this) {
-                Normal -> R.string.status_normal
-                Partial -> R.string.status_partial
-                Error -> R.string.status_error
-            }
-        )
+        @Composable
+        get() =
+            stringResource(
+                when (this) {
+                    Normal -> R.string.status_normal
+                    Partial -> R.string.status_partial
+                    Error -> R.string.status_error
+                },
+            )
 }

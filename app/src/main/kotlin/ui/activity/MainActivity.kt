@@ -50,14 +50,15 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
-        @Suppress("DEPRECATION") if (isMiui) {
+        @Suppress("DEPRECATION")
+        if (isMiui) {
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
             )
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+                WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
             )
         }
         super.onCreate(savedInstanceState)
@@ -76,38 +77,51 @@ class MainActivity : ComponentActivity() {
                             title = {
                                 Text(stringResource(R.string.app_name))
                             },
-                            windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top),
-                            scrollBehavior = scrollBehavior
+                            windowInsets =
+                                WindowInsets.safeDrawing.only(
+                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Top,
+                                ),
+                            scrollBehavior = scrollBehavior,
                         )
                     },
                 ) { padding ->
                     val layoutDirection = LocalLayoutDirection.current
-                    val insets = WindowInsets.displayCutout
-                        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-                        .asPaddingValues()
-                    val contentPadding = PaddingValues(
-                        start = padding.calculateStartPadding(layoutDirection) + insets.calculateStartPadding(
-                            layoutDirection
-                        ),
-                        top = padding.calculateTopPadding() + insets.calculateTopPadding() + 16.dp,
-                        end = padding.calculateEndPadding(layoutDirection) + insets.calculateEndPadding(
-                            layoutDirection
-                        ),
-                        bottom = padding.calculateBottomPadding() + insets.calculateBottomPadding() + 16.dp,
-                    )
+                    val insets =
+                        WindowInsets.displayCutout
+                            .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+                            .asPaddingValues()
+                    val contentPadding =
+                        PaddingValues(
+                            start =
+                                padding.calculateStartPadding(layoutDirection) +
+                                    insets.calculateStartPadding(
+                                        layoutDirection,
+                                    ),
+                            top =
+                                padding.calculateTopPadding() +
+                                    insets.calculateTopPadding() +
+                                    16.dp,
+                            end =
+                                padding.calculateEndPadding(layoutDirection) +
+                                    insets.calculateEndPadding(
+                                        layoutDirection,
+                                    ),
+                            bottom =
+                                padding.calculateBottomPadding() +
+                                    insets.calculateBottomPadding() +
+                                    16.dp,
+                        )
                     LazyColumn(
-                        modifier = Modifier
-                            .consumeWindowInsets(contentPadding)
-                            .fillMaxSize(),
+                        modifier = Modifier.consumeWindowInsets(contentPadding).fillMaxSize(),
                         contentPadding = contentPadding,
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         item {
                             StatusCard(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 isModuleActivated = isModuleActivated,
-                                isPreferencesReady = isPreferencesReady
+                                isPreferencesReady = isPreferencesReady,
                             )
                         }
 
@@ -117,7 +131,7 @@ class MainActivity : ComponentActivity() {
                                 testResults = testResults,
                                 afterChange = ::check,
                                 isPreferencesReady = isPreferencesReady,
-                                modifier = Modifier.padding(horizontal = 16.dp)
+                                modifier = Modifier.padding(horizontal = 16.dp),
                             )
                         }
                     }

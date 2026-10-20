@@ -25,11 +25,14 @@ fun CategoryCard(
     testResults: SnapshotStateMap<DetectionMethod, Boolean>,
     afterChange: () -> Unit,
     isPreferencesReady: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            ),
     ) {
         Column {
             Text(
@@ -43,12 +46,13 @@ fun CategoryCard(
             Spacer(Modifier.height(12.dp))
 
             category.methods.forEach { method ->
-                var pref by rememberBooleanSharedPreference(
-                    preferences = ModuleService.preferences,
-                    key = method.preferenceKey,
-                    defaultValue = true,
-                    afterSet = { afterChange() }
-                )
+                var pref by
+                    rememberBooleanSharedPreference(
+                        preferences = ModuleService.preferences,
+                        key = method.preferenceKey,
+                        defaultValue = true,
+                        afterSet = { afterChange() },
+                    )
 
                 val testResult = testResults[method] ?: false
 
@@ -57,7 +61,7 @@ fun CategoryCard(
                     testResult = testResult,
                     checked = pref,
                     onClick = { pref = !pref },
-                    enabled = isPreferencesReady
+                    enabled = isPreferencesReady,
                 )
             }
         }

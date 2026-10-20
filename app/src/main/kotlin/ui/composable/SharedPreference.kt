@@ -8,21 +8,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlin.reflect.KProperty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import top.ltfan.notdeveloper.ModuleService
 import top.ltfan.notdeveloper.xposed.Log
-import kotlin.reflect.KProperty
 
 /**
  * Wraps the boolean stored under [key] in [preferences] as Compose state.
  *
- * [preferences] is the remote preferences of
- * [top.ltfan.notdeveloper.ModuleService], which only exist once the
- * framework has connected, so it may be `null` for a while; the holder
- * is then recreated as soon as the preferences become available.
+ * [preferences] is the remote preferences of [ModuleService], which only exist once the framework
+ * has connected, so it may be `null` for a while; the holder is then recreated as soon as the
+ * preferences become available.
  */
 @Composable
 fun rememberBooleanSharedPreference(
@@ -32,9 +32,10 @@ fun rememberBooleanSharedPreference(
     beforeSet: ((Boolean) -> Boolean)? = null,
     afterSet: ((Boolean) -> Unit)? = null,
 ): BooleanSharedPreference {
-    val preference = remember(preferences, key) {
-        BooleanSharedPreference(preferences, key, defaultValue, beforeSet, afterSet)
-    }
+    val preference =
+        remember(preferences, key) {
+            BooleanSharedPreference(preferences, key, defaultValue, beforeSet, afterSet)
+        }
 
     DisposableEffect(preference) {
         onDispose {
@@ -59,8 +60,8 @@ class BooleanSharedPreference(
     }
 
     /**
-     * Pending writes for [key]; while one write runs, a newer request replaces
-     * the buffered one, so only the latest survives.
+     * Pending writes for [key]; while one write runs, a newer request replaces the buffered one, so
+     * only the latest survives.
      */
     private val requests = Channel<Boolean>(Channel.CONFLATED)
     private val job = SupervisorJob()
@@ -75,7 +76,8 @@ class BooleanSharedPreference(
         }
     }
 
-    private val prefsValue get() = preferences?.getBoolean(key, defaultValue) ?: defaultValue
+    private val prefsValue
+        get() = preferences?.getBoolean(key, defaultValue) ?: defaultValue
 
     private var value by mutableStateOf(prefsValue)
 
