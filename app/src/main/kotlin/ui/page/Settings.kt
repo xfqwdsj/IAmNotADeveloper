@@ -3,30 +3,26 @@ package top.ltfan.notdeveloper.ui.page
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import top.ltfan.material.m3.CardSettings
-import top.ltfan.material.m3.core.layout.only
-import top.ltfan.material.m3.core.layout.plus
-import top.ltfan.material.m3.core.visual.BackdropEdge
-import top.ltfan.material.m3.core.visual.LocalBackdrop
-import top.ltfan.material.m3.core.visual.backdropSurface
-import top.ltfan.material.m3.core.visual.captureBackdrop
-import top.ltfan.material.m3.core.visual.progressiveBlur
-import top.ltfan.material.m3.core.visual.rememberBackdropLayer
+import top.ltfan.m3x.backdrop.BackdropHost
+import top.ltfan.m3x.backdrop.captureBackdrop
+import top.ltfan.m3x.backdrop.rememberBackdropLayer
+import top.ltfan.m3x.compose.foundation.only
+import top.ltfan.m3x.compose.foundation.plus
+import top.ltfan.m3x.compose.material3.CardColorsLowest
+import top.ltfan.m3x.material.backdrop.BackdropCenterAlignedTopAppBar
+import top.ltfan.m3x.settingspage.material.CardSettings
 import top.ltfan.notdeveloper.R
-import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
-import top.ltfan.notdeveloper.ui.theme.LargeTopAppBarColorsTransparent
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
+import top.ltfan.notdeveloper.ui.util.appBarEffects
+import top.ltfan.notdeveloper.ui.util.appBarMask
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Settings : Main() {
@@ -41,21 +37,14 @@ object Settings : Main() {
         val background = MaterialTheme.colorScheme.background
         val backdrop = rememberBackdropLayer(background)
         val describer = settingsDescriber
-        CompositionLocalProvider(LocalBackdrop provides backdrop) {
+        BackdropHost(backdrop) {
             Scaffold(
                 topBar = {
-                    CenterAlignedTopAppBar(
+                    BackdropCenterAlignedTopAppBar(
+                        mask = appBarMask(progressive),
+                        effects = appBarEffects(progressive),
                         title = { Text(stringResource(navigationLabel)) },
-                        modifier =
-                            Modifier.backdropSurface(
-                                handle = backdrop,
-                                shape = RectangleShape,
-                                effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
-                                highlight = null,
-                                shadow = null,
-                            ),
                         windowInsets = AppWindowInsets.only { horizontal + top },
-                        colors = LargeTopAppBarColorsTransparent,
                     )
                 },
                 contentWindowInsets = AppWindowInsets,

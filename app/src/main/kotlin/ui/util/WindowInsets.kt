@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.unit.dp
-import top.ltfan.material.m3.core.layout.plus
+import top.ltfan.m3x.compose.foundation.plus
 
 /** Height reserved by the floating bottom bar. */
 val LocalBottomBarHeight = compositionLocalOf { 0.dp }

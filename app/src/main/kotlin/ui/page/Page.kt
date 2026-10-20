@@ -3,13 +3,13 @@ package top.ltfan.notdeveloper.ui.page
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import top.ltfan.material.m3.core.navigation.Page as MaterialPage
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Serializable
-sealed class Page : MaterialPage {
+sealed class Page : NavKey {
     @Transient open val metadata: Map<String, Any> = emptyMap()
 
     @Composable abstract fun AppViewModel.Content()

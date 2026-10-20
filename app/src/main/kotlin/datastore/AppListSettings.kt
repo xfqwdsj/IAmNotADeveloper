@@ -5,7 +5,7 @@ import android.os.Parcelable
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import top.ltfan.material.m3.datastore.annotation.Store
+import top.ltfan.m3x.datastore.annotation.Store
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo

@@ -3,7 +3,7 @@ package top.ltfan.notdeveloper.datastore
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.cbor.Cbor
-import top.ltfan.material.m3.datastore.StoreCodec
+import top.ltfan.m3x.datastore.StoreCodec
 
 /** The app-wide CBOR codec used by every `@Store` model. */
 @OptIn(ExperimentalSerializationApi::class)

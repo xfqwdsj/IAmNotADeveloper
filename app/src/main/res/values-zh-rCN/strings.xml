@@ -101,7 +101,6 @@
     <string name="item_apps_bottom_sheet_filter_unconfigured">未配置</string>
     <string name="item_apps_bottom_sheet_filter_system">系统应用</string>
     <string name="title_apps_modal_configuration">应用配置</string>
-    <string name="action_apps_modal_configuration_close">关闭应用配置</string>
     <string name="action_apps_modal_configuration_clear">清除此应用的配置</string>
     <string name="label_apps_item_menu_fab_add_app">手动添加应用</string>
     <string name="label_apps_item_menu_fab_search">搜索</string>
@@ -114,20 +113,8 @@
     <string name="toggle_hide_adb_root">隐藏ADB root状态（属性）</string>
 
     <string name="label_nav_settings">设置</string>
-    <string name="label_settings_category_ui">用户界面</string>
     <string name="label_settings_ui_blur">模糊效果</string>
-    <string name="label_settings_ui_blur_disabled">关闭</string>
-    <string name="label_settings_ui_blur_enabled">开启</string>
     <string name="label_settings_ui_blur_enabled_progressive">渐进式模糊</string>
-    <string name="label_settings_ui_blur_enabled_progressive_disabled">关闭</string>
-    <string name="label_settings_ui_blur_enabled_progressive_mask">遮罩</string>
-    <string name="description_settings_ui_blur_enabled_progressive_mask">使用遮罩效果替代开销较大的渐进式模糊效果。</string>
-    <string name="label_settings_ui_blur_enabled_progressive_scaled">缩放</string>
-    <string name="description_settings_ui_blur_enabled_progressive_scaled">在应用模糊前先缩小内容以提升性能。</string>
-    <string name="label_settings_ui_blur_enabled_progressive_scaled_auto">自动缩放</string>
-    <string name="label_settings_ui_blur_enabled_progressive_scaled_custom">自定义缩放</string>
-    <string name="label_settings_ui_blur_enabled_progressive_scaled_custom_factor">缩放系数</string>
-    <string name="label_settings_ui_blur_enabled_progressive_full">完整</string>
     <string name="label_settings_ui_smooth_corner">平滑圆角</string>
     <string name="description_settings_ui_smooth_corner">在整个应用中启用平滑圆角。部分设备上可能影响性能。</string>
 </resources>

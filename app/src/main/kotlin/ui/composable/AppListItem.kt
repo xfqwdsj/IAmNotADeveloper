@@ -19,9 +19,9 @@ import androidx.core.content.pm.PackageInfoCompat
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import top.ltfan.m3x.compose.material3.ListItemColorsTransparent
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
-import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Composable

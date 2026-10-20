@@ -2,13 +2,16 @@ package top.ltfan.notdeveloper.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import top.ltfan.m3x.material.bundle.M3xMaterialTheme
+import top.ltfan.m3x.material.theme.RoundedM3xShapeFactory
+import top.ltfan.m3x.material.theming.capsule.CapsuleM3xShapeFactory
+import top.ltfan.notdeveloper.ui.util.appBarBackdropTheme
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Composable
@@ -28,9 +31,11 @@ fun IAmNotADeveloperTheme(
             else -> lightColorScheme()
         }
 
-    MaterialTheme(
+    M3xMaterialTheme(
         colorScheme = colorScheme,
-        shapes = AppShapes,
+        backdrop = appBarBackdropTheme(viewModel.progressive),
+        shapeFactory =
+            if (viewModel.smoothRoundedCorners) CapsuleM3xShapeFactory else RoundedM3xShapeFactory,
     ) {
         with(viewModel) {
             content()

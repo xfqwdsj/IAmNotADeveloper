@@ -17,11 +17,11 @@ import androidx.compose.ui.semantics.semantics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import top.ltfan.m3x.compose.material3.ListItemColorsTransparent
+import top.ltfan.m3x.compose.runtime.collectAsMutableState
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.detection.DetectionMethod
-import top.ltfan.notdeveloper.ui.theme.ListItemColorsTransparent
-import top.ltfan.notdeveloper.ui.util.collectAsMutableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Composable

@@ -19,8 +19,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -34,17 +36,16 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.kyant.backdrop.backdrops.LayerBackdrop
-import top.ltfan.material.m3.core.layout.only
-import top.ltfan.material.m3.core.visual.LocalBackdrop
-import top.ltfan.material.m3.core.visual.LocalBlurEnabled
-import top.ltfan.material.m3.core.visual.captureBackdrop
-import top.ltfan.material.m3.core.visual.rememberBackdropLayer
-import top.ltfan.material.m3.overlay.OverlayHost
-import top.ltfan.material.m3.overlay.OverlayHostState
+import top.ltfan.m3x.backdrop.BackdropHost
+import top.ltfan.m3x.backdrop.captureBackdrop
+import top.ltfan.m3x.backdrop.rememberBackdropLayer
+import top.ltfan.m3x.compose.foundation.only
+import top.ltfan.m3x.compose.ui.visual.LocalBlurEnabled
+import top.ltfan.m3x.material.FloatingBottomBar
+import top.ltfan.m3x.material.item
+import top.ltfan.m3x.overlay.OverlayHost
+import top.ltfan.m3x.overlay.OverlayHostState
 import top.ltfan.notdeveloper.application.NotDevApplication
-import top.ltfan.notdeveloper.ui.composable.FloatingBottomBar
-import top.ltfan.notdeveloper.ui.composable.FloatingBottomBarItem
 import top.ltfan.notdeveloper.ui.page.Main
 import top.ltfan.notdeveloper.ui.theme.IAmNotADeveloperTheme
 import top.ltfan.notdeveloper.ui.util.LocalBottomBarHeight
@@ -92,40 +93,41 @@ class MainActivity : ComponentActivity() {
                 val bottomBarHeight = remember { mutableStateOf(0.dp) }
                 val density = LocalDensity.current
                 CompositionLocalProvider(
-                    LocalBackdrop provides backdrop,
                     LocalBlurEnabled provides blurEnabled,
                 ) {
-                    OverlayHost(overlayHost) {
-                        Box(Modifier.fillMaxSize()) {
-                            CompositionLocalProvider(
-                                LocalBottomBarHeight provides
-                                    if (vm.showNavBar) bottomBarHeight.value else 0.dp,
-                            ) {
-                                NavDisplay(
-                                    backStack = backStack,
-                                    modifier = Modifier.fillMaxSize().captureBackdrop(backdrop),
-                                    entryDecorators =
-                                        listOf(
-                                            rememberSaveableStateHolderNavEntryDecorator(),
-                                            rememberViewModelStoreNavEntryDecorator(),
-                                        ),
-                                    entryProvider = { it.navEntry() },
-                                )
-                            }
-                            if (vm.showNavBar) {
-                                Box(
-                                    Modifier.align(Alignment.BottomCenter)
-                                        .windowInsetsPadding(
-                                            WindowInsets.safeDrawing.only { bottom },
-                                        ),
+                    BackdropHost(backdrop) {
+                        OverlayHost(overlayHost) {
+                            Box(Modifier.fillMaxSize()) {
+                                CompositionLocalProvider(
+                                    LocalBottomBarHeight provides
+                                        if (vm.showNavBar) bottomBarHeight.value else 0.dp,
                                 ) {
+                                    NavDisplay(
+                                        backStack = backStack,
+                                        modifier = Modifier.fillMaxSize().captureBackdrop(backdrop),
+                                        entryDecorators =
+                                            listOf(
+                                                rememberSaveableStateHolderNavEntryDecorator(),
+                                                rememberViewModelStoreNavEntryDecorator(),
+                                            ),
+                                        entryProvider = { it.navEntry() },
+                                    )
+                                }
+                                if (vm.showNavBar) {
                                     Box(
-                                        Modifier.onGloballyPositioned {
-                                            bottomBarHeight.value =
-                                                with(density) { it.size.height.toDp() }
-                                        },
+                                        Modifier.align(Alignment.BottomCenter)
+                                            .windowInsetsPadding(
+                                                WindowInsets.safeDrawing.only { bottom },
+                                            ),
                                     ) {
-                                        BottomBar(vm, backdrop.layer)
+                                        Box(
+                                            Modifier.onGloballyPositioned {
+                                                bottomBarHeight.value =
+                                                    with(density) { it.size.height.toDp() }
+                                            },
+                                        ) {
+                                            BottomBar(vm)
+                                        }
                                     }
                                 }
                             }
@@ -145,19 +147,17 @@ class MainActivity : ComponentActivity() {
  * that does not contain itself.
  */
 @Composable
-private fun BottomBar(viewModel: AppViewModel, backdrop: LayerBackdrop) {
+private fun BottomBar(viewModel: AppViewModel) {
     val pages = Main.pages
     val selectedIndex = pages.indexOf(viewModel.navBarEntry).coerceAtLeast(0)
     FloatingBottomBar(
-        selectedTabIndex = { selectedIndex },
+        selectedTabIndex = selectedIndex,
         onTabSelected = { index -> viewModel.navigateMain(pages[index]) },
-        backdrop = backdrop,
-        tabsCount = pages.size,
         modifier = Modifier.padding(horizontal = 28.dp),
     ) {
         pages.forEach { page ->
-            FloatingBottomBarItem(
-                onClick = { viewModel.navigateMain(page) },
+            item(
+                key = page,
                 modifier = Modifier.defaultMinSize(minWidth = 76.dp),
             ) {
                 Icon(

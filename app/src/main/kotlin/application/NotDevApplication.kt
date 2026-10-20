@@ -3,7 +3,7 @@ package top.ltfan.notdeveloper.application
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import top.ltfan.material.m3.datastore.StoreHost
+import top.ltfan.m3x.datastore.compose.storeHost
 import top.ltfan.notdeveloper.App
 import top.ltfan.notdeveloper.database.PackageSettingsDatabase
 import top.ltfan.notdeveloper.datastore.AppFile
@@ -21,7 +21,7 @@ class NotDevApplication : App() {
      * recreating the UI reads the warm values directly.
      */
     val storeHost by lazy {
-        StoreHost(storeScope, AppFile(this)).also { host ->
+        storeHost(storeScope, AppFile(this)).also { host ->
             // Load every persisted model eagerly, before the first composition.
             host.mutable(AppListSettingsStore)
             host.mutable(UiSettingsModelStore)
@@ -31,10 +31,6 @@ class NotDevApplication : App() {
 
     override fun onCreate() {
         super.onCreate()
-        // Temporary: receive the overlay probe lines of the library.
-        top.ltfan.material.m3.overlay.ExtendedDebug.sink = { line ->
-            android.util.Log.e("GLASSDBG", line)
-        }
         // Warm the stores up as early as possible.
         storeHost
     }

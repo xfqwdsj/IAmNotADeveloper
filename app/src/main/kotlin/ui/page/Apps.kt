@@ -4,12 +4,13 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.Transition
-import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.spring
@@ -26,7 +27,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -35,9 +35,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -46,11 +46,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +61,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -84,50 +81,44 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMaxBy
-import com.kyant.capsule.ContinuousCapsule
-import com.kyant.capsule.ContinuousRoundedRectangle
-import kotlinx.coroutines.launch
-import top.ltfan.material.m3.card
-import top.ltfan.material.m3.core.layout.GroupedLazyColumn
-import top.ltfan.material.m3.core.layout.GroupedLazyListScope
-import top.ltfan.material.m3.core.layout.only
-import top.ltfan.material.m3.core.layout.plus
-import top.ltfan.material.m3.core.transition.FocusRequestingEffect
-import top.ltfan.material.m3.core.visual.BackdropEdge
-import top.ltfan.material.m3.core.visual.LocalBackdrop
-import top.ltfan.material.m3.core.visual.backdropSurface
-import top.ltfan.material.m3.core.visual.captureBackdrop
-import top.ltfan.material.m3.core.visual.progressiveBlur
-import top.ltfan.material.m3.core.visual.rememberBackdropLayer
-import top.ltfan.material.m3.items
-import top.ltfan.material.m3.layout.header
-import top.ltfan.material.m3.overlay.ExtendedAlertDialog
-import top.ltfan.material.m3.overlay.ExtendedBottomSheet
-import top.ltfan.material.m3.overlay.ExtendedMenuDefaults
-import top.ltfan.material.m3.overlay.ExtendedMenuItem
-import top.ltfan.material.m3.overlay.ExtendedSnackbarHost
-import top.ltfan.material.m3.overlay.localSharedTransitionScope
+import top.ltfan.m3x.backdrop.BackdropHost
+import top.ltfan.m3x.backdrop.captureBackdrop
+import top.ltfan.m3x.backdrop.rememberBackdropLayer
+import top.ltfan.m3x.compose.animation.AnimatedVisibilityWithBlur
+import top.ltfan.m3x.compose.animation.FocusRequestingEffect
+import top.ltfan.m3x.compose.foundation.GroupedLazyColumn
+import top.ltfan.m3x.compose.foundation.GroupedLazyListScope
+import top.ltfan.m3x.compose.foundation.only
+import top.ltfan.m3x.compose.foundation.plus
+import top.ltfan.m3x.compose.material3.CardColorsLowest
+import top.ltfan.m3x.compose.runtime.rememberAutoRestorableState
+import top.ltfan.m3x.material.FilterChip
+import top.ltfan.m3x.material.TextButton
+import top.ltfan.m3x.material.backdrop.BackdropCenterAlignedTopAppBar
+import top.ltfan.m3x.material.backdrop.BackdropTopAppBarControl
+import top.ltfan.m3x.material.card
+import top.ltfan.m3x.material.header
+import top.ltfan.m3x.material.items
+import top.ltfan.m3x.material.overlay.IconButtonWithTooltip
+import top.ltfan.m3x.material.overlay.MenuFloatingActionButton
+import top.ltfan.m3x.material.overlay.OverlayAlertDialog
+import top.ltfan.m3x.material.overlay.OverlayBottomSheet
+import top.ltfan.m3x.material.overlay.OverlayMenuDefaults
+import top.ltfan.m3x.material.overlay.OverlayMenuItem
+import top.ltfan.m3x.material.overlay.OverlaySnackbarHost
+import top.ltfan.m3x.material.overlay.sharedTransitionBounds
+import top.ltfan.m3x.overlay.LocalSharedTransitionScope
+import top.ltfan.m3x.overlay.rememberOverlayNavigationTransition
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppSort
-import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
-import top.ltfan.notdeveloper.ui.composable.ExtendedFloatingActionButtonWithMenu
-import top.ltfan.notdeveloper.ui.composable.FilterChip
-import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
-import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
-import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
-import top.ltfan.notdeveloper.ui.theme.AppRadiusMedium
-import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
-import top.ltfan.notdeveloper.ui.theme.TopAppBarColorsTransparent
-import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 import top.ltfan.notdeveloper.ui.util.AppWindowInsets
-import top.ltfan.notdeveloper.ui.util.EmptyContentTransform
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
+import top.ltfan.notdeveloper.ui.util.appBarEffects
+import top.ltfan.notdeveloper.ui.util.appBarMask
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
-import top.ltfan.notdeveloper.ui.util.pageSurface
-import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 object Apps : Main() {
@@ -145,41 +136,34 @@ object Apps : Main() {
     @Composable
     override fun AppViewModel.Content() {
         val transition = rememberTransition(packageInfoConfiguringTransitionState)
+        val navigationTransition =
+            rememberOverlayNavigationTransition(
+                state = packageInfoConfiguringTransitionState,
+                transition = transition,
+                targetState = currentConfiguringPackageInfo,
+                backTarget = null,
+                isVisible = { value, key ->
+                    key == AppConfigurationSharedKey.Container(value) && value != null
+                },
+            )
         val background = MaterialTheme.colorScheme.background
         val backdrop = rememberBackdropLayer(background)
 
         val snackbarHostState = remember { SnackbarHostState() }
         val snackbarMessage = stringResource(R.string.message_apps_snackbar_query_failed)
 
-        CompositionLocalProvider(LocalBackdrop provides backdrop) {
+        BackdropHost(backdrop) {
             Scaffold(
                 topBar = {
-                    Column(
-                        Modifier.backdropSurface(
-                            handle = backdrop,
-                            shape = RectangleShape,
-                            effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
-                            highlight = null,
-                            shadow = null,
-                        ),
-                    ) {
-                        CenterAlignedTopAppBar(
+                    Column {
+                        BackdropCenterAlignedTopAppBar(
+                            mask = appBarMask(progressive),
+                            effects = appBarEffects(progressive),
                             title = { Text(stringResource(navigationLabel)) },
                             actions = {
-                                Row(
-                                    modifier =
-                                        Modifier.pageSurface(
-                                            shape = ContinuousCapsule,
-                                            containerColor = MaterialTheme.colorScheme.surface,
-                                            blurRadius = 4.dp,
-                                        ),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    AppBarActions()
-                                }
+                                BackdropTopAppBarControl { AppBarActions() }
                             },
                             windowInsets = AppWindowInsets.only { horizontal + top },
-                            colors = TopAppBarColorsTransparent,
                         )
                         FilterBar()
                     }
@@ -189,7 +173,7 @@ object Apps : Main() {
             ) { contentPadding ->
                 val (configuredList, unconfiguredList) = collectAppLists()
 
-                localSharedTransitionScope {
+                with(requireNotNull(LocalSharedTransitionScope.current)) {
                     GroupedLazyColumn(
                         modifier = Modifier.captureBackdrop(backdrop).fillMaxSize(),
                         state = lazyListState,
@@ -228,17 +212,16 @@ object Apps : Main() {
                 FilterBottomSheet()
             }
 
-            localSharedTransitionScope { context(transition) { AppConfiguration() } }
+            with(requireNotNull(LocalSharedTransitionScope.current)) {
+                context(transition) { AppConfiguration(navigationTransition) }
+            }
 
-            ExtendedSnackbarHost(snackbarHostState)
+            OverlaySnackbarHost(snackbarHostState)
         }
 
-        val event by appListErrorSnackbarTrigger.collectAsState(null)
-
-        LaunchedEffect(event) {
-            if (event != null) {
+        LaunchedEffect(appListErrorSnackbarTrigger, snackbarHostState, snackbarMessage) {
+            appListErrorSnackbarTrigger.collect {
                 snackbarHostState.showSnackbar(snackbarMessage)
-                appListErrorSnackbarTrigger.emit(null)
             }
         }
     }
@@ -248,12 +231,12 @@ object Apps : Main() {
     fun AppBarActions() {
         if (viewModel.isAppListError) {
             IconButtonWithTooltip(
-                iconRes = R.drawable.warning_24px,
-                contentDescription = R.string.action_apps_query_details_show,
+                painter = painterResource(R.drawable.warning_24px),
+                contentDescription = stringResource(R.string.action_apps_query_details_show),
                 onClick = { showAppListErrorInfoDialog = true },
             )
 
-            ExtendedAlertDialog(
+            OverlayAlertDialog(
                 visible = { showAppListErrorInfoDialog },
                 onDismissRequest = { showAppListErrorInfoDialog = false },
                 confirmButton = {
@@ -274,7 +257,7 @@ object Apps : Main() {
 
         AnimatedContent(
             targetState = showUserFilter,
-            transitionSpec = { EmptyContentTransform },
+            transitionSpec = { EnterTransition.None togetherWith ExitTransition.None using null },
         ) { showing ->
             val rotation by
                 transition.animateFloat(
@@ -290,15 +273,15 @@ object Apps : Main() {
                 }
             if (showing) {
                 IconButtonWithTooltip(
-                    iconRes = R.drawable.expand_circle_up_24px,
-                    contentDescription = R.string.action_apps_user_select_hide,
+                    painter = painterResource(R.drawable.expand_circle_up_24px),
+                    contentDescription = stringResource(R.string.action_apps_user_select_hide),
                     modifier = Modifier.rotate(rotation),
                     onClick = { showUserFilter = false },
                 )
             } else {
                 IconButtonWithTooltip(
-                    iconRes = R.drawable.expand_circle_down_24px,
-                    contentDescription = R.string.action_apps_user_select_show,
+                    painter = painterResource(R.drawable.expand_circle_down_24px),
+                    contentDescription = stringResource(R.string.action_apps_user_select_show),
                     modifier = Modifier.rotate(rotation),
                     onClick = { showUserFilter = true },
                 )
@@ -306,8 +289,8 @@ object Apps : Main() {
         }
 
         IconButtonWithTooltip(
-            iconRes = R.drawable.filter_list_24px,
-            contentDescription = R.string.action_apps_bottom_sheet_filter_show,
+            painter = painterResource(R.drawable.filter_list_24px),
+            contentDescription = stringResource(R.string.action_apps_bottom_sheet_filter_show),
             onClick = { showFilterBottomSheet = true },
         )
     }
@@ -319,7 +302,13 @@ object Apps : Main() {
         layoutModifier: Modifier = Modifier,
     ) {
         with(viewModel) {
-            AnimatedVisibilityWithBlur(showUserFilter, modifier) {
+            AnimatedVisibilityWithBlur(
+                showUserFilter,
+                animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                modifier = modifier,
+                enter = expandVertically(clip = false),
+                exit = shrinkVertically(clip = false),
+            ) {
                 FilterBarLayout(
                     modifier =
                         layoutModifier.semantics {
@@ -336,8 +325,9 @@ object Apps : Main() {
                             contentAlignment = Alignment.Center,
                         ) {
                             PointerInjector()
-                            IconButtonSizedIcon(
-                                iconRes = R.drawable.account_circle_24px,
+                            Icon(
+                                painter = painterResource(R.drawable.account_circle_24px),
+                                modifier = Modifier.minimumInteractiveComponentSize().size(40.dp),
                                 contentDescription =
                                     stringResource(R.string.label_apps_user_select),
                             )
@@ -352,8 +342,10 @@ object Apps : Main() {
                             PointerInjector()
                             AnimatedContent(refreshFinished) {
                                 if (it) {
-                                    IconButtonSizedIcon(
-                                        iconRes = R.drawable.check_24px,
+                                    Icon(
+                                        painter = painterResource(R.drawable.check_24px),
+                                        modifier =
+                                            Modifier.minimumInteractiveComponentSize().size(40.dp),
                                         contentDescription =
                                             stringResource(
                                                 R.string.label_apps_user_list_refresh_done,
@@ -361,8 +353,9 @@ object Apps : Main() {
                                     )
                                 } else {
                                     IconButtonWithTooltip(
-                                        iconRes = R.drawable.refresh_24px,
-                                        contentDescription = R.string.action_apps_user_list_refresh,
+                                        painter = painterResource(R.drawable.refresh_24px),
+                                        contentDescription =
+                                            stringResource(R.string.action_apps_user_list_refresh),
                                         onClick = {
                                             updateUsers()
                                             refreshFinished = true
@@ -418,7 +411,10 @@ object Apps : Main() {
                             FilterChip(
                                 selected = selected,
                                 onClick = { selectedUser = user },
-                                text = user.name.getString(),
+                                label = { Text(user.name.getString()) },
+                                leadingIcon = {
+                                    if (selected) Icon(painterResource(R.drawable.check_24px), null)
+                                },
                                 modifier =
                                     Modifier.run {
                                             if (index == 0) {
@@ -445,29 +441,42 @@ object Apps : Main() {
     @Composable
     context(viewModel: AppViewModel)
     fun Fab() {
-        ExtendedFloatingActionButtonWithMenu(
-            showMenu = { showFabMenu },
+        MenuFloatingActionButton(
+            expanded = { showFabMenu },
             onExpandedChange = { expanded -> showFabMenu = expanded },
-        ) {
-            ExtendedMenuItem(
-                text = { Text(stringResource(R.string.label_apps_item_menu_fab_add_app)) },
-                onClick = { showFabMenu = false },
-                leadingIcon = { Icon(painterResource(R.drawable.add_24px), null) },
-                shape = ExtendedMenuDefaults.itemThemedShape(0, 2),
-            )
-            ExtendedMenuItem(
-                text = { Text(stringResource(R.string.label_apps_item_menu_fab_search)) },
-                onClick = { showFabMenu = false },
-                leadingIcon = { Icon(painterResource(R.drawable.search_24px), null) },
-                shape = ExtendedMenuDefaults.itemThemedShape(1, 2),
-            )
-        }
+            menuContentDescription = stringResource(R.string.description_fab_menu),
+            buttonContent = { expanded ->
+                Icon(
+                    painterResource(if (expanded) R.drawable.close_24px else R.drawable.add_24px),
+                    contentDescription =
+                        stringResource(
+                            if (expanded) R.string.action_fab_menu_collapse
+                            else R.string.action_fab_menu_expand,
+                        ),
+                )
+            },
+            menuContent = {
+                OverlayMenuItem(
+                    text = { Text(stringResource(R.string.label_apps_item_menu_fab_add_app)) },
+                    onClick = { showFabMenu = false },
+                    leadingIcon = { Icon(painterResource(R.drawable.add_24px), null) },
+                    shape = OverlayMenuDefaults.itemShape(0, 2),
+                )
+                OverlayMenuItem(
+                    text = { Text(stringResource(R.string.label_apps_item_menu_fab_search)) },
+                    onClick = { showFabMenu = false },
+                    leadingIcon = { Icon(painterResource(R.drawable.search_24px), null) },
+                    shape = OverlayMenuDefaults.itemShape(1, 2),
+                )
+            },
+        )
     }
 
     @Composable
     context(viewModel: AppViewModel)
     fun NoAppsBackground(contentPadding: PaddingValues) {
         with(viewModel) {
+            val effectsSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
             val (configuredList, unconfiguredList) = collectAppLists()
 
             AnimatedContent(
@@ -476,7 +485,9 @@ object Apps : Main() {
                         isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
                         isFiltered = appFilteredMethods.isNotEmpty(),
                     ),
-                transitionSpec = { AnimatedContentDefaultTransform using null },
+                transitionSpec = {
+                    fadeIn(effectsSpec) togetherWith fadeOut(effectsSpec) using null
+                },
                 contentKey = { it.isEmpty },
             ) { (isEmpty, isFiltered) ->
                 if (isEmpty) {
@@ -490,7 +501,12 @@ object Apps : Main() {
                             style = MaterialTheme.typography.bodyLarge,
                         )
 
-                        AnimatedVisibilityWithBlur(isFiltered) {
+                        AnimatedVisibilityWithBlur(
+                            isFiltered,
+                            animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                            enter = expandVertically(clip = false),
+                            exit = shrinkVertically(clip = false),
+                        ) {
                             Column {
                                 Spacer(Modifier.height(24.dp))
                                 TextButton(
@@ -509,9 +525,9 @@ object Apps : Main() {
     @Composable
     context(viewModel: AppViewModel)
     fun FilterBottomSheet() {
-        if (!showFilterBottomSheet) return
         with(viewModel) {
-            ExtendedBottomSheet(
+            OverlayBottomSheet(
+                visible = { showFilterBottomSheet },
                 onDismissRequest = { showFilterBottomSheet = false },
             ) {
                 Text(
@@ -527,7 +543,7 @@ object Apps : Main() {
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(8.dp))
-                localSharedTransitionScope {
+                with(requireNotNull(LocalSharedTransitionScope.current)) filters@{
                     FlowRow(
                         modifier =
                             Modifier.fillMaxWidth().padding(horizontal = 16.dp).animateBounds(this),
@@ -538,7 +554,16 @@ object Apps : Main() {
                             FilterChip(
                                 selected = selected,
                                 onClick = { appSortMethod = it },
-                                text = it.labelRes,
+                                label = { Text(stringResource(it.labelRes)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painterResource(
+                                            if (selected) R.drawable.check_24px
+                                            else R.drawable.remove_24px,
+                                        ),
+                                        null,
+                                    )
+                                },
                                 modifier = Modifier.skipToLookaheadSize(),
                             )
                         }
@@ -553,7 +578,7 @@ object Apps : Main() {
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(Modifier.height(8.dp))
-                localSharedTransitionScope {
+                with(requireNotNull(LocalSharedTransitionScope.current)) filters@{
                     FlowRow(
                         modifier =
                             Modifier.fillMaxWidth().padding(horizontal = 16.dp).animateBounds(this),
@@ -570,8 +595,16 @@ object Apps : Main() {
                                         emptySet()
                                     }
                             },
-                            text = AppFilter.All.labelRes,
-                            leadingPlaceholderIcon = R.drawable.remove_24px,
+                            label = { Text(stringResource(AppFilter.All.labelRes)) },
+                            leadingIcon = {
+                                Icon(
+                                    painterResource(
+                                        if (allSelected) R.drawable.check_24px
+                                        else R.drawable.remove_24px,
+                                    ),
+                                    null,
+                                )
+                            },
                         )
                         AppFilter.toggleableEntries.forEach {
                             val selected = !appFilteredMethods.contains(it)
@@ -584,11 +617,18 @@ object Apps : Main() {
                                         appFilteredMethods += it
                                     }
                                 },
-                                text = it.labelRes,
+                                label = { Text(stringResource(it.labelRes)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painterResource(
+                                            if (selected) R.drawable.check_24px
+                                            else R.drawable.remove_24px,
+                                        ),
+                                        null,
+                                    )
+                                },
                                 modifier =
-                                    Modifier.animateBounds(this@localSharedTransitionScope)
-                                        .skipToLookaheadSize(),
-                                leadingPlaceholderIcon = R.drawable.remove_24px,
+                                    Modifier.animateBounds(this@filters).skipToLookaheadSize(),
                             )
                         }
                     }
@@ -699,51 +739,35 @@ object Apps : Main() {
                 transition.AnimatedContent(
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                 ) { currentInfo ->
-                    val radius by
-                        this.transition.animateDp(label = "AppListItemRadius") {
-                            if (it == EnterExitState.Visible) AppRadiusMedium
-                            else AppRadiusExtraLarge
-                        }
-
                     if (currentInfo != info) {
                         with(sharedTransitionScope) {
                             Box(
-                                Modifier.sharedBounds(
-                                        sharedContentState =
-                                            rememberSharedContentState(
-                                                AppConfigurationSharedKey.Container(info),
-                                            ),
-                                        animatedVisibilityScope = this@AnimatedContent,
-                                        resizeMode =
-                                            SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                                    )
-                                    .clip(ContinuousRoundedRectangle(radius)),
+                                Modifier.sharedTransitionBounds(
+                                    sharedContentState =
+                                        rememberSharedContentState(
+                                            AppConfigurationSharedKey.Container(info),
+                                        ),
+                                    animatedVisibilityScope = this@AnimatedContent,
+                                    shape = MaterialTheme.shapes.medium,
+                                ),
                             ) {
                                 val headerText = stringResource(header)
                                 AppListItem(
                                     packageInfo = info,
                                     modifier =
-                                        Modifier.sharedBounds(
+                                        Modifier.sharedTransitionBounds(
                                                 sharedContentState =
                                                     rememberSharedContentState(
                                                         AppConfigurationSharedKey.ListItem(info),
                                                     ),
                                                 animatedVisibilityScope = this@AnimatedContent,
-                                                resizeMode =
-                                                    SharedTransitionScope.ResizeMode
-                                                        .RemeasureToBounds,
+                                                shape = MaterialTheme.shapes.medium,
                                             )
-                                            .clip(ContinuousRoundedRectangle(radius))
                                             .semantics {
                                                 contentDescription = headerText
                                             },
                                     onClick = {
-                                        coroutineScope.launch {
-                                            viewModel.packageInfoConfiguringTransitionState
-                                                .animateTo(
-                                                    info,
-                                                )
-                                        }
+                                        viewModel.currentConfiguringPackageInfo = info
                                     },
                                 )
                             }

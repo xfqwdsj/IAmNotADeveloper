@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import top.ltfan.material.m3.settingspage.SettingsStoreDescriber
+import top.ltfan.m3x.settingspage.SettingsStoreDescriber
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.ModuleService
 import top.ltfan.notdeveloper.application.NotDevApplication
@@ -45,7 +45,9 @@ import top.ltfan.notdeveloper.service.SystemServiceClient
 import top.ltfan.notdeveloper.service.systemService
 import top.ltfan.notdeveloper.settings.UiSettingsModelStore
 import top.ltfan.notdeveloper.settings.blur
+import top.ltfan.notdeveloper.settings.progressive
 import top.ltfan.notdeveloper.settings.settingsDescriber
+import top.ltfan.notdeveloper.settings.smoothRoundedCorners
 import top.ltfan.notdeveloper.ui.page.Apps
 import top.ltfan.notdeveloper.ui.page.Apps.processed
 import top.ltfan.notdeveloper.ui.page.Main
@@ -78,12 +80,12 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
 
     /** The settings page describer, backed by the persisted user interface settings. */
     val settingsDescriber: SettingsStoreDescriber by lazy {
-        uiSettingsStore.settingsDescriber(
-            viewModelScope,
-        )
+        uiSettingsStore.settingsDescriber()
     }
 
     var blur by uiSettingsStore.blur
+    var smoothRoundedCorners by uiSettingsStore.smoothRoundedCorners
+    var progressive by uiSettingsStore.progressive
 
     /**
      * Latest global detection states, mirrored into the framework remote preferences so the hooked
@@ -179,8 +181,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0).wrapped()
 
     val packageInfoConfiguringTransitionState = SeekableTransitionState<PackageInfoWrapper?>(null)
-    val currentConfiguringPackageInfo
-        inline get() = packageInfoConfiguringTransitionState.targetState
+    var currentConfiguringPackageInfo by mutableStateOf<PackageInfoWrapper?>(null)
 
     private var _users by mutableStateOf(queryUsers())
     val users
@@ -220,7 +221,7 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     val isAppListError
         get() = _isAppListError
 
-    val appListErrorSnackbarTrigger = MutableSharedFlow<Unit?>()
+    val appListErrorSnackbarTrigger = MutableSharedFlow<Unit>()
 
     private var _isAppListUpdating by mutableStateOf(false)
     val isAppListUpdating

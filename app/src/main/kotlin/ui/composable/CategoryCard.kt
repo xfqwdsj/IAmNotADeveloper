@@ -1,14 +1,14 @@
 package top.ltfan.notdeveloper.ui.composable
 
 import androidx.compose.ui.Modifier
-import top.ltfan.material.m3.CardLazyGroup
-import top.ltfan.material.m3.cards
-import top.ltfan.material.m3.core.layout.GroupedLazyListScope
-import top.ltfan.material.m3.items
-import top.ltfan.material.m3.layout.header
+import top.ltfan.m3x.compose.foundation.GroupedLazyListScope
+import top.ltfan.m3x.compose.material3.CardColorsLowest
+import top.ltfan.m3x.material.CardLazyGroup
+import top.ltfan.m3x.material.cards
+import top.ltfan.m3x.material.header
+import top.ltfan.m3x.material.items
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
-import top.ltfan.notdeveloper.ui.theme.CardColorsLowest
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 context(viewModel: AppViewModel)

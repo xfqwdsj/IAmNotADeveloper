@@ -7,8 +7,8 @@ import androidx.datastore.core.Storage
 import androidx.datastore.dataStoreFile
 import java.io.InputStream
 import java.io.OutputStream
-import top.ltfan.material.m3.datastore.StoreCodec
-import top.ltfan.material.m3.datastore.StoreFile
+import top.ltfan.m3x.datastore.StoreCodec
+import top.ltfan.m3x.datastore.StoreFile
 
 /**
  * The Android file backend: stores every model under the standard `filesDir/datastore/<name>` path

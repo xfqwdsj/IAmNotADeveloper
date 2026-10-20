@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -38,6 +39,8 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import top.ltfan.m3x.compose.animation.AnimatedVisibilityWithBlur
+import top.ltfan.m3x.material.Card
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.xposed.statusIsModuleActivated
 
@@ -55,14 +58,18 @@ fun StatusCard(
 
     val collapseText = stringResource(R.string.description_more_info_collapse)
 
-    ElevatedCard(
-        onClick = { expanded = !expanded },
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(),
         modifier =
-            modifier.fillMaxWidth().semantics {
-                if (expanded) {
-                    contentDescription = collapseText
-                }
-            },
+            modifier
+                .clip(MaterialTheme.shapes.medium)
+                .clickable { expanded = !expanded }
+                .fillMaxWidth()
+                .semantics {
+                    if (expanded) {
+                        contentDescription = collapseText
+                    }
+                },
         colors = CardDefaults.cardColors(containerColor = status.containerColor),
     ) {
         Row(
@@ -81,7 +88,12 @@ fun StatusCard(
                     modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 24.dp),
                     style = MaterialTheme.typography.headlineSmall,
                 )
-                AnimatedVisibilityWithBlur(visible = isPreferencesReady) {
+                AnimatedVisibilityWithBlur(
+                    visible = isPreferencesReady,
+                    animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                    enter = expandVertically(clip = false),
+                    exit = shrinkVertically(clip = false),
+                ) {
                     Text(
                         text = stringResource(R.string.description_changes_application),
                         modifier =
@@ -93,7 +105,12 @@ fun StatusCard(
                         style = MaterialTheme.typography.labelLarge,
                     )
                 }
-                AnimatedVisibilityWithBlur(visible = status != Status.Normal) {
+                AnimatedVisibilityWithBlur(
+                    visible = status != Status.Normal,
+                    animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+                    enter = expandVertically(clip = false),
+                    exit = shrinkVertically(clip = false),
+                ) {
                     Text(
                         text = stringResource(R.string.description_more_info),
                         modifier =
@@ -163,7 +180,12 @@ private fun ColumnScope.StatusEntry(
     @StringRes notWorkingText: Int,
     @StringRes descriptionText: Int,
 ) {
-    AnimatedVisibilityWithBlur(visible = expanded && working) {
+    AnimatedVisibilityWithBlur(
+        visible = expanded && working,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        enter = expandVertically(clip = false),
+        exit = shrinkVertically(clip = false),
+    ) {
         val description = stringResource(R.string.description_status_normal)
         Text(
             text = stringResource(workingText),
@@ -177,7 +199,12 @@ private fun ColumnScope.StatusEntry(
             style = MaterialTheme.typography.titleMedium,
         )
     }
-    AnimatedVisibilityWithBlur(visible = !working) {
+    AnimatedVisibilityWithBlur(
+        visible = !working,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        enter = expandVertically(clip = false),
+        exit = shrinkVertically(clip = false),
+    ) {
         val description = stringResource(R.string.description_status_abnormal)
         Text(
             text = stringResource(notWorkingText),
@@ -192,7 +219,12 @@ private fun ColumnScope.StatusEntry(
             style = MaterialTheme.typography.titleMedium,
         )
     }
-    AnimatedVisibilityWithBlur(visible = expanded) {
+    AnimatedVisibilityWithBlur(
+        visible = expanded,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
+        enter = expandVertically(clip = false),
+        exit = shrinkVertically(clip = false),
+    ) {
         Text(
             text = stringResource(descriptionText),
             modifier =
