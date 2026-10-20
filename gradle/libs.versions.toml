@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.4.21"
-kotlinx-serialization = "1.11.0"
+kotlinx-serialization = "1.12.0"
 ksp = "2.3.12"
 agp = "9.5.0-alpha10"
 lifecycle = "2.11.0"
@@ -8,11 +8,9 @@ lifecycle-viewmodelNav3 = "2.11.0"
 splashscreen = "1.2.0"
 activity = "1.13.0"
 compose = "2026.09.00"
-navigation = "1.2.0-rc01"
+navigation = "1.2.0"
 compose-adaptive = "1.3.0"
-capsule = "1.1.4"
-backdrop = "2.0.1"
-m3-extended = "0.1.0"
+m3x = "0.1.0-alpha01"
 coil = "3.6.3"
 room = "2.8.5"
 datastore = "1.2.1"
@@ -40,13 +38,11 @@ compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview"
 compose-animation = { module = "androidx.compose.animation:animation" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive-navigation3", version.ref = "compose-adaptive" }
-capsule = { module = "top.ltfan.capsule:capsule", version.ref = "capsule" }
-backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
-m3-extended = { module = "top.ltfan.material:m3-extended", version.ref = "m3-extended" }
-m3-settingsPage-core = { module = "top.ltfan.material:settings-page-core", version.ref = "m3-extended" }
-m3-settingsPage-processor = { module = "top.ltfan.material:settings-page-processor", version.ref = "m3-extended" }
-m3-datastore-core = { module = "top.ltfan.material:datastore-core", version.ref = "m3-extended" }
-m3-datastore-processor = { module = "top.ltfan.material:datastore-processor", version.ref = "m3-extended" }
+m3x-material-bundle = { module = "top.ltfan.m3x:material-bundle", version.ref = "m3x" }
+m3x-settingsPage-core = { module = "top.ltfan.m3x:settings-page-core", version.ref = "m3x" }
+m3x-settingsPage-processor = { module = "top.ltfan.m3x:settings-page-processor", version.ref = "m3x" }
+m3x-datastore-core = { module = "top.ltfan.m3x:datastore-core", version.ref = "m3x" }
+m3x-datastore-processor = { module = "top.ltfan.m3x:datastore-processor", version.ref = "m3x" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
@@ -65,5 +61,4 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
-
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

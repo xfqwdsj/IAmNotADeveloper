@@ -1,3 +1,4 @@
+import com.android.build.api.variant.HostTestBuilder
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -66,6 +67,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+
     buildFeatures {
         buildConfig = true
         compose = true
@@ -75,6 +80,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+androidComponents {
+    beforeVariants(selector().all()) { variant ->
+        variant.hostTests[HostTestBuilder.UNIT_TEST_TYPE]?.enable = true
     }
 }
 
@@ -95,14 +106,12 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
-    //    implementation(libs.compose.material3.adaptive)
-    implementation(libs.capsule)
-    implementation(libs.backdrop)
-    implementation(libs.m3.extended)
-    implementation(libs.m3.settingsPage.core)
-    ksp(libs.m3.settingsPage.processor)
-    implementation(libs.m3.datastore.core)
-    ksp(libs.m3.datastore.processor)
+    implementation(libs.compose.material3.adaptive)
+    implementation(libs.m3x.material.bundle)
+    implementation(libs.m3x.settingsPage.core)
+    ksp(libs.m3x.settingsPage.processor)
+    implementation(libs.m3x.datastore.core)
+    ksp(libs.m3x.datastore.processor)
     implementation(libs.coil)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
