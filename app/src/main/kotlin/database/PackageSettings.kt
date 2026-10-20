@@ -25,11 +25,13 @@ abstract class PackageSettingsDatabase : RoomDatabase() {
         const val DATABASE_NAME = "package_settings.db"
 
         context(application: Application)
-        fun get() = Room.databaseBuilder(
-            application,
-            PackageSettingsDatabase::class.java,
-            DATABASE_NAME,
-        ).build()
+        fun get() =
+            Room.databaseBuilder(
+                    application,
+                    PackageSettingsDatabase::class.java,
+                    DATABASE_NAME,
+                )
+                .build()
     }
 }
 
@@ -50,29 +52,33 @@ data class ParcelablePackageInfo(
         val CREATOR = parcelableCreator<ParcelablePackageInfo>()
     }
 
-    constructor(packageInfo: PackageInfo) : this(
+    constructor(
+        packageInfo: PackageInfo,
+    ) : this(
         packageName = packageInfo.packageName,
         userId = packageInfo.userId,
         appId = packageInfo.appId,
     )
 
-    fun restore() = PackageInfo(
-        packageName = packageName,
-        userId = userId,
-        appId = appId,
-    )
+    fun restore() =
+        PackageInfo(
+            packageName = packageName,
+            userId = userId,
+            appId = appId,
+        )
 }
 
 @Entity(
     primaryKeys = ["packageName", "userId", "methodName"],
-    foreignKeys = [
-        ForeignKey(
-            entity = PackageInfo::class,
-            parentColumns = ["packageName", "userId"],
-            childColumns = ["packageName", "userId"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
+    foreignKeys =
+        [
+            ForeignKey(
+                entity = PackageInfo::class,
+                parentColumns = ["packageName", "userId"],
+                childColumns = ["packageName", "userId"],
+                onDelete = ForeignKey.CASCADE,
+            ),
+        ],
 )
 data class Detection(
     val packageName: String,
@@ -89,7 +95,9 @@ data class GlobalDetection(
 
 @Dao
 interface PackageSettingsDao {
-    @Query("INSERT OR REPLACE INTO PackageInfo (packageName, userId, appId) VALUES (:packageName, :userId, :appId)")
+    @Query(
+        "INSERT OR REPLACE INTO PackageInfo (packageName, userId, appId) VALUES (:packageName, :userId, :appId)",
+    )
     suspend fun insertPackageInfo(packageName: String, userId: Int, appId: Int)
 
     @Query("DELETE FROM PackageInfo WHERE packageName = :packageName AND userId = :userId")
@@ -107,47 +115,63 @@ interface PackageSettingsDao {
     @Query("SELECT * FROM PackageInfo WHERE userId = :userId")
     fun getPackageInfoFlow(userId: Int): Flow<List<PackageInfo>>
 
-    @Query("SELECT * FROM PackageInfo")
-    fun getPackageInfoFlow(): Flow<List<PackageInfo>>
+    @Query("SELECT * FROM PackageInfo") fun getPackageInfoFlow(): Flow<List<PackageInfo>>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM PackageInfo WHERE packageName = :packageName AND userId = :userId)")
+    @Query(
+        "SELECT EXISTS(SELECT 1 FROM PackageInfo WHERE packageName = :packageName AND userId = :userId)",
+    )
     suspend fun isPackageExists(packageName: String, userId: Int): Boolean
 
-    @Query("SELECT EXISTS(SELECT 1 FROM PackageInfo WHERE packageName = :packageName AND userId = :userId)")
+    @Query(
+        "SELECT EXISTS(SELECT 1 FROM PackageInfo WHERE packageName = :packageName AND userId = :userId)",
+    )
     fun isPackageExistsFlow(packageName: String, userId: Int): Flow<Boolean>
 
-    @Query("INSERT OR REPLACE INTO Detection (packageName, userId, methodName, enabled) VALUES (:packageName, :userId, :methodName, :enabled)")
+    @Query(
+        "INSERT OR REPLACE INTO Detection (packageName, userId, methodName, enabled) VALUES (:packageName, :userId, :methodName, :enabled)",
+    )
     suspend fun insertDetection(
-        packageName: String, userId: Int, methodName: String, enabled: Boolean
+        packageName: String,
+        userId: Int,
+        methodName: String,
+        enabled: Boolean,
     )
 
     @Transaction
     suspend fun insertDetection(
-        packageInfo: PackageInfo, method: DetectionMethod, enabled: Boolean
+        packageInfo: PackageInfo,
+        method: DetectionMethod,
+        enabled: Boolean,
     ) {
         insertDetection(packageInfo.packageName, packageInfo.userId, method.name, enabled)
     }
 
-    @Query("SELECT EXISTS(SELECT 1 FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName)")
+    @Query(
+        "SELECT EXISTS(SELECT 1 FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName)",
+    )
     suspend fun isDetectionSet(packageName: String, userId: Int, methodName: String): Boolean
 
-    @Query("SELECT * FROM Detection")
-    fun getAllDetectionsFlow(): Flow<List<Detection>>
+    @Query("SELECT * FROM Detection") fun getAllDetectionsFlow(): Flow<List<Detection>>
 
-    @Query("SELECT COALESCE((SELECT enabled FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName), 1)")
+    @Query(
+        "SELECT COALESCE((SELECT enabled FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName), 1)",
+    )
     suspend fun isDetectionEnabled(packageName: String, userId: Int, methodName: String): Boolean
 
-    @Query("SELECT COALESCE((SELECT enabled FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName), 1)")
+    @Query(
+        "SELECT COALESCE((SELECT enabled FROM Detection WHERE packageName = :packageName AND userId = :userId AND methodName = :methodName), 1)",
+    )
     fun isDetectionEnabledFlow(packageName: String, userId: Int, methodName: String): Flow<Boolean>
 
     fun isDetectionEnabledFlow(packageInfo: PackageInfo, method: DetectionMethod): Flow<Boolean> {
         return isDetectionEnabledFlow(packageInfo.packageName, packageInfo.userId, method.name)
     }
 
-    @Query("DELETE FROM PackageInfo")
-    suspend fun clearAllPackages()
+    @Query("DELETE FROM PackageInfo") suspend fun clearAllPackages()
 
-    @Query("INSERT OR REPLACE INTO GlobalDetection (methodName, enabled) VALUES (:methodName, :enabled)")
+    @Query(
+        "INSERT OR REPLACE INTO GlobalDetection (methodName, enabled) VALUES (:methodName, :enabled)",
+    )
     suspend fun insertGlobalDetection(methodName: String, enabled: Boolean)
 
     @Transaction
@@ -155,10 +179,14 @@ interface PackageSettingsDao {
         insertGlobalDetection(method.name, enabled)
     }
 
-    @Query("SELECT COALESCE((SELECT enabled FROM GlobalDetection WHERE methodName = :methodName), 1)")
+    @Query(
+        "SELECT COALESCE((SELECT enabled FROM GlobalDetection WHERE methodName = :methodName), 1)",
+    )
     suspend fun isGlobalDetectionEnabled(methodName: String): Boolean
 
-    @Query("SELECT COALESCE((SELECT enabled FROM GlobalDetection WHERE methodName = :methodName), 1)")
+    @Query(
+        "SELECT COALESCE((SELECT enabled FROM GlobalDetection WHERE methodName = :methodName), 1)",
+    )
     fun isGlobalDetectionEnabledFlow(methodName: String): Flow<Boolean>
 
     fun isGlobalDetectionEnabledFlow(method: DetectionMethod): Flow<Boolean> {

@@ -5,21 +5,20 @@ import top.ltfan.notdeveloper.ModuleService
 import top.ltfan.notdeveloper.log.Log
 
 /**
- * Asks the framework to apply the module to the packages it needs at run
- * time. The module app has no scope list of its own, so the requested set
- * follows what the user configured.
+ * Asks the framework to apply the module to the packages it needs at run time. The module app has
+ * no scope list of its own, so the requested set follows what the user configured.
  */
 object ScopeController {
     private val requested = linkedSetOf<String>()
 
     /** The packages the framework currently applies this module to. */
-    val scope: Set<String> get() = requested.toSet()
+    val scope: Set<String>
+        get() = requested.toSet()
 
     /**
-     * Makes the framework's scope match [desired]: it requests the packages
-     * that are missing and removes the ones that are no longer wanted. A
-     * missing service means the module is not activated yet, so the request is
-     * skipped and retried on the next [sync].
+     * Makes the framework's scope match [desired]: it requests the packages that are missing and
+     * removes the ones that are no longer wanted. A missing service means the module is not
+     * activated yet, so the request is skipped and retried on the next [sync].
      */
     fun sync(desired: Set<String>) {
         val service = ModuleService.service ?: return

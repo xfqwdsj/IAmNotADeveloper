@@ -6,14 +6,14 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.ProviderInfo
 import android.os.IBinder
 import android.os.Process
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import top.ltfan.notdeveloper.BuildConfig
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.log.invalidPackage
 import top.ltfan.notdeveloper.service.SystemServiceInterface
 import top.ltfan.notdeveloper.service.wrap
 import top.ltfan.notdeveloper.util.Reflect
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 class SystemServiceProvider(service: SystemServiceInterface) : BinderProvider() {
     override val binder: IBinder = service.wrap()
@@ -21,17 +21,17 @@ class SystemServiceProvider(service: SystemServiceInterface) : BinderProvider() 
     companion object : BinderProvider.Companion {
         override val authority: String = SystemServiceProvider::class.java.name
 
-        val info = ProviderInfo().apply {
-            authority = Companion.authority
-            name = Companion.authority
-            exported = true
-            grantUriPermissions = true
-        }
+        val info =
+            ProviderInfo().apply {
+                authority = Companion.authority
+                name = Companion.authority
+                exported = true
+                grantUriPermissions = true
+            }
 
         /**
-         * Builds and returns the [ContentProviderHolder] that the system server
-         * should hand to the module app for [authority], or `null` when the caller
-         * must not receive it.
+         * Builds and returns the [ContentProviderHolder] that the system server should hand to the
+         * module app for [authority], or `null` when the caller must not receive it.
          */
         @OptIn(ExperimentalTime::class)
         fun patch(
@@ -46,36 +46,41 @@ class SystemServiceProvider(service: SystemServiceInterface) : BinderProvider() 
             classLoader: ClassLoader,
         ): Any? {
             if (callingPackage != BuildConfig.APPLICATION_ID) {
-                Log invalidPackage callingPackage requesting SystemServiceProvider::class.qualifiedName
+                Log invalidPackage
+                    callingPackage requesting
+                    SystemServiceProvider::class.qualifiedName
                 return null
             }
 
             Log.d("Building SystemServiceProvider for $callingPackage")
 
-            val contentProviderRecordClass = Reflect.findClass(
-                "com.android.server.am.ContentProviderRecord",
-                classLoader,
-            )
+            val contentProviderRecordClass =
+                Reflect.findClass(
+                    "com.android.server.am.ContentProviderRecord",
+                    classLoader,
+                )
 
-            val applicationInfo = ApplicationInfo().apply {
-                packageName = "android"
-                uid = Process.SYSTEM_UID
-                flags = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
-            }
+            val applicationInfo =
+                ApplicationInfo().apply {
+                    packageName = "android"
+                    uid = Process.SYSTEM_UID
+                    flags = ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP
+                }
             val providerInfo = info.apply {
                 processName = "system_server"
                 this.applicationInfo = applicationInfo
             }
 
             val application = Reflect.currentApplication()
-            val record = Reflect.newInstance(
-                contentProviderRecordClass,
-                ams,
-                providerInfo,
-                applicationInfo,
-                ComponentName(application, SystemServiceProvider::class.java),
-                true,
-            )
+            val record =
+                Reflect.newInstance(
+                    contentProviderRecordClass,
+                    ams,
+                    providerInfo,
+                    applicationInfo,
+                    ComponentName(application, SystemServiceProvider::class.java),
+                    true,
+                )
 
             provider.attachInfo(application, providerInfo)
             val iContentProvider = Reflect.callMethod(provider, "getIContentProvider")
@@ -109,11 +114,22 @@ class SystemServiceProvider(service: SystemServiceInterface) : BinderProvider() 
 
             try {
                 // ContentProviderHelper.incProviderCountLocked with userId (Android 15+).
-                connection = Reflect.callMethod(
-                    helper, "incProviderCountLocked",
-                    processRecord, record, null, callingUid, callingPackage,
-                    null, stable, true, startTimeMs, processList, userId,
-                )
+                connection =
+                    Reflect.callMethod(
+                        helper,
+                        "incProviderCountLocked",
+                        processRecord,
+                        record,
+                        null,
+                        callingUid,
+                        callingPackage,
+                        null,
+                        stable,
+                        true,
+                        startTimeMs,
+                        processList,
+                        userId,
+                    )
             } catch (e: Throwable) {
                 Log.w("Failed to get provider connection (1)", e)
             }
@@ -121,11 +137,21 @@ class SystemServiceProvider(service: SystemServiceInterface) : BinderProvider() 
             if (connection == null) {
                 try {
                     // ContentProviderHelper.incProviderCountLocked without userId.
-                    connection = Reflect.callMethod(
-                        helper, "incProviderCountLocked",
-                        processRecord, record, null, callingUid, callingPackage,
-                        null, stable, true, startTimeMs, processList,
-                    )
+                    connection =
+                        Reflect.callMethod(
+                            helper,
+                            "incProviderCountLocked",
+                            processRecord,
+                            record,
+                            null,
+                            callingUid,
+                            callingPackage,
+                            null,
+                            stable,
+                            true,
+                            startTimeMs,
+                            processList,
+                        )
                 } catch (e: Throwable) {
                     Log.w("Failed to get provider connection (2)", e)
                 }
@@ -134,10 +160,15 @@ class SystemServiceProvider(service: SystemServiceInterface) : BinderProvider() 
             if (connection == null) {
                 try {
                     // ActivityManagerService.incProviderCountLocked (legacy).
-                    connection = Reflect.callMethod(
-                        ams, "incProviderCountLocked",
-                        processRecord, record, null, stable,
-                    )
+                    connection =
+                        Reflect.callMethod(
+                            ams,
+                            "incProviderCountLocked",
+                            processRecord,
+                            record,
+                            null,
+                            stable,
+                        )
                 } catch (e: Throwable) {
                     Log.w("Failed to get provider connection (3)", e)
                 }

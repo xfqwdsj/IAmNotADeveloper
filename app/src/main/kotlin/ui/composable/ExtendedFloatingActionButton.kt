@@ -12,9 +12,9 @@ import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 /**
- * The floating action button and its backdrop menu, with the icons and the
- * descriptions of this app. The button, the menu and the shared bounds
- * between them come from `ExtendedFloatingActionButton`.
+ * The floating action button and its backdrop menu, with the icons and the descriptions of this
+ * app. The button, the menu and the shared bounds between them come from
+ * `ExtendedFloatingActionButton`.
  */
 @Composable
 context(viewModel: AppViewModel, page: Page)
@@ -31,16 +31,18 @@ fun ExtendedFloatingActionButtonWithMenu(
         menuContentDescription = stringResource(R.string.description_fab_menu),
         buttonContent = { expanded ->
             Icon(
-                painter = painterResource(
-                    if (expanded) R.drawable.close_24px else R.drawable.add_24px,
-                ),
-                contentDescription = stringResource(
-                    if (expanded) {
-                        R.string.action_fab_menu_collapse
-                    } else {
-                        R.string.action_fab_menu_expand
-                    },
-                ),
+                painter =
+                    painterResource(
+                        if (expanded) R.drawable.close_24px else R.drawable.add_24px,
+                    ),
+                contentDescription =
+                    stringResource(
+                        if (expanded) {
+                            R.string.action_fab_menu_collapse
+                        } else {
+                            R.string.action_fab_menu_expand
+                        },
+                    ),
             )
         },
         menuContent = menuContent,

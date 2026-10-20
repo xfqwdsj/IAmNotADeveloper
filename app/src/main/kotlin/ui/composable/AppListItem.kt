@@ -36,23 +36,26 @@ fun AppListItem(
 
         val applicationInfo = remember(packageInfo) { packageInfo.applicationInfo!! }
 
-        val appIcon = remember(packageInfo) {
-            applicationInfo.loadIcon(application.packageManager)
-        }
+        val appIcon =
+            remember(packageInfo) {
+                applicationInfo.loadIcon(application.packageManager)
+            }
 
         ListItem(
             headlineContent = {
                 val description = stringResource(R.string.description_apps_label)
-                val labelText = remember(packageInfo) {
-                    applicationInfo.loadLabel(application.packageManager).toString()
-                }
+                val labelText =
+                    remember(packageInfo) {
+                        applicationInfo.loadLabel(application.packageManager).toString()
+                    }
                 Box(Modifier.semantics { text = AnnotatedString(description) }) {
                     Text(labelText)
                 }
             },
-            modifier = modifier.run {
-                onClick?.let { clickable(onClick = it) } ?: this
-            },
+            modifier =
+                modifier.run {
+                    onClick?.let { clickable(onClick = it) } ?: this
+                },
             overlineContent = {
                 val description = stringResource(R.string.description_apps_package_name)
                 Box(Modifier.semantics { text = AnnotatedString(description) }) {
@@ -73,14 +76,9 @@ fun AppListItem(
             },
             leadingContent = {
                 AsyncImage(
-                    model = ImageRequest.Builder(application)
-                        .data(appIcon)
-                        .crossfade(true)
-                        .build(),
+                    model = ImageRequest.Builder(application).data(appIcon).crossfade(true).build(),
                     contentDescription = null,
-                    modifier = Modifier
-                        .padding(6.dp)
-                        .size(58.dp),
+                    modifier = Modifier.padding(6.dp).size(58.dp),
                 )
             },
             colors = ListItemColorsTransparent,

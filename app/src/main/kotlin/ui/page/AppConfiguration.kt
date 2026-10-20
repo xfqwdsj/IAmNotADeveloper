@@ -67,10 +67,9 @@ import top.ltfan.notdeveloper.util.getUserId
 
 @Composable
 context(
-    page: Page,
-    transition: Transition<PackageInfoWrapper?>,
-    sharedTransitionScope: SharedTransitionScope,
-)
+page: Page,
+transition: Transition<PackageInfoWrapper?>,
+sharedTransitionScope: SharedTransitionScope)
 fun AppViewModel.AppConfiguration() {
     val coroutineScope = rememberCoroutineScope()
 
@@ -91,15 +90,14 @@ fun AppViewModel.AppConfiguration() {
 
                 context(dao) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(scrim)
-                            .semantics { isTraversalGroup = true },
+                        modifier =
+                            Modifier.fillMaxSize().background(scrim).semantics {
+                                isTraversalGroup = true
+                            },
                         contentAlignment = Alignment.Center,
                     ) {
                         Spacer(
-                            Modifier
-                                .matchParentSize()
+                            Modifier.matchParentSize()
                                 .pointerInput(Unit) {
                                     detectTapGestures {
                                         coroutineScope.closeModal()
@@ -112,44 +110,55 @@ fun AppViewModel.AppConfiguration() {
                                         coroutineScope.closeModal()
                                         true
                                     }
-                                }
+                                },
                         )
-                        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-                            val radius by this@AnimatedContent.transition.animateDp(label = "AppConfigurationModalRadius") {
-                                if (it == EnterExitState.Visible) AppRadiusExtraLarge else AppRadiusMedium
-                            }
+                        CompositionLocalProvider(
+                            LocalContentColor provides MaterialTheme.colorScheme.onSurface,
+                        ) {
+                            val radius by
+                                this@AnimatedContent.transition.animateDp(
+                                    label = "AppConfigurationModalRadius",
+                                ) {
+                                    if (it == EnterExitState.Visible) AppRadiusExtraLarge
+                                    else AppRadiusMedium
+                                }
                             Column(
-                                modifier = Modifier
-                                    .padding(AppWindowInsets.asPaddingValues())
-                                    .padding(24.dp)
-                                    .widthIn(max = 600.dp)
-                                    .fillMaxWidth()
-                                    .extendedSharedElement(
-                                        sharedContentState = rememberSharedContentState(
-                                            AppConfigurationSharedKey.Container(packageInfo)
-                                        ),
-                                        animatedVisibilityScope = this@AnimatedContent,
-                                    )
-                                    .clip(ContinuousRoundedRectangle(radius))
-                                    .pageSurface(
-                                        shape = ContinuousRoundedRectangle(radius),
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                    )
-                                    .verticalScroll(rememberScrollState())
-                                    .semantics {
-                                        paneTitle = title
-                                        traversalIndex = 0f
-                                    },
+                                modifier =
+                                    Modifier.padding(AppWindowInsets.asPaddingValues())
+                                        .padding(24.dp)
+                                        .widthIn(max = 600.dp)
+                                        .fillMaxWidth()
+                                        .extendedSharedElement(
+                                            sharedContentState =
+                                                rememberSharedContentState(
+                                                    AppConfigurationSharedKey.Container(
+                                                        packageInfo,
+                                                    ),
+                                                ),
+                                            animatedVisibilityScope = this@AnimatedContent,
+                                        )
+                                        .clip(ContinuousRoundedRectangle(radius))
+                                        .pageSurface(
+                                            shape = ContinuousRoundedRectangle(radius),
+                                            containerColor = MaterialTheme.colorScheme.surface,
+                                        )
+                                        .verticalScroll(rememberScrollState())
+                                        .semantics {
+                                            paneTitle = title
+                                            traversalIndex = 0f
+                                        },
                             ) {
                                 Header(packageInfo)
                                 AppListItem(
                                     packageInfo = packageInfo,
-                                    modifier = Modifier.extendedSharedElement(
-                                        sharedContentState = rememberSharedContentState(
-                                            AppConfigurationSharedKey.ListItem(packageInfo)
+                                    modifier =
+                                        Modifier.extendedSharedElement(
+                                            sharedContentState =
+                                                rememberSharedContentState(
+                                                    AppConfigurationSharedKey.ListItem(packageInfo),
+                                                ),
+                                            animatedVisibilityScope = this@AnimatedContent,
                                         ),
-                                        animatedVisibilityScope = this@AnimatedContent,
-                                    ),
                                 )
                             }
                         }
@@ -211,5 +220,6 @@ private fun CoroutineScope.closeModal() {
 
 sealed class AppConfigurationSharedKey {
     data class Container(val key: Any?) : AppConfigurationSharedKey()
+
     data class ListItem(val key: Any?) : AppConfigurationSharedKey()
 }

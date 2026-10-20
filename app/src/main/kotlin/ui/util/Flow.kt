@@ -6,8 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import kotlinx.coroutines.flow.Flow
 import kotlin.properties.ReadWriteProperty
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun <T : R, R> Flow<T>.collectAsMutableState(
@@ -23,6 +23,7 @@ fun <T : R, R> Flow<T>.collectAsMutableState(
 
     return object : ReadWriteProperty<Any?, R> {
         override fun getValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>): R = state.value
+
         override fun setValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>, value: R) {
             set(value)
         }

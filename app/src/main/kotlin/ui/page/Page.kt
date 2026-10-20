@@ -10,32 +10,29 @@ import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
 @Serializable
 sealed class Page : MaterialPage {
-    @Transient
-    open val metadata: Map<String, Any> = emptyMap()
+    @Transient open val metadata: Map<String, Any> = emptyMap()
 
-    @Composable
-    abstract fun AppViewModel.Content()
+    @Composable abstract fun AppViewModel.Content()
 
     context(viewModel: AppViewModel)
-    fun navEntry() = NavEntry(
-        key = this,
-        metadata = metadata,
-    ) {
-        viewModel.Content()
-    }
+    fun navEntry() =
+        NavEntry(
+            key = this,
+            metadata = metadata,
+        ) {
+            viewModel.Content()
+        }
 }
 
 sealed class Main : Page() {
     abstract val navigationLabel: Int
 
-    @get:DrawableRes
-    abstract val navigationIcon: Int
+    @get:DrawableRes abstract val navigationIcon: Int
 
     companion object {
         val pages by lazy { listOf(Overview, Apps, Settings) }
     }
 
     context(viewModel: AppViewModel)
-    open fun secondClick() {
-    }
+    open fun secondClick() {}
 }

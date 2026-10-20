@@ -209,7 +209,7 @@ enum class EnterExitPredefinedDirection(
     Horizontal(
         enter = fadeIn() + expandHorizontally(clip = false),
         exit = fadeOut() + shrinkHorizontally(clip = false),
-    )
+    ),
 }
 
 @Composable

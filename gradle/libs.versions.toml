@@ -1,8 +1,8 @@
 [versions]
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 kotlinx-serialization = "1.11.0"
 ksp = "2.3.12"
-agp = "9.5.0-alpha05"
+agp = "9.5.0-alpha10"
 lifecycle = "2.11.0"
 lifecycle-viewmodelNav3 = "2.11.0"
 splashscreen = "1.2.0"
@@ -19,6 +19,8 @@ datastore = "1.2.1"
 preference = "1.2.1"
 kaidl = "0.2.0"
 libxposed = "102.0.0"
+
+spotless = "8.10.4"
 
 [libraries]
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
@@ -63,3 +65,5 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
+
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

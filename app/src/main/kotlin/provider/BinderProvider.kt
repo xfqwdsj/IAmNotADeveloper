@@ -29,24 +29,25 @@ abstract class BinderProvider : ContentProvider() {
     }
 
     override fun onCreate() = true
+
     override fun getType(uri: Uri) = null
 
     override fun insert(
         uri: Uri,
-        values: ContentValues?
+        values: ContentValues?,
     ): Uri? = null
 
     override fun delete(
         uri: Uri,
         selection: String?,
-        selectionArgs: Array<out String?>?
+        selectionArgs: Array<out String?>?,
     ) = 0
 
     override fun update(
         uri: Uri,
         values: ContentValues?,
         selection: String?,
-        selectionArgs: Array<out String?>?
+        selectionArgs: Array<out String?>?,
     ) = 0
 
     override fun query(
@@ -54,17 +55,18 @@ abstract class BinderProvider : ContentProvider() {
         projection: Array<out String?>?,
         selection: String?,
         selectionArgs: Array<out String?>?,
-        sortOrder: String?
+        sortOrder: String?,
     ): Cursor? = null
 }
 
 inline fun <R> ContentResolver.getInterfaceOrNull(
     provider: BinderProvider.Companion,
     builder: (IBinder) -> R,
-) = getInterfaceOrNull(
-    provider.authority,
-    builder,
-)
+) =
+    getInterfaceOrNull(
+        provider.authority,
+        builder,
+    )
 
 inline fun <R> ContentResolver.getInterfaceOrNull(authority: String, builder: (IBinder) -> R) =
     getInterfaceOrNull(
@@ -75,5 +77,4 @@ inline fun <R> ContentResolver.getInterfaceOrNull(authority: String, builder: (I
 inline fun <R> ContentResolver.getInterfaceOrNull(
     uri: Uri,
     builder: (IBinder) -> R,
-) = call(uri, CallMethodGet, null, null)
-    ?.getBinder(BundleExtraService)?.let(builder)
+) = call(uri, CallMethodGet, null, null)?.getBinder(BundleExtraService)?.let(builder)

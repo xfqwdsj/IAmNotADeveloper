@@ -28,10 +28,6 @@ fun IAmNotADeveloperTheme(
             else -> lightColorScheme()
         }
 
-        darkTheme -> darkColorScheme()
-        else -> lightColorScheme()
-    }
-
     MaterialTheme(
         colorScheme = colorScheme,
         shapes = AppShapes,

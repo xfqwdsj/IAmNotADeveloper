@@ -4,12 +4,12 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.UserHandle
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.full.staticFunctions
 import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.wrapped
 import top.ltfan.notdeveloper.log.Log
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
-import kotlin.reflect.full.declaredFunctions
-import kotlin.reflect.full.staticFunctions
 
 val isMiui: Boolean
     @SuppressLint("PrivateApi")
@@ -32,8 +32,10 @@ fun getPackageInfo(databaseInfo: top.ltfan.notdeveloper.database.PackageInfo): P
 }
 
 context(viewModel: AppViewModel)
-fun List<top.ltfan.notdeveloper.database.PackageInfo>.toAndroid() =
-    mapNotNull { getPackageInfo(it) }.toSet()
+fun List<top.ltfan.notdeveloper.database.PackageInfo>.toAndroid() = mapNotNull {
+    getPackageInfo(it)
+}
+    .toSet()
 
 fun PackageInfo.getUserId(): Int {
     val function = UserHandle::class.staticFunctions.first { it.name == "getUserId" }

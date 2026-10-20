@@ -9,11 +9,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 
-val EmptyContentTransform = ContentTransform(
-    targetContentEnter = EnterTransition.None,
-    initialContentExit = ExitTransition.None,
-    sizeTransform = null,
-)
+val EmptyContentTransform =
+    ContentTransform(
+        targetContentEnter = EnterTransition.None,
+        initialContentExit = ExitTransition.None,
+        sizeTransform = null,
+    )
 
 val AnimatedContentDefaultTransform =
     fadeIn(tween(220, 90)) + scaleIn(tween(220, 90), 0.92f) togetherWith fadeOut(tween(90))

@@ -2,11 +2,10 @@ package top.ltfan.notdeveloper.detection
 
 import android.content.Context
 import androidx.annotation.StringRes
-import top.ltfan.notdeveloper.xposed.hook.Hook
 
 /**
- * How a detection method is hidden. It tells the configuration and scope
- * logic which mechanism a method relies on.
+ * How a detection method is hidden. It tells the configuration and scope logic which mechanism a
+ * method relies on.
  */
 enum class HookKind {
     /** Hides a `Settings` entry through the settings provider. */
@@ -16,8 +15,8 @@ enum class HookKind {
     JvmProperty,
 
     /**
-     * Reads the property's final value through a native interception, which
-     * needs a native module entry and is not available yet.
+     * Reads the property's final value through a native interception, which needs a native module
+     * entry and is not available yet.
      */
     NativeProperty,
 }
@@ -27,17 +26,18 @@ sealed class DetectionMethod(
     @param:StringRes val labelResId: Int,
 ) {
     /**
-     * Key under which the framework shares this detection's enabled state with
-     * the hooked packages.
+     * Key under which the framework shares this detection's enabled state with the hooked packages.
      */
-    val preferenceKey: String get() = name
+    val preferenceKey: String
+        get() = name
 
     /** The mechanism used to hide this method. */
     val hookKind: HookKind
-        get() = when (this) {
-            is SettingsMethod -> HookKind.JvmSettings
-            is SystemPropertiesMethod -> HookKind.JvmProperty
-        }
+        get() =
+            when (this) {
+                is SettingsMethod -> HookKind.JvmSettings
+                is SystemPropertiesMethod -> HookKind.JvmProperty
+            }
 
     abstract fun test(context: Context): Boolean
 
@@ -49,6 +49,7 @@ sealed class DetectionMethod(
     ) : DetectionMethod(name, labelResId) {
         companion object {
             val all by lazy { DetectionCategory.allMethods.filterIsInstance<SettingsMethod>() }
+
             fun fromSettingKey(key: String) = all.filter { it.settingKey == key }
         }
     }
@@ -59,16 +60,21 @@ sealed class DetectionMethod(
         val propertyKey: String,
         val overrideValue: String,
     ) : DetectionMethod(name, labelResId) {
-        open fun getOverrideValue(methodName: String): Any? = when (methodName) {
-            "get", "getprop" -> overrideValue
-            "getBoolean" -> overrideValue.toBoolean()
-            "getInt" -> overrideValue.toIntOrNull() ?: 0
-            "getLong" -> overrideValue.toLongOrNull() ?: 0L
-            else -> overrideValue
-        }
+        open fun getOverrideValue(methodName: String): Any? =
+            when (methodName) {
+                "get",
+                "getprop" -> overrideValue
+                "getBoolean" -> overrideValue.toBoolean()
+                "getInt" -> overrideValue.toIntOrNull() ?: 0
+                "getLong" -> overrideValue.toLongOrNull() ?: 0L
+                else -> overrideValue
+            }
 
         companion object {
-            val all by lazy { DetectionCategory.allMethods.filterIsInstance<SystemPropertiesMethod>() }
+            val all by lazy {
+                DetectionCategory.allMethods.filterIsInstance<SystemPropertiesMethod>()
+            }
+
             fun fromPropertyKey(key: String) = all.filter { it.propertyKey == key }
         }
     }

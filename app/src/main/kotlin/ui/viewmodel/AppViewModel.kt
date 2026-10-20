@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.core.content.edit
 import androidx.lifecycle.viewModelScope
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,7 +54,6 @@ import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.util.getUserId
 import top.ltfan.notdeveloper.util.toAndroid
 import top.ltfan.notdeveloper.xposed.statusIsPreferencesReady
-import kotlin.time.Duration.Companion.seconds
 
 class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>(app) {
     private val stores = app.storeHost
@@ -76,27 +76,24 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         }
     }
 
-    /**
-     * The settings page describer, backed by the persisted user interface
-     * settings.
-     */
+    /** The settings page describer, backed by the persisted user interface settings. */
     val settingsDescriber: SettingsStoreDescriber by lazy {
         uiSettingsStore.settingsDescriber(
-            viewModelScope
+            viewModelScope,
         )
     }
 
     var blur by uiSettingsStore.blur
 
     /**
-     * Latest global detection states, mirrored into the framework remote
-     * preferences so the hooked packages read the same values.
+     * Latest global detection states, mirrored into the framework remote preferences so the hooked
+     * packages read the same values.
      */
     private val globalDetectionStates = mutableMapOf<String, Boolean>()
 
     /**
-     * Latest per-package detection states, keyed by `"package|method"`, also
-     * mirrored into the remote preferences.
+     * Latest per-package detection states, keyed by `"package|method"`, also mirrored into the
+     * remote preferences.
      */
     private val perAppDetectionStates = mutableMapOf<String, Boolean>()
 
@@ -137,9 +134,13 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         inline get() {
             return (currentPage != Apps || currentConfiguringPackageInfo == null)
         }
+
     val backStack = mutableStateListOf<Page>(Overview)
-    val currentPage inline get() = backStack.last()
-    val navBarEntry inline get() = backStack.last { it is Main }
+    val currentPage
+        inline get() = backStack.last()
+
+    val navBarEntry
+        inline get() = backStack.last { it is Main }
 
     fun navigateMain(page: Main) {
         if (currentPage == page) {
@@ -158,9 +159,11 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
             return
         }
 
-        val nextMainIndex = backStack.subList(existingIndex + 1, backStack.size)
-            .indexOfFirst { it is Main }
-            .let { if (it == -1) backStack.size else existingIndex + 1 + it }
+        val nextMainIndex =
+            backStack
+                .subList(existingIndex + 1, backStack.size)
+                .indexOfFirst { it is Main }
+                .let { if (it == -1) backStack.size else existingIndex + 1 + it }
 
         val pagesToMove = backStack.subList(existingIndex, nextMainIndex)
         backStack.addAll(pagesToMove)
@@ -176,55 +179,78 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         application.packageManager.getPackageInfo(BuildConfig.APPLICATION_ID, 0).wrapped()
 
     val packageInfoConfiguringTransitionState = SeekableTransitionState<PackageInfoWrapper?>(null)
-    val currentConfiguringPackageInfo inline get() = packageInfoConfiguringTransitionState.targetState
+    val currentConfiguringPackageInfo
+        inline get() = packageInfoConfiguringTransitionState.targetState
 
     private var _users by mutableStateOf(queryUsers())
-    val users get() = _users
+    val users
+        get() = _users
 
-    val selectedUserFlow = appListSettingsStore.data.map { it.selectedUser }.shareIn(
-        viewModelScope,
-        started = SharingStarted.Eagerly,
-        replay = 1,
-    )
+    val selectedUserFlow =
+        appListSettingsStore.data
+            .map { it.selectedUser }
+            .shareIn(
+                viewModelScope,
+                started = SharingStarted.Eagerly,
+                replay = 1,
+            )
     var selectedUser by appListSettingsStore.selectedUser
 
-    val appSortMethodFlow = appListSettingsStore.data.map { it.sort }.shareIn(
-        viewModelScope,
-        started = SharingStarted.Eagerly,
-        replay = 1,
-    )
+    val appSortMethodFlow =
+        appListSettingsStore.data
+            .map { it.sort }
+            .shareIn(
+                viewModelScope,
+                started = SharingStarted.Eagerly,
+                replay = 1,
+            )
     var appSortMethod by appListSettingsStore.sort
 
-    val appFilteredMethodsFlow = appListSettingsStore.data.map { it.filtered }.shareIn(
-        viewModelScope,
-        started = SharingStarted.Eagerly,
-        replay = 1,
-    )
+    val appFilteredMethodsFlow =
+        appListSettingsStore.data
+            .map { it.filtered }
+            .shareIn(
+                viewModelScope,
+                started = SharingStarted.Eagerly,
+                replay = 1,
+            )
     var appFilteredMethods by appListSettingsStore.filtered
 
     private var _isAppListError by mutableStateOf(false)
-    val isAppListError get() = _isAppListError
+    val isAppListError
+        get() = _isAppListError
+
     val appListErrorSnackbarTrigger = MutableSharedFlow<Unit?>()
 
     private var _isAppListUpdating by mutableStateOf(false)
-    val isAppListUpdating get() = _isAppListUpdating
+    val isAppListUpdating
+        get() = _isAppListUpdating
 
     private val appListUpdateTrigger = MutableSharedFlow<Unit>()
-    val appListFlow = combine(selectedUserFlow, appListUpdateTrigger) { userInfo, _ ->
-        queryAppList(userInfo)
-    }.shareIn(viewModelScope, started = SharingStarted.Eagerly, replay = 1)
+    val appListFlow =
+        combine(selectedUserFlow, appListUpdateTrigger) { userInfo, _ ->
+                queryAppList(userInfo)
+            }
+            .shareIn(viewModelScope, started = SharingStarted.Eagerly, replay = 1)
 
     fun queryAppList(userInfo: UserInfo = selectedUser): Set<PackageInfoWrapper> {
         _isAppListUpdating = true
-        val list = service?.queryApps(userInfo.id)?.ifEmpty { null }?.toSet().also {
-            if (it == null) {
-                _isAppListError = true
-                viewModelScope.launch { appListErrorSnackbarTrigger.emit(Unit) }
-                Log.Android.w("Failed to query apps for user ${userInfo.id}, service may not be connected")
-            } else {
-                _isAppListError = false
-            }
-        }
+        val list =
+            service
+                ?.queryApps(userInfo.id)
+                ?.ifEmpty { null }
+                ?.toSet()
+                .also {
+                    if (it == null) {
+                        _isAppListError = true
+                        viewModelScope.launch { appListErrorSnackbarTrigger.emit(Unit) }
+                        Log.Android.w(
+                            "Failed to query apps for user ${userInfo.id}, service may not be connected",
+                        )
+                    } else {
+                        _isAppListError = false
+                    }
+                }
         return list ?: setOf(myPackageInfo)
     }
 
@@ -235,29 +261,39 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val databaseListFlow = selectedUserFlow.flatMapLatest {
-        queryDatabaseList(it)
-    }.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = emptySet())
+    val databaseListFlow =
+        selectedUserFlow
+            .flatMapLatest {
+                queryDatabaseList(it)
+            }
+            .stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = emptySet())
 
-    val appLists = combine(
-        appListFlow,
-        databaseListFlow,
-        appSortMethodFlow,
-        appFilteredMethodsFlow,
-    ) { appList, databaseList, sortMethod, filteredMethods ->
-        val filters = filteredMethods.subtract(AppFilter.groupingEntries)
-        ((if (AppFilter.Configured !in filteredMethods) {
-            databaseList.asSequence().processed(sortMethod, filters)
-        } else emptyList()) to (if (AppFilter.Unconfigured !in filteredMethods) {
-            appList.subtract(databaseList).asSequence().processed(sortMethod, filters)
-        } else emptyList())).also {
-            _isAppListUpdating = false
-        }
-    }.stateIn(
-        viewModelScope,
-        started = SharingStarted.Eagerly,
-        initialValue = emptyList<PackageInfoWrapper>() to emptyList(),
-    )
+    val appLists =
+        combine(
+                appListFlow,
+                databaseListFlow,
+                appSortMethodFlow,
+                appFilteredMethodsFlow,
+            ) { appList, databaseList, sortMethod, filteredMethods ->
+                val filters = filteredMethods.subtract(AppFilter.groupingEntries)
+                ((if (AppFilter.Configured !in filteredMethods) {
+                        databaseList.asSequence().processed(sortMethod, filters)
+                    } else emptyList()) to
+                        (if (AppFilter.Unconfigured !in filteredMethods) {
+                            appList
+                                .subtract(databaseList)
+                                .asSequence()
+                                .processed(sortMethod, filters)
+                        } else emptyList()))
+                    .also {
+                        _isAppListUpdating = false
+                    }
+            }
+            .stateIn(
+                viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue = emptyList<PackageInfoWrapper>() to emptyList(),
+            )
 
     @Composable
     fun collectAppLists(): Pair<List<PackageInfoWrapper>, List<PackageInfoWrapper>> {
@@ -293,7 +329,9 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
             is DetectionMethod.SettingsMethod -> {
                 val service = service
                 if (service == null) {
-                    Log.Android.w("Service not connected, cannot notifySettingChange settings changes")
+                    Log.Android.w(
+                        "Service not connected, cannot notifySettingChange settings changes",
+                    )
                     return
                 }
 
@@ -331,9 +369,11 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
         updateAppList()
     }
 
-    fun queryUsers() = service?.queryUsers() ?: listOf(
-        UserInfo.current.copy(id = myPackageInfo.info.getUserId())
-    )
+    fun queryUsers() =
+        service?.queryUsers()
+            ?: listOf(
+                UserInfo.current.copy(id = myPackageInfo.info.getUserId()),
+            )
 
     fun updateUsers() {
         _users = queryUsers()
@@ -342,13 +382,16 @@ class AppViewModel(app: NotDevApplication) : AndroidViewModel<NotDevApplication>
     }
 
     fun queryDatabaseList(userInfo: UserInfo? = null) =
-        application.database.dao().let {
-            if (userInfo != null) {
-                it.getPackageInfoFlow(userInfo.id)
-            } else {
-                it.getPackageInfoFlow()
+        application.database
+            .dao()
+            .let {
+                if (userInfo != null) {
+                    it.getPackageInfoFlow(userInfo.id)
+                } else {
+                    it.getPackageInfoFlow()
+                }
             }
-        }.map { service?.queryApps(it)?.toSet() ?: it.toAndroid() }
+            .map { service?.queryApps(it)?.toSet() ?: it.toAndroid() }
 }
 
 private val StoreReadyTimeout = 2.seconds

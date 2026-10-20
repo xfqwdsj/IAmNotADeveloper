@@ -57,9 +57,8 @@ fun StatusCard(
 
     ElevatedCard(
         onClick = { expanded = !expanded },
-        modifier = modifier
-            .fillMaxWidth()
-            .semantics {
+        modifier =
+            modifier.fillMaxWidth().semantics {
                 if (expanded) {
                     contentDescription = collapseText
                 }
@@ -67,28 +66,26 @@ fun StatusCard(
         colors = CardDefaults.cardColors(containerColor = status.containerColor),
     ) {
         Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 24.dp),
-            verticalAlignment = Alignment.CenterVertically
+            Modifier.fillMaxWidth().padding(vertical = 24.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Spacer(Modifier.width(24.dp))
-            Icon(painterResource(status.icon), contentDescription = null, modifier = Modifier.size(32.dp))
+            Icon(
+                painterResource(status.icon),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+            )
             Column(Modifier.weight(1f)) {
                 Text(
                     text = status.summary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 24.dp),
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 24.dp),
                     style = MaterialTheme.typography.headlineSmall,
                 )
                 AnimatedVisibilityWithBlur(visible = isPreferencesReady) {
                     Text(
                         text = stringResource(R.string.description_changes_application),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 24.dp)
-                            .semantics {
+                        modifier =
+                            Modifier.fillMaxWidth().padding(start = 16.dp, end = 24.dp).semantics {
                                 if (expanded) {
                                     hideFromAccessibility()
                                 }
@@ -99,10 +96,8 @@ fun StatusCard(
                 AnimatedVisibilityWithBlur(visible = status != Status.Normal) {
                     Text(
                         text = stringResource(R.string.description_more_info),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 24.dp)
-                            .semantics {
+                        modifier =
+                            Modifier.fillMaxWidth().padding(start = 16.dp, end = 24.dp).semantics {
                                 if (expanded) {
                                     hideFromAccessibility()
                                 }
@@ -117,7 +112,7 @@ fun StatusCard(
                 Column(
                     Modifier.semantics {
                         text = AnnotatedString(description)
-                    }
+                    },
                 ) {
                     DynamicSpacer(status != Status.Normal || expanded)
                     StatusEntry(
@@ -154,7 +149,7 @@ private fun ColumnScope.DynamicSpacer(expanded: Boolean) {
     AnimatedVisibility(
         visible = expanded,
         enter = expandVertically(expandFrom = Alignment.CenterVertically),
-        exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically)
+        exit = shrinkVertically(shrinkTowards = Alignment.CenterVertically),
     ) {
         Spacer(Modifier.height(8.dp))
     }
@@ -172,10 +167,8 @@ private fun ColumnScope.StatusEntry(
         val description = stringResource(R.string.description_status_normal)
         Text(
             text = stringResource(workingText),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 24.dp)
-                .semantics {
+            modifier =
+                Modifier.fillMaxWidth().padding(start = 16.dp, end = 24.dp).semantics {
                     stateDescription = description
                     if (expanded) {
                         focused = true
@@ -188,10 +181,8 @@ private fun ColumnScope.StatusEntry(
         val description = stringResource(R.string.description_status_abnormal)
         Text(
             text = stringResource(notWorkingText),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 24.dp)
-                .semantics {
+            modifier =
+                Modifier.fillMaxWidth().padding(start = 16.dp, end = 24.dp).semantics {
                     stateDescription = description
                     if (expanded) {
                         focused = true
@@ -204,10 +195,8 @@ private fun ColumnScope.StatusEntry(
     AnimatedVisibilityWithBlur(visible = expanded) {
         Text(
             text = stringResource(descriptionText),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 24.dp)
-                .semantics {
+            modifier =
+                Modifier.fillMaxWidth().padding(start = 16.dp, end = 24.dp).semantics {
                     if (expanded) {
                         focused = true
                     }
@@ -246,10 +235,11 @@ enum class Status {
 
     @get:DrawableRes
     val icon: Int
-        get() = when (this) {
-            Normal -> R.drawable.check_circle_24px
-            else -> R.drawable.warning_24px
-        }
+        get() =
+            when (this) {
+                Normal -> R.drawable.check_circle_24px
+                else -> R.drawable.warning_24px
+            }
 
     val summary: String
         @Composable

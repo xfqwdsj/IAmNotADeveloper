@@ -37,48 +37,52 @@ fun DetectionItem(
     val coroutineScope = rememberCoroutineScope()
 
     val dao = remember { viewModel.application.database.dao() }
-    val flow = remember(method, packageInfo) {
-        if (packageInfo != null) {
-            dao.isDetectionEnabledFlow(packageInfo.toDatabaseInfo(), method)
-        } else {
-            dao.isGlobalDetectionEnabledFlow(method)
-        }
-    }
-
-    var value by flow.collectAsMutableState(true) {
-        if (packageInfo != null) {
-            coroutineScope.launch(Dispatchers.IO) {
-                dao.insertDetection(
-                    packageInfo = packageInfo.toDatabaseInfo(),
-                    method = method,
-                    enabled = it,
-                )
-                afterChange(method)
-            }
-        } else {
-            coroutineScope.launch(Dispatchers.IO) {
-                dao.insertGlobalDetection(
-                    method = method,
-                    enabled = it,
-                )
-                afterChange(method)
+    val flow =
+        remember(method, packageInfo) {
+            if (packageInfo != null) {
+                dao.isDetectionEnabledFlow(packageInfo.toDatabaseInfo(), method)
+            } else {
+                dao.isGlobalDetectionEnabledFlow(method)
             }
         }
-    }
 
-    var testResult by remember(method, packageInfo) {
-        mutableStateOf(
-            if (packageInfo == null) {
-                method.test(viewModel.application)
-            } else true
-        )
-    }
+    var value by
+        flow.collectAsMutableState(true) {
+            if (packageInfo != null) {
+                coroutineScope.launch(Dispatchers.IO) {
+                    dao.insertDetection(
+                        packageInfo = packageInfo.toDatabaseInfo(),
+                        method = method,
+                        enabled = it,
+                    )
+                    afterChange(method)
+                }
+            } else {
+                coroutineScope.launch(Dispatchers.IO) {
+                    dao.insertGlobalDetection(
+                        method = method,
+                        enabled = it,
+                    )
+                    afterChange(method)
+                }
+            }
+        }
 
-    val description = if (testResult) {
-        stringResource(R.string.test_result_on)
-    } else {
-        stringResource(R.string.test_result_off)
-    }
+    var testResult by
+        remember(method, packageInfo) {
+            mutableStateOf(
+                if (packageInfo == null) {
+                    method.test(viewModel.application)
+                } else true,
+            )
+        }
+
+    val description =
+        if (testResult) {
+            stringResource(R.string.test_result_on)
+        } else {
+            stringResource(R.string.test_result_off)
+        }
 
     PreferenceItem(
         value = value,
@@ -86,9 +90,10 @@ fun DetectionItem(
         headlineContent = {
             Text(stringResource(method.labelResId))
         },
-        modifier = Modifier.semantics {
-            contentDescription = description
-        },
+        modifier =
+            Modifier.semantics {
+                contentDescription = description
+            },
         enabled = enabled,
         leadingContent = {
             if (packageInfo != null) return@PreferenceItem
@@ -109,9 +114,10 @@ fun DetectionItem(
 
     LaunchedEffect(Unit) {
         testTrigger.collect {
-            testResult = method.test(viewModel.application).also {
-                afterTest(method, it)
-            }
+            testResult =
+                method.test(viewModel.application).also {
+                    afterTest(method, it)
+                }
         }
     }
 }

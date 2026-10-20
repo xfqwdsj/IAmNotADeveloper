@@ -17,8 +17,8 @@ class NotDevApplication : App() {
     private val storeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
-     * Process-wide store host. One host for the whole process keeps the loaded
-     * values in memory, so recreating the UI reads the warm values directly.
+     * Process-wide store host. One host for the whole process keeps the loaded values in memory, so
+     * recreating the UI reads the warm values directly.
      */
     val storeHost by lazy {
         StoreHost(storeScope, AppFile(this)).also { host ->
@@ -32,7 +32,9 @@ class NotDevApplication : App() {
     override fun onCreate() {
         super.onCreate()
         // Temporary: receive the overlay probe lines of the library.
-        top.ltfan.material.m3.overlay.ExtendedDebug.sink = { line -> android.util.Log.e("GLASSDBG", line) }
+        top.ltfan.material.m3.overlay.ExtendedDebug.sink = { line ->
+            android.util.Log.e("GLASSDBG", line)
+        }
         // Warm the stores up as early as possible.
         storeHost
     }

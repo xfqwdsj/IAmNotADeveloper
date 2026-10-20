@@ -19,79 +19,86 @@ fun Modifier.horizontalAlphaMaskLinear(
     vararg data: LinearMaskData,
     stepFactor: Float = 0.4f,
     map: (Float) -> Float = { t -> t },
-): Modifier = alphaMaskLinear(
-    data = data,
-    isHorizontal = true,
-    stepFactor = stepFactor,
-    map = map,
-)
+): Modifier =
+    alphaMaskLinear(
+        data = data,
+        isHorizontal = true,
+        stepFactor = stepFactor,
+        map = map,
+    )
 
 fun Modifier.verticalAlphaMaskLinear(
     vararg data: LinearMaskData,
     stepFactor: Float = 0.4f,
     map: (Float) -> Float = { t -> t },
-): Modifier = alphaMaskLinear(
-    data = data,
-    isHorizontal = false,
-    stepFactor = stepFactor,
-    map = map,
-)
+): Modifier =
+    alphaMaskLinear(
+        data = data,
+        isHorizontal = false,
+        stepFactor = stepFactor,
+        map = map,
+    )
 
 fun Modifier.alphaMaskLinear(
     vararg data: LinearMaskData,
     isHorizontal: Boolean = true,
     stepFactor: Float = 0.4f,
     map: (Float) -> Float = { t -> t },
-): Modifier = this
-    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-    .drawWithCache {
-        val width = size.width
-        val height = size.height
-        val maxSize = if (isHorizontal) width else height
+): Modifier =
+    this.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithCache {
+            val width = size.width
+            val height = size.height
+            val maxSize = if (isHorizontal) width else height
 
-        val brushList = mutableListOf<Brush>()
+            val brushList = mutableListOf<Brush>()
 
-        data.forEach {
-            val (startDp, endDp, reverse) = it
+            data.forEach {
+                val (startDp, endDp, reverse) = it
 
-            var startPx = if (startDp.isFinite) startDp.toPx().coerceIn(0f, maxSize) else 0f
-            var endPx = if (endDp.isFinite) endDp.toPx().coerceIn(0f, maxSize) else maxSize
+                var startPx = if (startDp.isFinite) startDp.toPx().coerceIn(0f, maxSize) else 0f
+                var endPx = if (endDp.isFinite) endDp.toPx().coerceIn(0f, maxSize) else maxSize
 
-            if (reverse) {
-                startPx = maxSize - startPx
-                endPx = maxSize - endPx
+                if (reverse) {
+                    startPx = maxSize - startPx
+                    endPx = maxSize - endPx
+                }
+
+                val (start, end) =
+                    if (isHorizontal) {
+                        Offset(startPx, height / 2) to Offset(endPx, height / 2)
+                    } else {
+                        Offset(width / 2, startPx) to Offset(width / 2, endPx)
+                    }
+
+                val lengthPx = abs(endPx - startPx)
+                val n = (stepFactor * lengthPx).roundToInt().coerceAtLeast(2)
+
+                val pairs =
+                    (0 until n)
+                        .map { i ->
+                            val t = i / (n - 1f)
+                            val alpha = map(t).coerceIn(0f, 1f)
+                            t to Color.White.copy(alpha = alpha)
+                        }
+                        .toTypedArray()
+
+                brushList +=
+                    Brush.linearGradient(
+                        colorStops = pairs,
+                        start = start,
+                        end = end,
+                        tileMode = TileMode.Clamp,
+                    )
             }
 
-            val (start, end) = if (isHorizontal) {
-                Offset(startPx, height / 2) to Offset(endPx, height / 2)
-            } else {
-                Offset(width / 2, startPx) to Offset(width / 2, endPx)
+            onDrawWithContent {
+                drawContent()
+                brushList.forEach {
+                    drawRect(brush = it, blendMode = BlendMode.DstOut)
+                }
             }
-
-            val lengthPx = abs(endPx - startPx)
-            val n = (stepFactor * lengthPx).roundToInt().coerceAtLeast(2)
-
-            val pairs = (0 until n).map { i ->
-                val t = i / (n - 1f)
-                val alpha = map(t).coerceIn(0f, 1f)
-                t to Color.White.copy(alpha = alpha)
-            }.toTypedArray()
-
-            brushList += Brush.linearGradient(
-                colorStops = pairs,
-                start = start,
-                end = end,
-                tileMode = TileMode.Clamp
-            )
         }
-
-        onDrawWithContent {
-            drawContent()
-            brushList.forEach {
-                drawRect(brush = it, blendMode = BlendMode.DstOut)
-            }
-        }
-    }
 
 data class LinearMaskData(
     val startDp: Dp = 0.dp,

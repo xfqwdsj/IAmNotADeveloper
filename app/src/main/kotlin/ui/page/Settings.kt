@@ -46,13 +46,14 @@ object Settings : Main() {
                 topBar = {
                     CenterAlignedTopAppBar(
                         title = { Text(stringResource(navigationLabel)) },
-                        modifier = Modifier.backdropSurface(
-                            handle = backdrop,
-                            shape = RectangleShape,
-                            effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
-                            highlight = null,
-                            shadow = null,
-                        ),
+                        modifier =
+                            Modifier.backdropSurface(
+                                handle = backdrop,
+                                shape = RectangleShape,
+                                effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
+                                highlight = null,
+                                shadow = null,
+                            ),
                         windowInsets = AppWindowInsets.only { horizontal + top },
                         colors = LargeTopAppBarColorsTransparent,
                     )
@@ -62,16 +63,16 @@ object Settings : Main() {
                 with(this@Settings) {
                     CardSettings(
                         store = describer,
-                        modifier = Modifier
-                            .captureBackdrop(backdrop)
-                            .fillMaxSize(),
+                        modifier = Modifier.captureBackdrop(backdrop).fillMaxSize(),
                         lazyListState = lazyListState,
-                        contentPadding = contentPadding + PaddingValues(
-                            start = 16.dp,
-                            top = 16.dp,
-                            end = 16.dp,
-                            bottom = 16.dp,
-                        ),
+                        contentPadding =
+                            contentPadding +
+                                PaddingValues(
+                                    start = 16.dp,
+                                    top = 16.dp,
+                                    end = 16.dp,
+                                    bottom = 16.dp,
+                                ),
                         cardColors = CardColorsLowest,
                     )
                 }

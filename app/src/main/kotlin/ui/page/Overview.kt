@@ -21,16 +21,15 @@ import androidx.compose.ui.unit.dp
 import top.ltfan.material.m3.card
 import top.ltfan.material.m3.core.layout.GroupedLazyColumn
 import top.ltfan.material.m3.core.layout.item
-import top.ltfan.material.m3.core.layout.items
 import top.ltfan.material.m3.core.layout.only
 import top.ltfan.material.m3.core.layout.plus
-import top.ltfan.material.m3.item
 import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.backdropSurface
 import top.ltfan.material.m3.core.visual.captureBackdrop
 import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
+import top.ltfan.material.m3.item
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.ui.composable.PreferenceItem
@@ -59,13 +58,14 @@ object Overview : Main() {
                         title = {
                             Text(stringResource(R.string.app_name))
                         },
-                        modifier = Modifier.backdropSurface(
-                            handle = backdrop,
-                            shape = RectangleShape,
-                            effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
-                            highlight = null,
-                            shadow = null,
-                        ),
+                        modifier =
+                            Modifier.backdropSurface(
+                                handle = backdrop,
+                                shape = RectangleShape,
+                                effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
+                                highlight = null,
+                                shadow = null,
+                            ),
                         windowInsets = AppWindowInsets.only { horizontal + top },
                         scrollBehavior = scrollBehavior,
                         colors = LargeTopAppBarColorsTransparent,
@@ -76,9 +76,7 @@ object Overview : Main() {
                 val contentPadding = contentPadding + PaddingValues(top = 16.dp, bottom = 16.dp)
 
                 GroupedLazyColumn(
-                    modifier = Modifier
-                        .captureBackdrop(backdrop)
-                        .fillMaxSize(),
+                    modifier = Modifier.captureBackdrop(backdrop).fillMaxSize(),
                     contentPadding = contentPadding,
                     spacing = 16.dp,
                 ) {
@@ -106,10 +104,18 @@ object Overview : Main() {
                                 value = useGlobalPreferences,
                                 onValueChange = { useGlobalPreferences = it },
                                 headlineContent = {
-                                    Text(stringResource(R.string.toggle_overview_use_global_preferences))
+                                    Text(
+                                        stringResource(
+                                            R.string.toggle_overview_use_global_preferences,
+                                        ),
+                                    )
                                 },
                                 supportingContent = {
-                                    Text(stringResource(R.string.description_overview_use_global_preferences))
+                                    Text(
+                                        stringResource(
+                                            R.string.description_overview_use_global_preferences,
+                                        ),
+                                    )
                                 },
                                 colors = ListItemColorsTransparent,
                             )

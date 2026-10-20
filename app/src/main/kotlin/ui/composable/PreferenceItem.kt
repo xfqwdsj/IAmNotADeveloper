@@ -26,8 +26,8 @@ fun PreferenceItem(
 ) {
     ListItem(
         headlineContent = headlineContent,
-        modifier = modifier
-            .toggleable(
+        modifier =
+            modifier.toggleable(
                 value = value,
                 enabled = enabled,
                 role = Role.Switch,

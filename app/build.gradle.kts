@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    alias(libs.plugins.spotless)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
@@ -21,9 +22,10 @@ android {
 
     namespace = appId
     compileSdk {
-        version = release(37) {
-            minorApiLevel = 2
-        }
+        version =
+            release(37) {
+                minorApiLevel = 2
+            }
     }
 
     signingConfigs {
@@ -93,7 +95,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.animation)
     implementation(libs.compose.material3)
-//    implementation(libs.compose.material3.adaptive)
+    //    implementation(libs.compose.material3.adaptive)
     implementation(libs.capsule)
     implementation(libs.backdrop)
     implementation(libs.m3.extended)
@@ -115,4 +117,14 @@ dependencies {
 
 room {
     schemaDirectory("$projectDir/schemas")
+}
+
+spotless {
+    kotlin {
+        target("src/*/kotlin/**/*.kt")
+        ktfmt().kotlinlangStyle()
+    }
+    kotlinGradle {
+        ktfmt().kotlinlangStyle()
+    }
 }

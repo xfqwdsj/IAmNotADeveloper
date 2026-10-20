@@ -19,10 +19,11 @@ val AppLargeShape = ContinuousRoundedRectangle(AppRadiusLarge)
 val AppRadiusExtraLarge = 36.dp
 val AppExtraLargeShape = ContinuousRoundedRectangle(AppRadiusExtraLarge)
 
-val AppShapes = Shapes(
-    extraSmall = AppExtraSmallShape,
-    small = AppSmallShape,
-    medium = AppMediumShape,
-    large = AppLargeShape,
-    extraLarge = AppExtraLargeShape,
-)
+val AppShapes =
+    Shapes(
+        extraSmall = AppExtraSmallShape,
+        small = AppSmallShape,
+        medium = AppMediumShape,
+        large = AppLargeShape,
+        extraLarge = AppExtraLargeShape,
+    )

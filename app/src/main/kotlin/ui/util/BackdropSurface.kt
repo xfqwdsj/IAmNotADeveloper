@@ -15,8 +15,8 @@ import top.ltfan.material.m3.core.visual.backdropSurface
 
 /**
  * Draws [containerColor] over the backdrop sampled by [LocalBackdrop], clipped to [shape]: a
- * vibrancy tint, and while [LocalBlurEnabled] is true a blur of [blurRadius]. The container color is
- * drawn at [surfaceAlpha] on top of the sampled backdrop.
+ * vibrancy tint, and while [LocalBlurEnabled] is true a blur of [blurRadius]. The container color
+ * is drawn at [surfaceAlpha] on top of the sampled backdrop.
  *
  * Without a backdrop host (for example in a preview) this falls back to a plain [containerColor]
  * background, so the layout stays visible.

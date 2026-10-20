@@ -47,7 +47,7 @@ fun FilterChip(
             label = {
                 Text(
                     text = text,
-//                    modifier = Modifier.keepSizeWhenLookingAhead(),
+                    //                    modifier = Modifier.keepSizeWhenLookingAhead(),
                 )
             },
             leadingIcon = {

@@ -92,15 +92,14 @@ import top.ltfan.material.m3.core.layout.GroupedLazyColumn
 import top.ltfan.material.m3.core.layout.GroupedLazyListScope
 import top.ltfan.material.m3.core.layout.only
 import top.ltfan.material.m3.core.layout.plus
+import top.ltfan.material.m3.core.transition.FocusRequestingEffect
 import top.ltfan.material.m3.core.visual.BackdropEdge
 import top.ltfan.material.m3.core.visual.LocalBackdrop
 import top.ltfan.material.m3.core.visual.backdropSurface
 import top.ltfan.material.m3.core.visual.captureBackdrop
-import top.ltfan.notdeveloper.ui.util.pageSurface
 import top.ltfan.material.m3.core.visual.progressiveBlur
 import top.ltfan.material.m3.core.visual.rememberBackdropLayer
 import top.ltfan.material.m3.items
-import top.ltfan.material.m3.core.transition.FocusRequestingEffect
 import top.ltfan.material.m3.layout.header
 import top.ltfan.material.m3.overlay.ExtendedAlertDialog
 import top.ltfan.material.m3.overlay.ExtendedBottomSheet
@@ -114,8 +113,8 @@ import top.ltfan.notdeveloper.datastore.AppFilter
 import top.ltfan.notdeveloper.datastore.AppSort
 import top.ltfan.notdeveloper.ui.composable.AnimatedVisibilityWithBlur
 import top.ltfan.notdeveloper.ui.composable.AppListItem
-import top.ltfan.notdeveloper.ui.composable.FilterChip
 import top.ltfan.notdeveloper.ui.composable.ExtendedFloatingActionButtonWithMenu
+import top.ltfan.notdeveloper.ui.composable.FilterChip
 import top.ltfan.notdeveloper.ui.composable.IconButtonSizedIcon
 import top.ltfan.notdeveloper.ui.composable.IconButtonWithTooltip
 import top.ltfan.notdeveloper.ui.theme.AppRadiusExtraLarge
@@ -127,6 +126,7 @@ import top.ltfan.notdeveloper.ui.util.AppWindowInsets
 import top.ltfan.notdeveloper.ui.util.EmptyContentTransform
 import top.ltfan.notdeveloper.ui.util.LinearMaskData
 import top.ltfan.notdeveloper.ui.util.horizontalAlphaMaskLinear
+import top.ltfan.notdeveloper.ui.util.pageSurface
 import top.ltfan.notdeveloper.ui.util.rememberAutoRestorableState
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
 
@@ -161,17 +161,18 @@ object Apps : Main() {
                             effects = { progressiveBlur(48.dp.toPx(), BackdropEdge.Top) },
                             highlight = null,
                             shadow = null,
-                        )
+                        ),
                     ) {
                         CenterAlignedTopAppBar(
                             title = { Text(stringResource(navigationLabel)) },
                             actions = {
                                 Row(
-                                    modifier = Modifier.pageSurface(
-                                        shape = ContinuousCapsule,
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                        blurRadius = 4.dp,
-                                    ),
+                                    modifier =
+                                        Modifier.pageSurface(
+                                            shape = ContinuousCapsule,
+                                            containerColor = MaterialTheme.colorScheme.surface,
+                                            blurRadius = 4.dp,
+                                        ),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     AppBarActions()
@@ -190,14 +191,14 @@ object Apps : Main() {
 
                 localSharedTransitionScope {
                     GroupedLazyColumn(
-                        modifier = Modifier
-                            .captureBackdrop(backdrop)
-                            .fillMaxSize(),
+                        modifier = Modifier.captureBackdrop(backdrop).fillMaxSize(),
                         state = lazyListState,
-                        contentPadding = contentPadding + PaddingValues(
-                            top = 16.dp,
-                            bottom = 16.dp
-                        ),
+                        contentPadding =
+                            contentPadding +
+                                PaddingValues(
+                                    top = 16.dp,
+                                    bottom = 16.dp,
+                                ),
                         spacing = 16.dp,
                     ) {
                         context(transition) {
@@ -273,19 +274,20 @@ object Apps : Main() {
 
         AnimatedContent(
             targetState = showUserFilter,
-            transitionSpec = { EmptyContentTransform }
+            transitionSpec = { EmptyContentTransform },
         ) { showing ->
-            val rotation by transition.animateFloat(
-                label = "UserFilterRotation",
-                transitionSpec = { spring(stiffness = Spring.StiffnessMediumLow) },
-            ) {
-                val factor = if (showUserFilter) 1f else -1f
-                when (it) {
-                    EnterExitState.PreEnter -> -180f * factor
-                    EnterExitState.Visible -> 0f
-                    EnterExitState.PostExit -> 180f * factor
+            val rotation by
+                transition.animateFloat(
+                    label = "UserFilterRotation",
+                    transitionSpec = { spring(stiffness = Spring.StiffnessMediumLow) },
+                ) {
+                    val factor = if (showUserFilter) 1f else -1f
+                    when (it) {
+                        EnterExitState.PreEnter -> -180f * factor
+                        EnterExitState.Visible -> 0f
+                        EnterExitState.PostExit -> 180f * factor
+                    }
                 }
-            }
             if (showing) {
                 IconButtonWithTooltip(
                     iconRes = R.drawable.expand_circle_up_24px,
@@ -319,31 +321,31 @@ object Apps : Main() {
         with(viewModel) {
             AnimatedVisibilityWithBlur(showUserFilter, modifier) {
                 FilterBarLayout(
-                    modifier = layoutModifier.semantics {
-                        isTraversalGroup = true
-                    },
+                    modifier =
+                        layoutModifier.semantics {
+                            isTraversalGroup = true
+                        },
                     leading = {
                         Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .semantics(mergeDescendants = true) {
-                                    heading()
-                                }
-                                .padding(8.dp),
+                            modifier =
+                                Modifier.fillMaxHeight()
+                                    .semantics(mergeDescendants = true) {
+                                        heading()
+                                    }
+                                    .padding(8.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             PointerInjector()
                             IconButtonSizedIcon(
                                 iconRes = R.drawable.account_circle_24px,
-                                contentDescription = stringResource(R.string.label_apps_user_select),
+                                contentDescription =
+                                    stringResource(R.string.label_apps_user_select),
                             )
                         }
                     },
                     trailing = {
                         Box(
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(8.dp),
+                            modifier = Modifier.fillMaxHeight().padding(8.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             var refreshFinished by rememberAutoRestorableState(false)
@@ -352,7 +354,10 @@ object Apps : Main() {
                                 if (it) {
                                     IconButtonSizedIcon(
                                         iconRes = R.drawable.check_24px,
-                                        contentDescription = stringResource(R.string.label_apps_user_list_refresh_done),
+                                        contentDescription =
+                                            stringResource(
+                                                R.string.label_apps_user_list_refresh_done,
+                                            ),
                                     )
                                 } else {
                                     IconButtonWithTooltip(
@@ -369,35 +374,40 @@ object Apps : Main() {
                     },
                 ) { contentPadding ->
                     val focusRequester = remember { FocusRequester() }
-                    // The request belongs to the bar, not to the first item: inside the lazy item it
-                    // would run again every time that item re-enters the composition while scrolling,
+                    // The request belongs to the bar, not to the first item: inside the lazy item
+                    // it
+                    // would run again every time that item re-enters the composition while
+                    // scrolling,
                     // and steal focus back to the first chip.
                     FocusRequestingEffect(focusRequester)
 
                     LazyRow(
-                        modifier = Modifier
-                            .horizontalAlphaMaskLinear(
-                                LinearMaskData(
-                                    startDp = contentPadding.calculateStartPadding(
-                                        LocalLayoutDirection.current
+                        modifier =
+                            Modifier.horizontalAlphaMaskLinear(
+                                    LinearMaskData(
+                                        startDp =
+                                            contentPadding.calculateStartPadding(
+                                                LocalLayoutDirection.current,
+                                            ),
+                                        endDp = 0.dp,
                                     ),
-                                    endDp = 0.dp,
-                                ),
-                                LinearMaskData(
-                                    startDp = contentPadding.calculateEndPadding(
-                                        LocalLayoutDirection.current
+                                    LinearMaskData(
+                                        startDp =
+                                            contentPadding.calculateEndPadding(
+                                                LocalLayoutDirection.current,
+                                            ),
+                                        endDp = 0.dp,
+                                        reverse = true,
                                     ),
-                                    endDp = 0.dp,
-                                    reverse = true,
-                                ),
-                                map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
-                            )
-                            .semantics {
-                                collectionInfo = CollectionInfo(
-                                    rowCount = -1,
-                                    columnCount = users.size,
+                                    map = { CubicBezierEasing(.1f, 1f, 0f, 1f).transform(it) },
                                 )
-                            },
+                                .semantics {
+                                    collectionInfo =
+                                        CollectionInfo(
+                                            rowCount = -1,
+                                            columnCount = users.size,
+                                        )
+                                },
                         contentPadding = contentPadding,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -409,20 +419,21 @@ object Apps : Main() {
                                 selected = selected,
                                 onClick = { selectedUser = user },
                                 text = user.name.getString(),
-                                modifier = Modifier
-                                    .run {
-                                        if (index == 0) {
-                                            focusRequester(focusRequester).focusable()
-                                        } else this
-                                    }
-                                    .semantics {
-                                        collectionItemInfo = CollectionItemInfo(
-                                            rowIndex = 0,
-                                            rowSpan = 1,
-                                            columnIndex = index,
-                                            columnSpan = 1,
-                                        )
-                                    },
+                                modifier =
+                                    Modifier.run {
+                                            if (index == 0) {
+                                                focusRequester(focusRequester).focusable()
+                                            } else this
+                                        }
+                                        .semantics {
+                                            collectionItemInfo =
+                                                CollectionItemInfo(
+                                                    rowIndex = 0,
+                                                    rowSpan = 1,
+                                                    columnIndex = index,
+                                                    columnSpan = 1,
+                                                )
+                                        },
                             )
                         }
                     }
@@ -460,18 +471,17 @@ object Apps : Main() {
             val (configuredList, unconfiguredList) = collectAppLists()
 
             AnimatedContent(
-                targetState = AppListState(
-                    isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
-                    isFiltered = appFilteredMethods.isNotEmpty(),
-                ),
+                targetState =
+                    AppListState(
+                        isEmpty = configuredList.isEmpty() && unconfiguredList.isEmpty(),
+                        isFiltered = appFilteredMethods.isNotEmpty(),
+                    ),
                 transitionSpec = { AnimatedContentDefaultTransform using null },
                 contentKey = { it.isEmpty },
             ) { (isEmpty, isFiltered) ->
                 if (isEmpty) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding),
+                        modifier = Modifier.fillMaxSize().padding(contentPadding),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -519,11 +529,9 @@ object Apps : Main() {
                 Spacer(Modifier.height(8.dp))
                 localSharedTransitionScope {
                     FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .animateBounds(this),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier =
+                            Modifier.fillMaxWidth().padding(horizontal = 16.dp).animateBounds(this),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         AppSort.entries.forEach {
                             val selected = appSortMethod == it
@@ -547,21 +555,20 @@ object Apps : Main() {
                 Spacer(Modifier.height(8.dp))
                 localSharedTransitionScope {
                     FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .animateBounds(this),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier =
+                            Modifier.fillMaxWidth().padding(horizontal = 16.dp).animateBounds(this),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         val allSelected = appFilteredMethods.isEmpty()
                         FilterChip(
                             selected = allSelected,
                             onClick = {
-                                appFilteredMethods = if (allSelected) {
-                                    AppFilter.toggleableEntries
-                                } else {
-                                    emptySet()
-                                }
+                                appFilteredMethods =
+                                    if (allSelected) {
+                                        AppFilter.toggleableEntries
+                                    } else {
+                                        emptySet()
+                                    }
                             },
                             text = AppFilter.All.labelRes,
                             leadingPlaceholderIcon = R.drawable.remove_24px,
@@ -578,9 +585,9 @@ object Apps : Main() {
                                     }
                                 },
                                 text = it.labelRes,
-                                modifier = Modifier
-                                    .animateBounds(this@localSharedTransitionScope)
-                                    .skipToLookaheadSize(),
+                                modifier =
+                                    Modifier.animateBounds(this@localSharedTransitionScope)
+                                        .skipToLookaheadSize(),
                                 leadingPlaceholderIcon = R.drawable.remove_24px,
                             )
                         }
@@ -601,47 +608,55 @@ object Apps : Main() {
         SubcomposeLayout(modifier) { constraints ->
             val width = constraints.maxWidth
 
-            val contentPlaceablesForHeight = subcompose("content_height") {
-                content(PaddingValues())
-            }.fastMap {
-                it.measure(constraints)
-            }
+            val contentPlaceablesForHeight =
+                subcompose("content_height") {
+                        content(PaddingValues())
+                    }
+                    .fastMap {
+                        it.measure(constraints)
+                    }
 
             val height = contentPlaceablesForHeight.maxOfOrNull { it.height } ?: 0
 
-            val childConstraints = constraints.copy(
-                maxHeight = height,
-            )
+            val childConstraints =
+                constraints.copy(
+                    maxHeight = height,
+                )
 
-            val leading = subcompose("leading") { leading?.invoke() }
-                .fastMap { it.measure(childConstraints) }
+            val leading =
+                subcompose("leading") { leading?.invoke() }.fastMap { it.measure(childConstraints) }
 
             val leadingWidth = leading.fastMaxBy { it.width }?.width ?: 0
             val leadingHeight = leading.fastMaxBy { it.height }?.height ?: 0
-            val leadingX = when (layoutDirection) {
-                LayoutDirection.Ltr -> 0
-                LayoutDirection.Rtl -> width - leadingWidth
-            }
+            val leadingX =
+                when (layoutDirection) {
+                    LayoutDirection.Ltr -> 0
+                    LayoutDirection.Rtl -> width - leadingWidth
+                }
             val leadingY = (height - leadingHeight) / 2
 
-            val trailing = subcompose("trailing") { trailing?.invoke() }
-                .fastMap { it.measure(childConstraints) }
+            val trailing =
+                subcompose("trailing") { trailing?.invoke() }
+                    .fastMap { it.measure(childConstraints) }
 
             val trailingWidth = trailing.fastMaxBy { it.width }?.width ?: 0
             val trailingHeight = trailing.fastMaxBy { it.height }?.height ?: 0
-            val trailingX = when (layoutDirection) {
-                LayoutDirection.Ltr -> width - trailingWidth
-                LayoutDirection.Rtl -> 0
-            }
+            val trailingX =
+                when (layoutDirection) {
+                    LayoutDirection.Ltr -> width - trailingWidth
+                    LayoutDirection.Rtl -> 0
+                }
             val trailingY = (height - trailingHeight) / 2
 
-            val contentPadding = PaddingValues(
-                start = leadingWidth.toDp(),
-                end = trailingWidth.toDp(),
-            )
+            val contentPadding =
+                PaddingValues(
+                    start = leadingWidth.toDp(),
+                    end = trailingWidth.toDp(),
+                )
 
             val content =
-                subcompose("content") { content(contentPadding) }.fastMap { it.measure(constraints) }
+                subcompose("content") { content(contentPadding) }
+                    .fastMap { it.measure(constraints) }
 
             layout(width, height) {
                 content.fastForEach { it.place(0, 0) }
@@ -652,10 +667,9 @@ object Apps : Main() {
     }
 
     context(
-        viewModel: AppViewModel,
-        transition: Transition<PackageInfoWrapper?>,
-        sharedTransitionScope: SharedTransitionScope,
-    )
+    viewModel: AppViewModel,
+    transition: Transition<PackageInfoWrapper?>,
+    sharedTransitionScope: SharedTransitionScope)
     fun GroupedLazyListScope.appListCard(
         list: List<PackageInfoWrapper>,
         @StringRes header: Int,
@@ -668,9 +682,7 @@ object Apps : Main() {
             header(
                 textRes = header,
                 modifier = {
-                    Modifier
-                        .animateItem()
-                        .padding(horizontal = 16.dp)
+                    Modifier.animateItem().padding(horizontal = 16.dp)
                 },
             )
 
@@ -679,9 +691,7 @@ object Apps : Main() {
                 key = { it.listKey },
                 contentType = { "app" },
                 modifier = {
-                    Modifier
-                        .animateItem()
-                        .padding(horizontal = 16.dp)
+                    Modifier.animateItem().padding(horizontal = 16.dp)
                 },
             ) { info ->
                 val coroutineScope = rememberCoroutineScope()
@@ -689,43 +699,50 @@ object Apps : Main() {
                 transition.AnimatedContent(
                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                 ) { currentInfo ->
-                    val radius by this.transition.animateDp(label = "AppListItemRadius") {
-                        if (it == EnterExitState.Visible) AppRadiusMedium else AppRadiusExtraLarge
-                    }
+                    val radius by
+                        this.transition.animateDp(label = "AppListItemRadius") {
+                            if (it == EnterExitState.Visible) AppRadiusMedium
+                            else AppRadiusExtraLarge
+                        }
 
                     if (currentInfo != info) {
                         with(sharedTransitionScope) {
                             Box(
-                                Modifier
-                                    .sharedBounds(
-                                        sharedContentState = rememberSharedContentState(
-                                            AppConfigurationSharedKey.Container(info)
-                                        ),
+                                Modifier.sharedBounds(
+                                        sharedContentState =
+                                            rememberSharedContentState(
+                                                AppConfigurationSharedKey.Container(info),
+                                            ),
                                         animatedVisibilityScope = this@AnimatedContent,
-                                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                                        resizeMode =
+                                            SharedTransitionScope.ResizeMode.RemeasureToBounds,
                                     )
-                                    .clip(ContinuousRoundedRectangle(radius))
+                                    .clip(ContinuousRoundedRectangle(radius)),
                             ) {
                                 val headerText = stringResource(header)
                                 AppListItem(
                                     packageInfo = info,
-                                    modifier = Modifier
-                                        .sharedBounds(
-                                            sharedContentState = rememberSharedContentState(
-                                                AppConfigurationSharedKey.ListItem(info)
-                                            ),
-                                            animatedVisibilityScope = this@AnimatedContent,
-                                            resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
-                                        )
-                                        .clip(ContinuousRoundedRectangle(radius))
-                                        .semantics {
-                                            contentDescription = headerText
-                                        },
+                                    modifier =
+                                        Modifier.sharedBounds(
+                                                sharedContentState =
+                                                    rememberSharedContentState(
+                                                        AppConfigurationSharedKey.ListItem(info),
+                                                    ),
+                                                animatedVisibilityScope = this@AnimatedContent,
+                                                resizeMode =
+                                                    SharedTransitionScope.ResizeMode
+                                                        .RemeasureToBounds,
+                                            )
+                                            .clip(ContinuousRoundedRectangle(radius))
+                                            .semantics {
+                                                contentDescription = headerText
+                                            },
                                     onClick = {
                                         coroutineScope.launch {
-                                            viewModel.packageInfoConfiguringTransitionState.animateTo(
-                                                info
-                                            )
+                                            viewModel.packageInfoConfiguringTransitionState
+                                                .animateTo(
+                                                    info,
+                                                )
                                         }
                                     },
                                 )
@@ -734,9 +751,7 @@ object Apps : Main() {
                     } else {
                         AppListItem(
                             packageInfo = info,
-                            modifier = Modifier
-                                .alpha(0f)
-                                .clearAndSetSemantics {},
+                            modifier = Modifier.alpha(0f).clearAndSetSemantics {},
                         )
                     }
                 }
@@ -752,9 +767,7 @@ object Apps : Main() {
     @Composable
     fun BoxScope.PointerInjector() {
         Spacer(
-            Modifier
-                .matchParentSize()
-                .pointerInteropFilter { true }
+            Modifier.matchParentSize().pointerInteropFilter { true },
         )
     }
 
@@ -763,20 +776,24 @@ object Apps : Main() {
         val isFiltered: Boolean,
     )
 
-    val PackageInfoWrapper.listKey: String get() = "${info.packageName}-${info.applicationInfo?.uid}"
+    val PackageInfoWrapper.listKey: String
+        get() = "${info.packageName}-${info.applicationInfo?.uid}"
 
     context(viewModel: AppViewModel)
     fun Sequence<PackageInfoWrapper>.filtered(filters: Set<AppFilter>) =
-        filters.fold(this) { acc, filter ->
-            with(filter) {
-                acc.filtered()
+        filters
+            .fold(this) { acc, filter ->
+                with(filter) {
+                    acc.filtered()
+                }
             }
-        }.toList()
+            .toList()
 
     context(viewModel: AppViewModel)
-    fun Collection<PackageInfoWrapper>.sorted(sort: AppSort) = with(sort) {
-        sorted()
-    }
+    fun Collection<PackageInfoWrapper>.sorted(sort: AppSort) =
+        with(sort) {
+            sorted()
+        }
 
     context(viewModel: AppViewModel)
     fun Sequence<PackageInfoWrapper>.processed(sort: AppSort, filters: Set<AppFilter>) =

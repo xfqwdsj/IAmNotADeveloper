@@ -4,8 +4,8 @@ import androidx.compose.ui.Modifier
 import top.ltfan.material.m3.CardLazyGroup
 import top.ltfan.material.m3.cards
 import top.ltfan.material.m3.core.layout.GroupedLazyListScope
-import top.ltfan.material.m3.layout.header
 import top.ltfan.material.m3.items
+import top.ltfan.material.m3.layout.header
 import top.ltfan.notdeveloper.detection.DetectionCategory
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.ui.theme.CardColorsLowest

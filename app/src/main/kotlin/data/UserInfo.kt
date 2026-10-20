@@ -18,11 +18,12 @@ data class UserInfo(
     companion object {
         val CREATOR = parcelableCreator<UserInfo>()
 
-        val current = UserInfo(
-            id = -2,
-            name = UserInfoName.Current,
-            flags = 0,
-        )
+        val current =
+            UserInfo(
+                id = -2,
+                name = UserInfoName.Current,
+                flags = 0,
+            )
     }
 
     constructor(

@@ -23,7 +23,9 @@ class DatabaseServiceProvider : BinderProvider() {
         /** Whether [callingPackage] is allowed to reach the settings database. */
         fun isAllowed(callingPackage: String): Boolean {
             if (callingPackage !in validPackages) {
-                Log invalidPackage callingPackage requesting DatabaseServiceProvider::class.qualifiedName
+                Log invalidPackage
+                    callingPackage requesting
+                    DatabaseServiceProvider::class.qualifiedName
                 return false
             }
             return true

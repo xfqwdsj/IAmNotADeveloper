@@ -13,5 +13,5 @@ val LocalBottomBarHeight = compositionLocalOf { 0.dp }
 
 /** The window insets extended by the floating bottom bar height. */
 val AppWindowInsets
-    @Composable inline get() =
-        WindowInsets.safeDrawing + PaddingValues(bottom = LocalBottomBarHeight.current)
+    @Composable
+    inline get() = WindowInsets.safeDrawing + PaddingValues(bottom = LocalBottomBarHeight.current)

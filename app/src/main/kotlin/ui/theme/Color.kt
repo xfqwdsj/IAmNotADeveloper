@@ -8,7 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 val TopAppBarColorsTransparent
-    @Composable inline get() =
+    @Composable
+    inline get() =
         TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
             scrolledContainerColor = Color.Transparent,
@@ -18,19 +19,20 @@ val TopAppBarColorsTransparent
         )
 
 val LargeTopAppBarColorsTransparent
-    @Composable inline get() =
+    @Composable
+    inline get() =
         TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
             scrolledContainerColor = Color.Transparent,
             navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
-            actionIconContentColor = MaterialTheme.colorScheme.onSurface
+            actionIconContentColor = MaterialTheme.colorScheme.onSurface,
         )
 
 val CardColorsLowest
-    @Composable inline get() =
+    @Composable
+    inline get() =
         CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest)
 
 val ListItemColorsTransparent
-    @Composable inline get() =
-        ListItemDefaults.colors(containerColor = Color.Transparent)
+    @Composable inline get() = ListItemDefaults.colors(containerColor = Color.Transparent)

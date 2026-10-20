@@ -99,31 +99,31 @@ class MainActivity : ComponentActivity() {
                         Box(Modifier.fillMaxSize()) {
                             CompositionLocalProvider(
                                 LocalBottomBarHeight provides
-                                        if (vm.showNavBar) bottomBarHeight.value else 0.dp,
+                                    if (vm.showNavBar) bottomBarHeight.value else 0.dp,
                             ) {
                                 NavDisplay(
                                     backStack = backStack,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .captureBackdrop(backdrop),
-                                    entryDecorators = listOf(
-                                        rememberSaveableStateHolderNavEntryDecorator(),
-                                        rememberViewModelStoreNavEntryDecorator(),
-                                    ),
+                                    modifier = Modifier.fillMaxSize().captureBackdrop(backdrop),
+                                    entryDecorators =
+                                        listOf(
+                                            rememberSaveableStateHolderNavEntryDecorator(),
+                                            rememberViewModelStoreNavEntryDecorator(),
+                                        ),
                                     entryProvider = { it.navEntry() },
                                 )
                             }
                             if (vm.showNavBar) {
                                 Box(
-                                    Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .windowInsetsPadding(WindowInsets.safeDrawing.only { bottom })
+                                    Modifier.align(Alignment.BottomCenter)
+                                        .windowInsetsPadding(
+                                            WindowInsets.safeDrawing.only { bottom },
+                                        ),
                                 ) {
                                     Box(
                                         Modifier.onGloballyPositioned {
                                             bottomBarHeight.value =
                                                 with(density) { it.size.height.toDp() }
-                                        }
+                                        },
                                     ) {
                                         BottomBar(vm, backdrop.layer)
                                     }
@@ -138,12 +138,11 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * The floating bottom bar is hosted as a sibling of [NavDisplay] rather
- * than inside a scene, so it is composed once and stays fixed while the
- * scenes cross-fade underneath it. Its measured height is published
- * through [LocalBottomBarHeight] for the pages to reserve as content
- * padding. The app-scoped backdrop captures the [NavDisplay] content
- * alone, so the sibling bar samples a layer that does not contain itself.
+ * The floating bottom bar is hosted as a sibling of [NavDisplay] rather than inside a scene, so it
+ * is composed once and stays fixed while the scenes cross-fade underneath it. Its measured height
+ * is published through [LocalBottomBarHeight] for the pages to reserve as content padding. The
+ * app-scoped backdrop captures the [NavDisplay] content alone, so the sibling bar samples a layer
+ * that does not contain itself.
  */
 @Composable
 private fun BottomBar(viewModel: AppViewModel, backdrop: LayerBackdrop) {

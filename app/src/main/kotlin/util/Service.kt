@@ -15,8 +15,9 @@ inline fun <T : IInterface> RemoteCallbackList<T>.doBroadcast(action: (T) -> Uni
     }
 }
 
-inline fun <R> clearBinderCallingIdentity(block: () -> R) = Binder.clearCallingIdentity().let {
-    block().also { _ ->
-        Binder.restoreCallingIdentity(it)
+inline fun <R> clearBinderCallingIdentity(block: () -> R) =
+    Binder.clearCallingIdentity().let {
+        block().also { _ ->
+            Binder.restoreCallingIdentity(it)
+        }
     }
-}

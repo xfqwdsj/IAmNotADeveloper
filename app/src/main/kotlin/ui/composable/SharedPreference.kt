@@ -14,15 +14,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import top.ltfan.notdeveloper.ModuleService
 import top.ltfan.notdeveloper.xposed.Log
 
 /**
  * Wraps the boolean stored under [key] in [preferences] as Compose state.
  *
- * [preferences] is the remote preferences of [ModuleService], which only exist once the framework
- * has connected, so it may be `null` for a while; the holder is then recreated as soon as the
- * preferences become available.
+ * [preferences] is the remote preferences of [top.ltfan.notdeveloper.ModuleService], which only
+ * exist once the framework has connected, so it may be `null` for a while; the holder is then
+ * recreated as soon as the preferences become available.
  */
 @Composable
 fun rememberBooleanSharedPreference(

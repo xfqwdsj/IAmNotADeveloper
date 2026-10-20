@@ -21,9 +21,7 @@ fun IconButtonSizedIcon(
     tint: Color = LocalContentColor.current,
 ) {
     Box(
-        modifier = modifier
-            .minimumInteractiveComponentSize()
-            .size(40.dp),
+        modifier = modifier.minimumInteractiveComponentSize().size(40.dp),
         contentAlignment = Alignment.Center,
     ) {
         Icon(

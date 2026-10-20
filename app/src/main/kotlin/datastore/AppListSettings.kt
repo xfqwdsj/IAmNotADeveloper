@@ -22,33 +22,37 @@ data class AppListSettings(
 
 enum class AppSort(@param:StringRes val labelRes: Int) {
     Label(R.string.item_apps_bottom_sheet_filter_sort_label) {
-        override operator fun invoke(viewModel: AppViewModel) = compareBy<PackageInfoWrapper> {
-            val packageManager = viewModel.application.packageManager
-            it.info.applicationInfo!!.loadLabel(packageManager).toString()
-        }
+        override operator fun invoke(viewModel: AppViewModel) =
+            compareBy<PackageInfoWrapper> {
+                val packageManager = viewModel.application.packageManager
+                it.info.applicationInfo!!.loadLabel(packageManager).toString()
+            }
 
         context(viewModel: AppViewModel)
-        override fun Collection<PackageInfoWrapper>.sorted() = sortedWith(
-            invoke(viewModel) then Package(viewModel) then Updated(viewModel)
-        )
+        override fun Collection<PackageInfoWrapper>.sorted() =
+            sortedWith(
+                invoke(viewModel) then Package(viewModel) then Updated(viewModel),
+            )
     },
     Package(R.string.item_apps_bottom_sheet_filter_sort_package) {
         override operator fun invoke(viewModel: AppViewModel) =
             compareBy<PackageInfoWrapper> { it.info.packageName }
 
         context(viewModel: AppViewModel)
-        override fun Collection<PackageInfoWrapper>.sorted() = sortedWith(
-            invoke(viewModel) then Label(viewModel) then Updated(viewModel)
-        )
+        override fun Collection<PackageInfoWrapper>.sorted() =
+            sortedWith(
+                invoke(viewModel) then Label(viewModel) then Updated(viewModel),
+            )
     },
     Updated(R.string.item_apps_bottom_sheet_filter_sort_updated) {
         override operator fun invoke(viewModel: AppViewModel) =
             compareByDescending<PackageInfoWrapper> { it.info.lastUpdateTime }
 
         context(viewModel: AppViewModel)
-        override fun Collection<PackageInfoWrapper>.sorted() = sortedWith(
-            invoke(viewModel) then Package(viewModel) then Label(viewModel)
-        )
+        override fun Collection<PackageInfoWrapper>.sorted() =
+            sortedWith(
+                invoke(viewModel) then Package(viewModel) then Label(viewModel),
+            )
     };
 
     abstract operator fun invoke(viewModel: AppViewModel): Comparator<PackageInfoWrapper>
@@ -77,7 +81,7 @@ enum class AppFilter(@param:StringRes val labelRes: Int) {
         context(viewModel: AppViewModel)
         override fun Sequence<PackageInfoWrapper>.filtered() = filter {
             (it.info.applicationInfo?.flags ?: 0) and
-                    (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
+                (ApplicationInfo.FLAG_SYSTEM or ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) == 0
         }
     };
 

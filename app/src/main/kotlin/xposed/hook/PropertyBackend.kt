@@ -2,16 +2,16 @@ package top.ltfan.notdeveloper.xposed.hook
 
 import io.github.libxposed.api.XposedInterface.Hooker
 import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
+import java.lang.reflect.Executable
 import top.ltfan.notdeveloper.xposed.Log
 import top.ltfan.notdeveloper.xposed.Module
-import java.lang.reflect.Executable
 
 /**
  * How a system property override reaches the target process.
  *
- * The default [JvmPropertyBackend] hooks the `SystemProperties` getters.
- * A native backend can override the property's final value instead, which
- * also covers readers that bypass the Java getters.
+ * The default [JvmPropertyBackend] hooks the `SystemProperties` getters. A native backend can
+ * override the property's final value instead, which also covers readers that bypass the Java
+ * getters.
  */
 interface PropertyBackend {
     fun interceptor(
@@ -64,18 +64,20 @@ object JvmPropertyBackend : PropertyBackend {
         overrides: Map<String, Any>,
         isEnabled: () -> Boolean,
     ): Int {
-        val systemProperties = try {
-            Class.forName(SYSTEM_PROPERTIES_CLASS_NAME, false, param.classLoader)
-        } catch (e: ClassNotFoundException) {
-            Log.w("cannot find $SYSTEM_PROPERTIES_CLASS_NAME", e)
-            return 0
-        }
+        val systemProperties =
+            try {
+                Class.forName(SYSTEM_PROPERTIES_CLASS_NAME, false, param.classLoader)
+            } catch (e: ClassNotFoundException) {
+                Log.w("cannot find $SYSTEM_PROPERTIES_CLASS_NAME", e)
+                return 0
+            }
 
         var installed = 0
         overrides.keys.forEach { methodName ->
-            installed += installAllMethods(systemProperties, methodName) {
-                interceptor(it, propertyKey, overrides, isEnabled)
-            }
+            installed +=
+                installAllMethods(systemProperties, methodName) {
+                    interceptor(it, propertyKey, overrides, isEnabled)
+                }
         }
         return installed
     }

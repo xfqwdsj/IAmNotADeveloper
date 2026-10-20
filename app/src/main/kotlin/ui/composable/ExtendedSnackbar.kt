@@ -62,21 +62,21 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
+import kotlin.math.max
+import kotlin.math.min
 import kotlinx.coroutines.delay
 import top.ltfan.notdeveloper.R
 import top.ltfan.notdeveloper.ui.page.Page
 import top.ltfan.notdeveloper.ui.util.AnimatedContentDefaultTransform
 import top.ltfan.notdeveloper.ui.util.pageSurface
 import top.ltfan.notdeveloper.ui.viewmodel.AppViewModel
-import kotlin.math.max
-import kotlin.math.min
 
 @Composable
 context(viewModel: AppViewModel, page: Page)
 fun ExtendedSnackbarHost(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
-    snackbar: @Composable (SnackbarData) -> Unit = { ExtendedSnackbar(it) }
+    snackbar: @Composable (SnackbarData) -> Unit = { ExtendedSnackbar(it) },
 ) {
     val currentSnackbarData = hostState.currentSnackbarData
     val accessibilityManager = LocalAccessibilityManager.current
@@ -85,7 +85,7 @@ fun ExtendedSnackbarHost(
             val duration =
                 currentSnackbarData.visuals.duration.toMillis(
                     currentSnackbarData.visuals.actionLabel != null,
-                    accessibilityManager
+                    accessibilityManager,
                 )
             delay(duration)
             currentSnackbarData.dismiss()
@@ -97,7 +97,7 @@ fun ExtendedSnackbarHost(
     ) {
         AnimatedContent(
             targetState = currentSnackbarData,
-            transitionSpec = { AnimatedContentDefaultTransform using null }
+            transitionSpec = { AnimatedContentDefaultTransform using null },
         ) { currentSnackbarData ->
             if (currentSnackbarData != null) {
                 Box(
@@ -107,7 +107,7 @@ fun ExtendedSnackbarHost(
                             currentSnackbarData.dismiss()
                             true
                         }
-                    }
+                    },
                 ) {
                     snackbar(currentSnackbarData)
                 }
@@ -118,7 +118,7 @@ fun ExtendedSnackbarHost(
 
 internal fun SnackbarDuration.toMillis(
     hasAction: Boolean,
-    accessibilityManager: AccessibilityManager?
+    accessibilityManager: AccessibilityManager?,
 ): Long {
     val original =
         when (this) {
@@ -133,7 +133,7 @@ internal fun SnackbarDuration.toMillis(
         original,
         containsIcons = true,
         containsText = true,
-        containsControls = hasAction
+        containsControls = hasAction,
     )
 }
 
@@ -157,7 +157,7 @@ fun ExtendedSnackbar(
                 TextButton(
                     colors = ButtonDefaults.textButtonColors(contentColor = actionColor),
                     onClick = { snackbarData.performAction() },
-                    content = { Text(actionLabel) }
+                    content = { Text(actionLabel) },
                 )
             }
         } else {
@@ -169,11 +169,15 @@ fun ExtendedSnackbar(
                 IconButton(
                     onClick = { snackbarData.dismiss() },
                     content = {
-                        @SuppressLint("PrivateResource") Icon(
+                        @SuppressLint("PrivateResource")
+                        Icon(
                             painterResource(R.drawable.close_24px),
-                            contentDescription = stringResource(androidx.compose.material3.R.string.m3c_snackbar_dismiss),
+                            contentDescription =
+                                stringResource(
+                                    androidx.compose.material3.R.string.m3c_snackbar_dismiss,
+                                ),
                         )
-                    }
+                    },
                 )
             }
         } else {
@@ -189,7 +193,7 @@ fun ExtendedSnackbar(
         contentColor = contentColor,
         actionContentColor = actionContentColor,
         dismissActionContentColor = dismissActionContentColor,
-        content = { Text(snackbarData.visuals.message) }
+        content = { Text(snackbarData.visuals.message) },
     )
 }
 
@@ -205,7 +209,7 @@ fun ExtendedSnackbar(
     contentColor: Color = SnackbarDefaults.contentColor,
     actionContentColor: Color = SnackbarDefaults.actionContentColor,
     dismissActionContentColor: Color = SnackbarDefaults.dismissActionContentColor,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Surface(
         modifier = modifier,
@@ -217,7 +221,7 @@ fun ExtendedSnackbar(
             Modifier.pageSurface(
                 shape = shape,
                 containerColor = containerColor,
-            )
+            ),
         ) {
             val textStyle = MaterialTheme.typography.bodyMedium
             val actionTextStyle = MaterialTheme.typography.labelLarge
@@ -255,7 +259,7 @@ private fun NewLineButtonSnackbar(
     dismissAction: @Composable (() -> Unit)?,
     actionTextStyle: TextStyle,
     actionContentColor: Color,
-    dismissActionContentColor: Color
+    dismissActionContentColor: Color,
 ) {
     Column(
         modifier =
@@ -263,31 +267,29 @@ private fun NewLineButtonSnackbar(
                 // Fill max width, up to ContainerMaxWidth.
                 .widthIn(max = ContainerMaxWidth)
                 .fillMaxWidth()
-                .padding(start = HorizontalSpacing, bottom = SeparateButtonExtraY)
+                .padding(start = HorizontalSpacing, bottom = SeparateButtonExtraY),
     ) {
         Box(
-            Modifier
-                .paddingFromBaseline(HeightToFirstLine, LongButtonVerticalOffset)
-                .padding(end = HorizontalSpacingButtonSide)
+            Modifier.paddingFromBaseline(HeightToFirstLine, LongButtonVerticalOffset)
+                .padding(end = HorizontalSpacingButtonSide),
         ) {
             text()
         }
 
         Box(
-            Modifier
-                .align(Alignment.End)
-                .padding(end = if (dismissAction == null) HorizontalSpacingButtonSide else 0.dp)
+            Modifier.align(Alignment.End)
+                .padding(end = if (dismissAction == null) HorizontalSpacingButtonSide else 0.dp),
         ) {
             Row {
                 CompositionLocalProvider(
                     LocalContentColor provides actionContentColor,
                     LocalTextStyle provides actionTextStyle,
-                    content = action
+                    content = action,
                 )
                 if (dismissAction != null) {
                     CompositionLocalProvider(
                         LocalContentColor provides dismissActionContentColor,
-                        content = dismissAction
+                        content = dismissAction,
                     )
                 }
             }
@@ -302,7 +304,7 @@ private fun OneRowSnackbar(
     dismissAction: @Composable (() -> Unit)?,
     actionTextStyle: TextStyle,
     actionTextColor: Color,
-    dismissActionColor: Color
+    dismissActionColor: Color,
 ) {
     val textTag = "text"
     val actionTag = "action"
@@ -310,16 +312,16 @@ private fun OneRowSnackbar(
     Layout(
         {
             Box(
-                Modifier
-                    .layoutId(textTag)
-                    .padding(vertical = SnackbarVerticalPadding)
-            ) { text() }
+                Modifier.layoutId(textTag).padding(vertical = SnackbarVerticalPadding),
+            ) {
+                text()
+            }
             if (action != null) {
                 Box(Modifier.layoutId(actionTag)) {
                     CompositionLocalProvider(
                         LocalContentColor provides actionTextColor,
                         LocalTextStyle provides actionTextStyle,
-                        content = action
+                        content = action,
                     )
                 }
             }
@@ -327,7 +329,7 @@ private fun OneRowSnackbar(
                 Box(Modifier.layoutId(dismissActionTag)) {
                     CompositionLocalProvider(
                         LocalContentColor provides dismissActionColor,
-                        content = dismissAction
+                        content = dismissAction,
                     )
                 }
             }
@@ -335,8 +337,8 @@ private fun OneRowSnackbar(
         modifier =
             Modifier.padding(
                 start = HorizontalSpacing,
-                end = if (dismissAction == null) HorizontalSpacingButtonSide else 0.dp
-            )
+                end = if (dismissAction == null) HorizontalSpacingButtonSide else 0.dp,
+            ),
     ) { measurables, constraints ->
         val containerWidth = min(constraints.maxWidth, ContainerMaxWidth.roundToPx())
         val actionButtonPlaceable =
@@ -360,7 +362,7 @@ private fun OneRowSnackbar(
         val lastTextBaseline = textPlaceable[LastBaseline]
         val hasText =
             firstTextBaseline != AlignmentLine.Unspecified &&
-                    lastTextBaseline != AlignmentLine.Unspecified
+                lastTextBaseline != AlignmentLine.Unspecified
         val isOneLine = firstTextBaseline == lastTextBaseline || !hasText
         val dismissButtonPlaceX = containerWidth - dismissButtonWidth
         val actionButtonPlaceX = dismissButtonPlaceX - actionButtonWidth

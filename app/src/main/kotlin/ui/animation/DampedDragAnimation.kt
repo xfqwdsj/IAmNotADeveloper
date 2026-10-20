@@ -12,13 +12,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.IntSize
+import kotlin.math.abs
+import kotlin.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlin.math.abs
-import kotlin.time.Clock
 
 class DampedDragAnimation(
     private val animationScope: CoroutineScope,
@@ -32,58 +32,62 @@ class DampedDragAnimation(
     val onDrag: DampedDragAnimation.(size: IntSize, dragAmount: Offset) -> Unit,
 ) {
 
-    private val valueAnimationSpec =
-        spring(1f, 1000f, visibilityThreshold)
-    private val velocityAnimationSpec =
-        spring(0.5f, 300f, visibilityThreshold * 10f)
-    private val pressProgressAnimationSpec =
-        spring(1f, 1000f, 0.001f)
-    private val scaleXAnimationSpec =
-        spring(0.6f, 250f, 0.001f)
-    private val scaleYAnimationSpec =
-        spring(0.7f, 250f, 0.001f)
+    private val valueAnimationSpec = spring(1f, 1000f, visibilityThreshold)
+    private val velocityAnimationSpec = spring(0.5f, 300f, visibilityThreshold * 10f)
+    private val pressProgressAnimationSpec = spring(1f, 1000f, 0.001f)
+    private val scaleXAnimationSpec = spring(0.6f, 250f, 0.001f)
+    private val scaleYAnimationSpec = spring(0.7f, 250f, 0.001f)
 
-    private val valueAnimation =
-        Animatable(initialValue, visibilityThreshold)
-    private val velocityAnimation =
-        Animatable(0f, 5f)
-    private val pressProgressAnimation =
-        Animatable(0f, 0.001f)
-    private val scaleXAnimation =
-        Animatable(initialScale, 0.001f)
-    private val scaleYAnimation =
-        Animatable(initialScale, 0.001f)
+    private val valueAnimation = Animatable(initialValue, visibilityThreshold)
+    private val velocityAnimation = Animatable(0f, 5f)
+    private val pressProgressAnimation = Animatable(0f, 0.001f)
+    private val scaleXAnimation = Animatable(initialScale, 0.001f)
+    private val scaleYAnimation = Animatable(initialScale, 0.001f)
 
     private val mutatorMutex = MutatorMutex()
 
     private val velocityTracker = VelocityTracker()
 
-    val value: Float get() = valueAnimation.value
-    val progress: Float get() = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
-    val targetValue: Float get() = valueAnimation.targetValue
-    val pressProgress: Float get() = pressProgressAnimation.value
-    val scaleX: Float get() = scaleXAnimation.value
-    val scaleY: Float get() = scaleYAnimation.value
-    val velocity: Float get() = velocityAnimation.value
+    val value: Float
+        get() = valueAnimation.value
 
-    val modifier: Modifier = Modifier.pointerInput(Unit) {
-        inspectDragGestures(
-            onDragStart = { down ->
-                onDragStarted(down.position)
-                press()
-            },
-            onDragEnd = {
-                onDragStopped()
-                release()
-            },
-            onDragCancel = {
-                onDragStopped()
-                release()
+    val progress: Float
+        get() = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+
+    val targetValue: Float
+        get() = valueAnimation.targetValue
+
+    val pressProgress: Float
+        get() = pressProgressAnimation.value
+
+    val scaleX: Float
+        get() = scaleXAnimation.value
+
+    val scaleY: Float
+        get() = scaleYAnimation.value
+
+    val velocity: Float
+        get() = velocityAnimation.value
+
+    val modifier: Modifier =
+        Modifier.pointerInput(Unit) {
+            inspectDragGestures(
+                onDragStart = { down ->
+                    onDragStarted(down.position)
+                    press()
+                },
+                onDragEnd = {
+                    onDragStopped()
+                    release()
+                },
+                onDragCancel = {
+                    onDragStopped()
+                    release()
+                },
+            ) { change, dragAmount ->
+                onDrag(size, dragAmount)
             }
-        ) { change, dragAmount ->
-            onDrag(size, dragAmount)
         }
-    }
 
     fun press() {
         velocityTracker.resetTracking()
@@ -115,8 +119,10 @@ class DampedDragAnimation(
             launch {
                 valueAnimation.animateTo(
                     targetValue,
-                    valueAnimationSpec
-                ) { updateVelocity() }
+                    valueAnimationSpec,
+                ) {
+                    updateVelocity()
+                }
             }
         }
     }
@@ -138,7 +144,7 @@ class DampedDragAnimation(
     private fun updateVelocity() {
         velocityTracker.addPosition(
             Clock.System.now().toEpochMilliseconds(),
-            Offset(value, 0f)
+            Offset(value, 0f),
         )
         val targetVelocity =
             velocityTracker.calculateVelocity().x / (valueRange.endInclusive - valueRange.start)

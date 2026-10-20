@@ -15,6 +15,7 @@ import top.ltfan.notdeveloper.data.PackageInfoWrapper
 import top.ltfan.notdeveloper.data.UserInfo
 import top.ltfan.notdeveloper.data.UserInfoName
 import top.ltfan.notdeveloper.data.wrapped
+import top.ltfan.notdeveloper.database.PackageInfo as DatabasePackageInfo
 import top.ltfan.notdeveloper.database.ParcelablePackageInfo
 import top.ltfan.notdeveloper.detection.DetectionMethod
 import top.ltfan.notdeveloper.log.Log
@@ -25,20 +26,22 @@ import top.ltfan.notdeveloper.provider.getInterfaceOrNull
 import top.ltfan.notdeveloper.util.Reflect
 import top.ltfan.notdeveloper.util.clearBinderCallingIdentity
 import top.ltfan.notdeveloper.util.getUserId
-import top.ltfan.notdeveloper.database.PackageInfo as DatabasePackageInfo
 
 const val CallMethodNotify = "NOTIFY"
 const val BundleExtraType = "type"
 
 /**
- * Cross-process contract served from system server, which can enumerate
- * every user and their packages on behalf of the module app.
+ * Cross-process contract served from system server, which can enumerate every user and their
+ * packages on behalf of the module app.
  */
 @BinderInterface
 interface SystemServiceInterface {
     fun queryUsers(userIds: List<Int> = emptyList()): List<UserInfo>
+
     fun queryAppsByUserId(userIds: List<Int> = emptyList()): List<PackageInfoWrapper>
+
     fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfoWrapper>
+
     fun notifySettingChange(name: String, type: Int)
 }
 
@@ -49,8 +52,9 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
         val application = callingApplication(identity) ?: return emptyList()
 
         return clearBinderCallingIdentity {
-            val userManager = application.getSystemService<UserManager>()
-                ?: return@clearBinderCallingIdentity emptyList()
+            val userManager =
+                application.getSystemService<UserManager>()
+                    ?: return@clearBinderCallingIdentity emptyList()
             (Reflect.callMethod(userManager, "getUsers") as List<*>)
                 .map { user ->
                     UserInfo(
@@ -59,7 +63,9 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
                         Reflect.getObjectField(user, "flags") as Int,
                     )
                 }
-                .let { list -> if (userIds.isNotEmpty()) list.filter { it.id in userIds } else list }
+                .let { list ->
+                    if (userIds.isNotEmpty()) list.filter { it.id in userIds } else list
+                }
         }
     }
 
@@ -71,22 +77,30 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
         val packageManager = packageManager()
         val requestedIds = userIds.ifEmpty { queryUsers().map { it.id } }
 
-        return requestedIds.asSequence().flatMap { userId ->
-            clearBinderCallingIdentity {
-                val slice = Reflect.callMethod(packageManager, "getInstalledPackages", 0, userId)
-                @Suppress("UNCHECKED_CAST")
-                Reflect.getObjectField(slice!!, "mList") as List<PackageInfo>
+        return requestedIds
+            .asSequence()
+            .flatMap { userId ->
+                clearBinderCallingIdentity {
+                    val slice =
+                        Reflect.callMethod(packageManager, "getInstalledPackages", 0, userId)
+                    @Suppress("UNCHECKED_CAST")
+                    Reflect.getObjectField(slice!!, "mList") as List<PackageInfo>
+                }
             }
-        }.filter {
-            val result = it.applicationInfo != null
-            if (!result) {
-                Log.w("Application info for package ${it.packageName} is null, skipping")
+            .filter {
+                val result = it.applicationInfo != null
+                if (!result) {
+                    Log.w("Application info for package ${it.packageName} is null, skipping")
+                }
+                result
             }
-            result
-        }.map { it.wrapped() }.toList()
+            .map { it.wrapped() }
+            .toList()
     }
 
-    override fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfoWrapper> {
+    override fun queryAppsByInfo(
+        databaseList: List<ParcelablePackageInfo>,
+    ): List<PackageInfoWrapper> {
         val identity =
             "${SystemService::class.qualifiedName}.${::queryAppsByInfo.name}(${databaseList.joinToString()})"
         callingApplication(identity) ?: return emptyList()
@@ -97,8 +111,11 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
             databaseList.forEach { (packageName, userId, appId) ->
                 val info = clearBinderCallingIdentity {
                     Reflect.callMethod(
-                        packageManager, "getPackageInfo",
-                        packageName, 0, userId,
+                        packageManager,
+                        "getPackageInfo",
+                        packageName,
+                        0,
+                        userId,
                     ) as? PackageInfo? ?: return@forEach
                 }
 
@@ -107,13 +124,17 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
                     return@forEach
                 }
 
-                val queriedAppId = Reflect.callStaticMethod(
-                    UserHandle::class.java, "getAppId",
-                    info.applicationInfo?.uid,
-                ) as? Int ?: return@forEach
+                val queriedAppId =
+                    Reflect.callStaticMethod(
+                        UserHandle::class.java,
+                        "getAppId",
+                        info.applicationInfo?.uid,
+                    ) as? Int ?: return@forEach
 
                 if (appId != queriedAppId) {
-                    Log.i("App ID mismatch for package $packageName: expected $appId, got $queriedAppId")
+                    Log.i(
+                        "App ID mismatch for package $packageName: expected $appId, got $queriedAppId",
+                    )
                     return@forEach
                 }
 
@@ -132,10 +153,11 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
         val uid = Binder.getCallingUid()
         val userId = Reflect.callStaticMethod(UserHandle::class.java, "getUserId", uid) as Int
 
-        val bundle = Bundle().apply {
-            putInt(BundleExtraType, type)
-            putInt("_user", userId)
-        }
+        val bundle =
+            Bundle().apply {
+                putInt(BundleExtraType, type)
+                putInt("_user", userId)
+            }
 
         clearBinderCallingIdentity {
             application.contentResolver.call(
@@ -152,11 +174,12 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
     private fun callingApplication(identity: String): android.app.Application? {
         val application = Reflect.currentApplication()
         val uid = Binder.getCallingUid()
-        val packageName = application.packageManager.getPackagesForUid(uid)
-            ?.takeIf { it.size == 1 }?.first() ?: run {
-            Log callingPackageNotFoundWhen identity
-            return null
-        }
+        val packageName =
+            application.packageManager.getPackagesForUid(uid)?.takeIf { it.size == 1 }?.first()
+                ?: run {
+                    Log callingPackageNotFoundWhen identity
+                    return null
+                }
 
         if (packageName != BuildConfig.APPLICATION_ID) {
             Log invalidPackage packageName skipping identity
@@ -169,19 +192,25 @@ class SystemService(private val classLoader: ClassLoader) : SystemServiceInterfa
         val serviceManagerClass = Reflect.findClass("android.os.ServiceManager", classLoader)
         val packageManagerService =
             Reflect.callStaticMethod(serviceManagerClass, "getService", "package")
-        val stubClass = Reflect.findClass(
-            "android.content.pm.IPackageManager\$Stub", classLoader,
-        )
+        val stubClass =
+            Reflect.findClass(
+                "android.content.pm.IPackageManager\$Stub",
+                classLoader,
+            )
         return Reflect.callStaticMethod(stubClass, "asInterface", packageManagerService)!!
     }
 }
 
-val SystemServiceInterface.client inline get() = SystemServiceClient(this)
+val SystemServiceInterface.client
+    inline get() = SystemServiceClient(this)
 
 interface SystemServiceClient : SystemServiceInterface {
     fun queryUsers(vararg userId: Int) = queryUsers(userId.toList())
+
     fun queryUser(userId: Int) = queryUsers(listOf(userId)).firstOrNull()
+
     fun queryApps(vararg userId: Int) = queryAppsByUserId(userId.toList())
+
     fun queryApps(databaseList: List<DatabasePackageInfo>) =
         queryAppsByInfo(databaseList.map { ParcelablePackageInfo(it) })
 
@@ -202,32 +231,36 @@ fun SystemServiceClient(service: SystemServiceInterface): SystemServiceClient =
     object : SystemServiceClient, SystemServiceInterface by service {}
 
 /**
- * In-process fallback used while the system server service is not
- * reachable. It serves the current user and its installed packages.
+ * In-process fallback used while the system server service is not reachable. It serves the current
+ * user and its installed packages.
  */
 class LocalSystemService(private val context: Context) : SystemServiceClient {
     override fun queryUsers(userIds: List<Int>): List<UserInfo> {
-        val user = UserInfo(
-            context.packageManager.getPackageInfo(context.packageName, 0).getUserId(),
-            UserInfoName.Current,
-            0,
-        )
+        val user =
+            UserInfo(
+                context.packageManager.getPackageInfo(context.packageName, 0).getUserId(),
+                UserInfoName.Current,
+                0,
+            )
         return if (userIds.isEmpty()) listOf(user) else listOf(user).filter { it.id in userIds }
     }
 
     override fun queryAppsByUserId(userIds: List<Int>): List<PackageInfoWrapper> = runCatching {
-        context.packageManager.getInstalledPackages(0)
-            .mapNotNull { info -> info.applicationInfo?.let { info.wrapped() } }
-    }.getOrElse {
-        Log.Android.e("Failed to query installed packages: ${it.message}", it)
-        emptyList()
-    }
-
-    override fun queryAppsByInfo(databaseList: List<ParcelablePackageInfo>): List<PackageInfoWrapper> =
-        databaseList.mapNotNull { entry ->
-            runCatching { context.packageManager.getPackageInfo(entry.packageName, 0).wrapped() }
-                .getOrNull()
+        context.packageManager.getInstalledPackages(0).mapNotNull { info ->
+            info.applicationInfo?.let { info.wrapped() }
         }
+    }
+        .getOrElse {
+            Log.Android.e("Failed to query installed packages: ${it.message}", it)
+            emptyList()
+        }
+
+    override fun queryAppsByInfo(
+        databaseList: List<ParcelablePackageInfo>,
+    ): List<PackageInfoWrapper> = databaseList.mapNotNull { entry ->
+        runCatching { context.packageManager.getPackageInfo(entry.packageName, 0).wrapped() }
+            .getOrNull()
+    }
 
     override fun notifySettingChange(name: String, type: Int) {
         Log.d("Settings change for $name (type $type) is applied in-process")
@@ -239,7 +272,8 @@ val Context.systemService: SystemServiceClient
         contentResolver.getInterfaceOrNull(SystemServiceProvider) {
             it.unwrap(SystemServiceInterface::class).client
         } ?: error("Failed to get SystemService binder")
-    }.getOrElse {
-        Log.Android.e("Failed to get SystemService: ${it.message}", it)
-        LocalSystemService(this)
     }
+        .getOrElse {
+            Log.Android.e("Failed to get SystemService: ${it.message}", it)
+            LocalSystemService(this)
+        }

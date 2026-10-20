@@ -26,7 +26,8 @@ interface Logger {
         android.util.Log.e(LogTag, message, throwable)
     }
 
-    val debug get() = DebugLogger(this)
+    val debug
+        get() = DebugLogger(this)
 }
 
 interface XposedLogger {
