@@ -6,7 +6,7 @@ lifecycle = "2.11.0"
 activity = "1.13.0"
 preference = "1.2.1"
 libxposed = "102.0.0"
-spotless = "8.10.4"
+spotless = "8.11.0"
 
 [libraries]
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
