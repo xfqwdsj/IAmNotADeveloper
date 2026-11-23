@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.4.21"
 agp = "9.5.0-alpha10"
-compose = "2026.09.00"
+compose = "2026.11.01"
 lifecycle = "2.11.0"
 activity = "1.13.0"
 preference = "1.2.1"
